@@ -1,8 +1,42 @@
 import { Types } from "mongoose";
 import { SpeciesController, SpeciesModel } from "../types"
 import { parseNewSpecies, parsePatchSpecies } from "../utils/parser";
+import { nullableInput, nullableInputCanBeNull } from "../utils/nullableInput";
 
-const setAncestor = (ancestor: any) => typeof ancestor === "string" ? new Types.ObjectId(ancestor) : undefined;
+type Input = Partial<{
+    ancestorId: string;
+    apparition: number;
+    afterApparition: number;
+    description: string;
+    descendants: Omit<Input, "ancestorId">[];
+}> & {
+    name: string;
+    duration: number;
+};
+
+type Output = Omit<Input, "ancestorId"> & { ancestorId?: Types.ObjectId };
+
+type PartialOutput = Omit<Partial<Input>, "ancestorId"> & { ancestorId?: Types.ObjectId | null };
+
+const toOutput = ({
+    ancestorId,
+    descendants,
+    ...data
+}: Input): Output => ({
+    ancestorId: nullableInput(ancestorId, a => new Types.ObjectId(a)),
+    descendants: descendants?.map(toOutput),
+    ...data
+});
+
+const toPartialOutput = ({
+    ancestorId,
+    descendants,
+    ...data
+}: Partial<Input>): PartialOutput => ({
+    ancestorId: nullableInputCanBeNull(ancestorId, a => new Types.ObjectId(a)),
+    descendants: descendants?.map(toOutput),
+    ...data
+});
 
 export const speciesController = ({
     speciesModel
@@ -12,25 +46,14 @@ export const speciesController = ({
         const { treeId } = req.params;
         if (!token) return res.status(401).json({ message: "Unauthorized" });
         try {
-            const {
-                name,
-                ancestorId,
-                apparition,
-                afterApparition,
-                duration,
-                description
-            } = parseNewSpecies(req.body);
-            if(!ancestorId && !apparition) return res.status(400).json({ message: "Apparition is required if there's no ancestor" });
-            if(ancestorId && !afterApparition) return res.status(400).json({ message: "After Apparition is required if there's an ancestor" });
+            const parse = parseNewSpecies(req.body);
+            if(!parse.ancestorId && !parse.apparition) return res.status(400).json({ message: "Apparition is required if there's no ancestor" });
+            if(parse.ancestorId && !parse.afterApparition) return res.status(400).json({ message: "After Apparition is required if there's an ancestor" });
+            const output = toOutput(parse);
             const species = await speciesModel.createSpecies({
                 token,
                 treeId: new Types.ObjectId(treeId),
-                name,
-                ancestorId: setAncestor(ancestorId),
-                apparition,
-                afterApparition,
-                duration,
-                description
+                ...output
             });
             if(!species) return res.status(404).json({ message: "PhTree not found" });
             res.json(species);
@@ -46,24 +69,12 @@ export const speciesController = ({
         } = req.params;
         if (!token) return res.status(401).json({ message: "Unauthorized" });
         try {
-            const {
-                name,
-                ancestorId,
-                apparition,
-                afterApparition,
-                duration,
-                description
-            } = parsePatchSpecies(req.body);
+            const parse = parsePatchSpecies(req.body);
             const updatedSpecies = await speciesModel.updateSpecies({
                 token,
                 treeId: new Types.ObjectId(treeId),
                 id: new Types.ObjectId(id),
-                name,
-                ancestorId: setAncestor(ancestorId),
-                apparition,
-                afterApparition,
-                duration,
-                description
+                ...toPartialOutput(parse)
             });
             if(!updatedSpecies) return res.status(404).json({ message: "PhTree or Species not found" });
             res.json(updatedSpecies);
