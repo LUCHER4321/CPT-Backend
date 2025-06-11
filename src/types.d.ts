@@ -317,27 +317,26 @@ export interface SpeciesController {
     getPhTreeSpecies: ControllerFunction;
 }
 
+interface SpeciesInput {
+    name: string;
+    ancestorId?: Types.ObjectId;
+    apparition?: number;
+    afterApparition?: number;
+    duration: number;
+    description?: string;
+    descendants?: Omit<SpeciesInput, "ancestorId">[];
+}
+
 export interface SpeciesModel {
-    createSpecies: ModelFuncton<{
-        token: string;
+    createSpecies: ModelFuncton<SpeciesInput & {
         treeId: Types.ObjectId;
-        name: string;
-        ancestorId?: Types.ObjectId;
-        apparition?: number;
-        afterApparition?: number;
-        duration: number;
-        description?: string;
+        token: string;
     }, SpeciesMongo>;
-    updateSpecies: ModelFuncton<{
+    updateSpecies: ModelFuncton<Partial<Omit<SpeciesInput, "ancestorId">> & {
         token: string;
         treeId: Types.ObjectId;
         id: Types.ObjectId;
-        name?: string;
         ancestorId?: Types.ObjectId | null;
-        apparition?: number;
-        afterApparition?: number;
-        duration?: number;
-        description?: string;
     }, SpeciesMongo>;
     deleteSpecies: ModelFuncton<{
         token: string;
