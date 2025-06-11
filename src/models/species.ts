@@ -103,7 +103,7 @@ const spApparition = async (id: Types.ObjectId): Promise<number> => {
 }
 
 export const speciesModel: SpeciesModel = {
-    createSpecies: async ({ token, treeId, name, ancestorId, apparition, afterApparition, duration, description }) => {
+    createSpecies: async ({ token, treeId, name, ancestorId, apparition, afterApparition, duration, description, descendants }) => {
         const { phTree } = await check({token, treeId});
         const species = new SpeciesClass({
             ancestorId,
@@ -129,10 +129,11 @@ export const speciesModel: SpeciesModel = {
             apparition: newSpecies.apparition ?? undefined,
             afterApparition: newSpecies.afterApparition ?? undefined,
             duration: newSpecies.duration,
-            description: newSpecies.description ?? undefined
+            description: newSpecies.description ?? undefined,
+            descendants: (await nullableInput(descendants, d => Promise.all(d?.map(desc => speciesModel.createSpecies({ treeId, token, ...desc })))))?.filter(d => d !== undefined)
         }
     },
-    updateSpecies: async ({ token, treeId, id, name, ancestorId, apparition, afterApparition, duration, description }) => {
+    updateSpecies: async ({ token, treeId, id, name, ancestorId, apparition, afterApparition, duration, description, descendants }) => {
         const {
             phTree,
             species
@@ -165,6 +166,10 @@ export const speciesModel: SpeciesModel = {
             const oldAncestor = await SpeciesClass.findById(species.ancestorId?.prototype);
             if(oldAncestor && afterApparition !== undefined) species.afterApparition = Math.max(afterApparition, 0);
             else if(!oldAncestor && apparition !== undefined) species.apparition = apparition
+        }
+        if(descendants) {
+            await Promise.all((await SpeciesClass.find({ ancestorId: id })).map(s => speciesModel.deleteSpecies({ token, treeId, id: s._id })));
+            await Promise.all(descendants.map(d => speciesModel.createSpecies({ token, treeId, ancestorId: id, ...d })));
         }
         await species.save()
         phTree.updatedAt = new Date();
