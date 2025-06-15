@@ -1,13 +1,14 @@
 import { rename, unlink } from "node:fs";
 import { ImageModel } from "../types";
 import { userByToken } from "../schemas/user";
+import { IMAGES } from "../config";
 
 export const imageModel: ImageModel = {
     getImage: async ({ img }) => {
         if (!img) {
             throw new Error("Image name is required");
         }
-        return { path: `images/${img}` };
+        return { path: `${IMAGES}/${img}` };
     },
     createImage: async ({ token, file }) => {
         const user = await userByToken(token);
@@ -24,7 +25,7 @@ export const imageModel: ImageModel = {
             throw new Error("File must be an image (jpg, jpeg, png, gif)");
         }
         const fileName = `${user._id.toString}-${Date.now()}.${extension}`;
-        const newPath = `images/${fileName}`;
+        const newPath = `${IMAGES}/${fileName}`;
         rename(file.path, newPath, (err) => {
             if (err) throw new Error("Error creating image");
         });
@@ -36,7 +37,7 @@ export const imageModel: ImageModel = {
         if (!img) {
             throw new Error("Image path is required");
         }
-        unlink(`images/${img}`, (err) => {
+        unlink(`${IMAGES}/${img}`, (err) => {
             if(err) throw new Error("Error deleting image");
         });
     }
