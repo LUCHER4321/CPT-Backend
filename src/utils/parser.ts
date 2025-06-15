@@ -1,3 +1,5 @@
+import { NotiFunc } from "./enums";
+
 const isString = (str: any): boolean => typeof str === "string" || str instanceof String;
 
 const parseProp = <T,>(t: any, check: (t: any) => boolean, prop: string): T => {
@@ -110,4 +112,22 @@ export const parsePatchSpecies = (object: any): Partial<SpeciesInput> => ({
     name: toPartial(() => parseString(object.name)),
     duration: toPartial(() => parseNumber(object.duration)),
     ...speciesPartials(object)
+});
+
+const isFun = (fun: any) => Object.values(NotiFunc).includes(fun);
+
+const parseFun = (fun: any, prop: string = "") => parseProp<NotiFunc>(fun, isFun, prop);
+
+const isDate = (date: any) => date instanceof Date;
+
+const parseDate = (date: any, prop: string = "") => parseProp<Date>(date, isDate, prop);
+
+export const parseNewNotification = (data: any) => ({
+    fun: toPartial(() => parseFun(data.fun)),
+    followedUserId: toPartial(() => parseString(data.followedUserId)),
+    treeId: toPartial(() => parseString(data.treeId)),
+    commentId: toPartial(() => parseString(data.commentId)),
+    from: toPartial(() => parseDate(data.from)),
+    limit: toPartial(() => parseNumber(data.limit)),
+    see: toPartial(() => parseBoolean(data.see))
 });

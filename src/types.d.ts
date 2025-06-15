@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
+import { Server, Socket } from "socket.io";
+import { NotiFunc } from "./utils/enums";
 
 type ControllerFunction = (req: Request, res: Response) => Promise;
 
@@ -363,4 +365,51 @@ export interface SpeciesModel {
         token?: string;
         treeId: Types.ObjectId;
     }, SpeciesMongo[]>;
+}
+
+export interface Notification {
+    id: Types.ObjectId;
+    fun: NotiFunc;
+    usersId: Types.ObjectId[];
+    inputs: string[];
+    authorId: Types.ObjectId;
+    seen: boolean;
+    createdAt: Date;
+}
+
+type WSControllerFunction = ModelFuncton<{
+    socket: Socket;
+    call: string;
+}, void>;
+
+export interface NotificationController {
+    setNotification: WSControllerFunction;
+    getNotifications: WSControllerFunction;
+}
+
+export interface NotificationModel {
+    newFollower: ModelFuncton<{
+        token: string;
+        followedUserId: Types.ObjectId;
+    }, Notification>;
+    newTree: ModelFuncton<{
+        token: string;
+        treeId: Types.ObjectId;
+    }, Notification>;
+    newComment: ModelFuncton<{
+        token: string;
+        treeId: Types.ObjectId;
+        commentId: Types.ObjectId;
+    }, Notification>;
+    newLike: ModelFuncton<{
+        token: string;
+        treeId?: Types.ObjectId;
+        commentId?: Types.ObjectId;
+    }, Notification>;
+    getNotifications: ModelFuncton<{
+        token: string;
+        from?: Date;
+        limit?: number;
+        see?: boolean
+    }, Notification[]>
 }
