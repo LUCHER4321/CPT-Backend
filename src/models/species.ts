@@ -140,7 +140,7 @@ export const speciesModel: SpeciesModel = {
         } = await check({token, treeId, id });
         if(!species) return undefined;
         if(name) species.name = name;
-        if(duration) species.duration = Math.max(Math.min(...await Promise.all((await SpeciesClass.find({ ancestorId: id })).map(d => d.afterApparition ?? Number.MAX_VALUE)), duration), 0);
+        if(duration) species.duration = Math.max(Math.min(...await Promise.all((await SpeciesClass.find({ ancestorId: id })).map(d => d.afterApparition ?? Number.MAX_SAFE_INTEGER)), duration), 0);
         if(description) species.description = description !== "" ? description : undefined;
         if(ancestorId){
             const newAncestor = await SpeciesClass.findById(ancestorId);
