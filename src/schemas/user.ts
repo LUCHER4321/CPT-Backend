@@ -21,11 +21,7 @@ const UserSchema = new Schema({
     password: {
         type: String,
         required: true,
-        minlength: 6,
-        validate: {
-            validator: (v: string) => /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,}$/.test(v),
-            message: "Password must be at least 6 characters long and contain at least one uppercase letter, one lowercase letter, and one number"
-        }
+        minlength: 6
     },
     photo: String,
     role: {
