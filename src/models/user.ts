@@ -11,6 +11,8 @@ export const userModel: UserModel = {
     register: async ({ email, password, username }) => {
         const user0 = await UserClass.findOne({ email });
         if (user0) throw new Error("Email already exists");
+        const user1 = await UserClass.findOne({ username });
+        if (user1) throw new Error("Username taken");
         const user = new UserClass({
             email,
             password: await encryptPassword(password),
@@ -37,6 +39,12 @@ export const userModel: UserModel = {
             token
         };
     },
+    logout: async ({ token }) => {
+        const user = await userByToken(token);
+        if (!user) return;
+        user.isActive = false;
+        await user.save();
+    },
     getUser: async ({ id }) => {
         const user = await UserClass.findById(id);
         if (!user) return undefined;
@@ -58,6 +66,8 @@ export const userModel: UserModel = {
     updateMe: async ({ username, password, token }) => {
         const user = await userByToken(token);
         if (!user) return undefined;
+        const user0 = await UserClass.findOne({ username });
+        if (user0 && user0.username !== user.username) throw new Error("Username taken");
         if (password) user.password = await encryptPassword(password);
         if (username) user.username = username;
         await user.save();
