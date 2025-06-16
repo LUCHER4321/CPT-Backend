@@ -27,8 +27,10 @@ export const userController = ({
             res.status(400).json({ message: error.message });
         }
     },
-    logout: async (_, res) => {
+    logout: async (req, res) => {
+        const { token } = req.cookies;
         res.clearCookie("token");
+        await userModel.logout({ token });
         res.status(200).json({ message: "Logged out successfully" });
     },
     getUser: async (req, res) => {
