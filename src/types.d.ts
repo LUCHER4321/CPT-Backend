@@ -59,6 +59,9 @@ export interface UserModel {
         email: string;
         password: string;
     }, User & { token: string }>;
+    logout: ModelFuncton<{
+        token: string;
+    }, void>
     getUser: ModelFuncton<{
         id: Types.ObjectId;
     }, User>;
