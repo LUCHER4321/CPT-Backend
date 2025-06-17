@@ -12,7 +12,7 @@ export const commentModel: CommentModel = {
         const user = await userByToken(token);
         if (!user) return undefined;
         const parent = await nullableInput(parentId, p => CommentClass.findById(p));
-        if(parent && parent?.treeId?.prototype !== treeId) throw new Error("Parent comment isn't a tree's comment");
+        if(parent && parent?.treeId.prototype !== treeId) throw new Error("Parent comment isn't a tree's comment");
         const comment = new CommentClass({
             treeId,
             userId: user?._id,
