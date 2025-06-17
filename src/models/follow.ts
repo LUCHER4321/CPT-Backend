@@ -1,9 +1,13 @@
 import { FollowModel } from "../types";
-import { userByToken, UserClass } from "../schemas/user";
+import { UserClass } from "../schemas/user";
 import { FollowClass } from "../schemas/follow";
+import { userByToken } from "../utils/token";
+import { confirmAPIKey } from "../utils/apiKey";
 
 export const followModel: FollowModel = {
-    followUser: async ({ token, followedUserId }) => {
+    followUser: async ({ token, followedUserId, key }) => {
+        const apiKey = await confirmAPIKey(key);
+        if(!apiKey) return undefined;
         const user = await userByToken(token);
         if (!user) return undefined;
         const followed = await UserClass.findById(followedUserId);
@@ -25,7 +29,9 @@ export const followModel: FollowModel = {
             followedUserId: newFollow.followedUserId.prototype
         };
     },
-    unfollowUser: async ({ token, followedUserId }) => {
+    unfollowUser: async ({ token, followedUserId, key }) => {
+        const apiKey = await confirmAPIKey(key);
+        if(!apiKey) return undefined;
         const user = await userByToken(token);
         if (!user) return;
         const followed = await UserClass.findById(followedUserId);

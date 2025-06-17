@@ -1,12 +1,14 @@
 import { Types } from "mongoose";
 import { PhTreeClass } from "../schemas/phTree";
-import { userByToken } from "../schemas/user";
-import { PhTree, PhTreeModel, treeCriteria } from "../types";
+import { PhTree, PhTreeModel } from "../types";
 import { photoToString } from "../utils/photo";
 import { imageModel } from "./image";
 import { nullableInput } from "../utils/nullableInput";
 import { CommentClass } from "../schemas/comment";
 import { LikeClass } from "../schemas/like";
+import { userByToken } from "../utils/token";
+import { confirmAPIKey } from "../utils/apiKey";
+import { Order, TreeCriteria } from "../utils/enums";
 
 interface MyTreeProps {
     token?: string;
@@ -37,8 +39,8 @@ interface GetTreesProps {
     page?: number;
     limit?: number;
     search?: string;
-    criteria?: treeCriteria;
-    order?: "asc" | "desc";
+    criteria?: TreeCriteria;
+    order?: Order;
     myTrees?: boolean;
 }
 
@@ -118,7 +120,9 @@ const getTrees = async ({
 };
 
 export const phTreeModel: PhTreeModel = {
-    createPhTree: async ({ token, name, description, isPublic, tags, collaborators }) => {
+    createPhTree: async ({ token, name, description, isPublic, tags, collaborators, key }) => {
+        const apiKey = await confirmAPIKey(key);
+        if(!apiKey) return undefined;
         const user = await nullableInput(token, userByToken);
         if (!user) return undefined;
         const phTree = new PhTreeClass({
@@ -144,7 +148,19 @@ export const phTreeModel: PhTreeModel = {
             myTrees: true
         });
     },
-    updatePhTree: async ({ token, id, name, description, isPublic, tags, newCollaborators, deleteCollaborators }) => {
+    updatePhTree: async ({
+        token,
+        id,
+        name,
+        description,
+        isPublic,
+        tags,
+        newCollaborators,
+        deleteCollaborators,
+        key
+    }) => {
+        const apiKey = await confirmAPIKey(key);
+        if(!apiKey) return undefined;
         const mt = await myTree({ token, id });
         if(!mt) return undefined;
         const {
@@ -165,7 +181,9 @@ export const phTreeModel: PhTreeModel = {
         await phTree.save()
         return await phTreeModel.getPhTree({ token, id });
     },
-    deletePhTree: async ({ token, id }) => {
+    deletePhTree: async ({ token, id, key }) => {
+        const apiKey = await confirmAPIKey(key);
+        if(!apiKey) return undefined;
         const mt = await myTree({ token, id, mustBeOwner: true });
         if(!mt) return;
         const { user, phTree } = mt;
@@ -176,7 +194,9 @@ export const phTreeModel: PhTreeModel = {
         await LikeClass.deleteMany({ $or: (await CommentClass.find({ treeId: id })).map(c => ({ commentId: c._id })) })
         await CommentClass.deleteMany({ treeId: id });
     },
-    setPhTreeImage: async ({ token, id, image }) => {
+    setPhTreeImage: async ({ token, id, image, key }) => {
+        const apiKey = await confirmAPIKey(key);
+        if(!apiKey) return undefined;
         const mt = await myTree({ token, id });
         if(!mt) return undefined;
         const { user, phTree } = mt;
@@ -187,7 +207,9 @@ export const phTreeModel: PhTreeModel = {
         await phTree.save();
         return await phTreeModel.getPhTree({ token, id });
     },
-    deletePhTreeImage: async ({ token, id }) => {
+    deletePhTreeImage: async ({ token, id, key }) => {
+        const apiKey = await confirmAPIKey(key);
+        if(!apiKey) return undefined;
         const mt = await myTree({ token, id });
         if(!mt) return undefined;
         const { phTree } = mt;
@@ -196,6 +218,7 @@ export const phTreeModel: PhTreeModel = {
         phTree.updatedAt = new Date();
         phTree.userId.prototype
         await phTree.save();
+        return await phTreeModel.getPhTree({ token, id });
     },
     getPhTrees: async ({ token, page, limit, search, criteria, order }) => {
         return await getTrees({

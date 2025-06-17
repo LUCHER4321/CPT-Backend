@@ -1,22 +1,20 @@
-import { Types } from "mongoose";
 import { CommentController, CommentModel } from "../types";
-import { parseNewComment, parsePatchComment } from "../utils/parser";
+import { getKey, parseNewComment, parsePatchComment, toObjectId } from "../utils/parser";
 
 export const commentController = ({
     commentModel
 }: { commentModel: CommentModel }): CommentController => ({
     createComment: async (req, res) => {
         const { token } = req.cookies;
-        const { treeId } = req.params
+        const { treeId: t_id } = req.params
         if (!token) return res.status(401).json({ message: "Unauthorized" });
+        const { apiKey } = req.query;
+        const key = getKey(apiKey);
         try {
-            const { content, parentId } = parseNewComment(req.body);
-            const newComment = await commentModel.createComment({
-                token,
-                treeId: new Types.ObjectId(treeId),
-                content,
-                parentId: new Types.ObjectId(parentId)
-            });
+            const treeId = toObjectId(t_id);
+            const { content, parentId: _id } = parseNewComment(req.body);
+            const parentId = getKey(_id);
+            const newComment = await commentModel.createComment({ token, treeId, content, parentId, key });
             if (!newComment) return res.status(404).json({ message: "PhTree not found" });
             res.json(newComment);
         } catch (error: any) {
@@ -25,15 +23,14 @@ export const commentController = ({
     },
     deleteComment: async (req, res) => {
         const { token } = req.cookies;
-        const { treeId, id } = req.params;
+        const { treeId: t_id, id: _id } = req.params;
         if (!token) return res.status(401).json({ message: "Unauthorized" });
-        if (!id) return res.status(400).json({ message: "Comment ID is required" });
+        const { apiKey } = req.query;
+        const key = getKey(apiKey);
         try {
-            await commentModel.deleteComment({
-                token,
-                treeId: new Types.ObjectId(treeId),
-                id: new Types.ObjectId(id)
-            });
+            const treeId = toObjectId(t_id);
+            const id = toObjectId(_id);
+            await commentModel.deleteComment({ token, treeId, id, key });
             res.status(204).send();
         } catch (error: any) {
             res.status(400).json({ message: error.message });
@@ -41,17 +38,16 @@ export const commentController = ({
     },
     updateComment: async (req, res) => {
         const { token } = req.cookies;
-        const { treeId, id } = req.params;
+        const { treeId: t_id, id: _id } = req.params;
         const { content } = parsePatchComment(req.body);
         if (!token) return res.status(401).json({ message: "Unauthorized" });
-        if (!id || !content) return res.status(400).json({ message: "Comment ID and content are required" });
+        if (!content) return res.status(400).json({ message: "Content is required" });
+        const { apiKey } = req.query;
+        const key = getKey(apiKey);
         try {
-            const updatedComment = await commentModel.updateComment({
-                token,
-                treeId: new Types.ObjectId(treeId),
-                id: new Types.ObjectId(id),
-                content
-            });
+            const treeId = toObjectId(t_id);
+            const id = toObjectId(_id);
+            const updatedComment = await commentModel.updateComment({ token, treeId, id, content, key });
             if (!updatedComment) return res.status(404).json({ message: "Comment not found" });
             res.json(updatedComment);
         } catch (error: any) {
@@ -59,12 +55,10 @@ export const commentController = ({
         }
     },
     getComments: async (req, res) => {
-        const { treeId } = req.params;
-        if (!treeId) return res.status(400).json({ message: "PhTree ID is required" });
+        const { treeId: _id } = req.params;
         try {
-            const comments = await commentModel.getComments({
-                treeId: new Types.ObjectId(treeId)
-            });
+            const treeId = toObjectId(_id)
+            const comments = await commentModel.getComments({ treeId });
             if (!comments) return res.status(404).json({ message: "PhTree not found" });
             res.json(comments);
         } catch (error: any) {
@@ -72,13 +66,11 @@ export const commentController = ({
         }
     },
     getComment: async (req, res) => {
-        const { treeId, id } = req.params;
-        if (!id) return res.status(400).json({ message: "Parent comment ID is required" });
+        const { treeId: t_id, id: _id } = req.params;
         try {
-            const replies = await commentModel.getComment({
-                treeId: new Types.ObjectId(treeId),
-                id: new Types.ObjectId(id)
-            });
+            const treeId = toObjectId(t_id);
+            const id = toObjectId(_id);
+            const replies = await commentModel.getComment({ treeId, id });
             if (!replies) return res.status(404).json({ message: "Parent comment not found" });
             res.json(replies);
         } catch (error: any) {

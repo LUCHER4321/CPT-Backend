@@ -12,6 +12,7 @@ export const createUserRoutes = ({
     router.post("/logout", userController.logout);
     router.get("/:id", userController.getUser);
     router.use("/me", createUserMeRoutes({ userController }));
+    router.post("/admin", userController.makeAdmin);
     return router;
 }
 
@@ -24,6 +25,8 @@ const createUserMeRoutes = ({
     router.delete("/", userController.deleteMe);
     router.post("/photo", multerMw, userController.photoMe);
     router.delete("/photo", userController.deletePhotoMe);
+    router.post("/key", userController.generateKey);
+    router.delete("/key", userController.deleteKey);
     allowedMethods({ router });
     return router;
 }

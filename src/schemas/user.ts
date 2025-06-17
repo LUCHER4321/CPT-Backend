@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import { tokenVerify } from "../utils/token";
+import { Role } from "../utils/enums";
 
 const UserSchema = new Schema({
     username: {
@@ -26,8 +26,8 @@ const UserSchema = new Schema({
     photo: String,
     role: {
         type: String,
-        enum: ["user", "admin"],
-        default: "user"
+        enum: Object.values(Role),
+        default: Role.USER
     },
     lastLogin: {
         type: Date,
@@ -40,10 +40,3 @@ const UserSchema = new Schema({
 });
 
 export const UserClass = model("User", UserSchema);
-
-export const userByToken = async (token: string) => {
-    const decoded = tokenVerify(token);
-    if (!decoded) throw new Error("Invalid token");
-    const user = await UserClass.findById(decoded.id);
-    return user;
-};

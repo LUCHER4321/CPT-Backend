@@ -1,13 +1,12 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
 import { Server, Socket } from "socket.io";
-import { NotiFunc } from "./utils/enums";
+import { NotiFunc, Order, Role, TreeCriteria } from "./utils/enums";
+import { SpeciesJSON } from "chrono-phylo-tree";
 
 type ControllerFunction = (req: Request, res: Response) => Promise;
 
-type ModelFuncton<DATA, OUTPUT> = (data: DATA) => Promise<OUTPUT | undefined>;
-
-export type treeCriteria = "createdAt" | "updatedAt" | "likes" | "comments" | "name";
+type ModelFuncton<DATA, OUTPUT> = (data: DATA & { key?: Types.ObjectId }) => Promise<OUTPUT | undefined>;
 
 export interface ImageController {
     getImage: ControllerFunction;
@@ -32,9 +31,10 @@ export interface User {
     email: string;
     username: string;
     photo?: string;
-    role: "admin" | "user";
+    role: Role;
     lastLogin?: Date;
     isActive?: boolean;
+    apiKeys?: Types.ObjectId[];
 }
 
 export interface UserController {
@@ -47,6 +47,9 @@ export interface UserController {
     deleteMe: ControllerFunction;
     photoMe: ControllerFunction;
     deletePhotoMe: ControllerFunction;
+    makeAdmin: ControllerFunction;
+    generateKey: ControllerFunction;
+    deleteKey: ControllerFunction;
 }
 
 export interface UserModel {
@@ -69,9 +72,10 @@ export interface UserModel {
         token: string;
     }, User>;
     updateMe: ModelFuncton<{
-        username?: string;
-        password?: string;
         token: string;
+        username?: string;
+        oldPassword?: string;
+        password?: string;
     }, User>;
     deleteMe: ModelFuncton<{
         token: string;
@@ -82,6 +86,18 @@ export interface UserModel {
     }, User>;
     deletePhotoMe: ModelFuncton<{
         token: string;
+    }, User>;
+    makeAdmin: ModelFuncton<{
+        token: string;
+        adminId: Types.ObjectId;
+        removeAdmin?: boolean
+    }, User>;
+    generateKey: ModelFuncton<{
+        token: string;
+    }, Types.ObjectId>;
+    deleteKey: ModelFuncton<{
+        token: string;
+        keyToDelete: Types.ObjectId;
     }, void>;
 }
 
@@ -157,8 +173,8 @@ export interface PhTreeModel {
         page?: number;
         limit?: number;
         search?: string;
-        criteria?: treeCriteria;
-        order?: "asc" | "desc";
+        criteria?: TreeCriteria;
+        order?: Order;
     }, (PhTree & { commentsCount: number })[]>;
     updatePhTree: ModelFuncton<{
         token: string;
@@ -182,14 +198,14 @@ export interface PhTreeModel {
     deletePhTreeImage: ModelFuncton<{
         token: string;
         id: Types.ObjectId;
-    }, void>;
+    }, PhTree>;
     getPhTrees: ModelFuncton<Partial<{
         token: string;
         page: number;
         limit: number;
         search: string;
-        criteria: treeCriteria;
-        order: "asc" | "desc";
+        criteria: TreeCriteria;
+        order: Order;
     }>, (PhTree & { commentsCount: number })[]>;
     getPhTree: ModelFuncton<{
         token?: string;
@@ -300,16 +316,10 @@ export interface LikeModel {
     }>;
 }
 
-export interface SpeciesMongo {
+export interface SpeciesMongo extends Omit<SpeciesJSON, "descendants"> {
     id: Types.ObjectId;
     treeId: Types.ObjectId;
     descendants?: SpeciesMongo[];
-    name: string;
-    apparition?: number;
-    afterApparition?: number;
-    duration?: number;
-    description?: string;
-    image?: string;
 }
 
 export interface SpeciesController {
@@ -358,7 +368,7 @@ export interface SpeciesModel {
         token: string;
         treeId: Types.ObjectId;
         id: Types.ObjectId;
-    }, void>;
+    }, SpeciesMongo>;
     getSpecies: ModelFuncton<{
         token?: string;
         treeId: Types.ObjectId;

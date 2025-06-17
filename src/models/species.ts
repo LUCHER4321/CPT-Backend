@@ -1,12 +1,13 @@
 import { Types } from "mongoose";
 import { PhTreeClass } from "../schemas/phTree";
 import { SpeciesClass } from "../schemas/species";
-import { userByToken } from "../schemas/user";
 import { SpeciesModel, SpeciesMongo } from "../types";
 import { nullableInput } from "../utils/nullableInput";
 import { Species } from "chrono-phylo-tree";
 import { imageModel } from "./image";
 import { photoToString } from "../utils/photo";
+import { userByToken } from "../utils/token";
+import { confirmAPIKey } from "../utils/apiKey";
 
 interface CheckProps {
     token?: string;
@@ -103,7 +104,20 @@ const spApparition = async (id: Types.ObjectId): Promise<number> => {
 }
 
 export const speciesModel: SpeciesModel = {
-    createSpecies: async ({ token, treeId, name, ancestorId, apparition, afterApparition, duration, description, descendants }) => {
+    createSpecies: async ({
+        token,
+        treeId,
+        name,
+        ancestorId,
+        apparition,
+        afterApparition,
+        duration,
+        description,
+        descendants,
+        key
+    }) => {
+        const apiKey = await confirmAPIKey(key);
+        if(!apiKey) return undefined;
         const { phTree } = await check({token, treeId});
         const species = new SpeciesClass({
             ancestorId,
@@ -133,7 +147,21 @@ export const speciesModel: SpeciesModel = {
             descendants: (await nullableInput(descendants, d => Promise.all(d?.map(desc => speciesModel.createSpecies({ treeId, token, ...desc })))))?.filter(d => d !== undefined)
         }
     },
-    updateSpecies: async ({ token, treeId, id, name, ancestorId, apparition, afterApparition, duration, description, descendants }) => {
+    updateSpecies: async ({
+        token,
+        treeId,
+        id,
+        name,
+        ancestorId,
+        apparition,
+        afterApparition,
+        duration,
+        description,
+        descendants,
+        key
+    }) => {
+        const apiKey = await confirmAPIKey(key);
+        if(!apiKey) return undefined;
         const {
             phTree,
             species
@@ -176,7 +204,9 @@ export const speciesModel: SpeciesModel = {
         await phTree.save();
         return await getSpecies({ token, treeId, id, mustCheck: false });
     },
-    deleteSpecies: async ({ token, treeId, id }) => {
+    deleteSpecies: async ({ token, treeId, id, key }) => {
+        const apiKey = await confirmAPIKey(key);
+        if(!apiKey) return;
         const { phTree } = await check({ token, treeId, id });
         const json = await getSpecies({ token, treeId, id, mustCheck: false });
         if(!json) return;
@@ -185,7 +215,9 @@ export const speciesModel: SpeciesModel = {
         phTree.updatedAt = new Date();
         await phTree.save();
     },
-    setSpeciesImage: async ({ token, treeId, id, image }) => {
+    setSpeciesImage: async ({ token, treeId, id, image, key }) => {
+        const apiKey = await confirmAPIKey(key);
+        if(!apiKey) return undefined;
         const {
             phTree,
             species
@@ -196,7 +228,9 @@ export const speciesModel: SpeciesModel = {
         await phTree.save();
         return await getSpecies({ token, treeId, id, mustCheck: false });
     },
-    deleteSpeciesImage: async ({ token, treeId, id }) => {
+    deleteSpeciesImage: async ({ token, treeId, id, key }) => {
+        const apiKey = await confirmAPIKey(key);
+        if(!apiKey) return undefined;
         const {
             phTree,
             species
@@ -207,6 +241,7 @@ export const speciesModel: SpeciesModel = {
         phTree.updatedAt = new Date();
         await phTree.save();
         await species.save();
+        return await getSpecies({ token, treeId, id, mustCheck: false });
     },
     getSpecies: async ({ token, treeId, id }) => {
         return await getSpecies({ token, treeId, id });

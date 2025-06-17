@@ -1,7 +1,7 @@
 import { rename, unlink } from "node:fs";
 import { ImageModel } from "../types";
-import { userByToken } from "../schemas/user";
 import { IMAGES } from "../config";
+import { userByToken } from "../utils/token";
 
 export const imageModel: ImageModel = {
     getImage: async ({ img }) => {

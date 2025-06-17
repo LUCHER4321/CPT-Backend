@@ -1,6 +1,7 @@
 import { sign, verify } from "jsonwebtoken";
 import { Types } from "mongoose";
 import { EXPIRATION, SECRET } from "../config";
+import { UserClass } from "../schemas/user";
 
 interface TokenPayload {
     id: Types.ObjectId;
@@ -29,4 +30,11 @@ export const tokenVerify = (token?: string) => {
     } catch (error) {
         throw new Error("Invalid token");
     }
-}
+};
+
+export const userByToken = async (token: string) => {
+    const decoded = tokenVerify(token);
+    if (!decoded) throw new Error("Invalid token");
+    const user = await UserClass.findById(decoded.id);
+    return user;
+};

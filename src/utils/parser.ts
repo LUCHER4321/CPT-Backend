@@ -1,13 +1,15 @@
-import { NotiFunc } from "./enums";
+import { Types } from "mongoose";
+import { NotiFunc, Order, TreeCriteria } from "./enums";
+import { nullableInput } from "./nullableInput";
 
 const isString = (str: any): boolean => typeof str === "string" || str instanceof String;
 
-const parseProp = <T,>(t: any, check: (t: any) => boolean, prop: string): T => {
+const parseProp = <T>(t: any, check: (t: any) => boolean, prop: string): T => {
     if(!check(t)) throw new Error(`Incorrect or missing ${prop}`);
     return t as T;
 }
 
-const parseString = (str: any, prop: string = "") => parseProp<string>(str, isString, prop);
+const parseString = (str: any, prop = "") => parseProp<string>(str, isString, prop);
 
 type Email = `${string}@${string}.${string}`;
 
@@ -17,17 +19,25 @@ const parseEmail = (str: string) => {
     throw new Error("Invalid Email");
 };
 
+const isEnum = (T: any) => (t: any) => Object.values(T).includes(t)
+
 const isBoolean = (bool: any): boolean => typeof bool === "boolean" || bool instanceof Boolean;
 
-const parseBoolean = (bool: any, prop: string = "") => parseProp<boolean>(bool, isBoolean, prop);
+const parseBoolean = (bool: any, prop = "") => parseProp<boolean>(bool, isBoolean, prop);
 
 const isList = (ls: any): boolean => Array.isArray(ls);
 
-const parseList = <T,>(ls: any, parse: (el: any, pr: string) => T, prop: string = "", props: string = "") => parseProp<any[]>(ls, isList, props).map(el => parse(el, prop));
+const parseList = <T,>(ls: any, parse: (el: any, pr: string) => T, prop = "", props: string = "") => parseProp<any[]>(ls, isList, props).map(el => parse(el, prop));
 
 const isNumber = (num: any): boolean => typeof num === "number" || num instanceof Number;
 
-const parseNumber = (num: any, prop: string = "") => parseProp<number>(num, isNumber, prop);
+const parseNumber = (num: any, prop = "") => parseProp<number>(num, isNumber, prop);
+
+const parseFun = (fun: any, prop = "") => parseProp<NotiFunc>(fun, isEnum(NotiFunc), prop);
+
+const isDate = (date: any) => date instanceof Date;
+
+const parseDate = (date: any, prop = "") => parseProp<Date>(date, isDate, prop);
 
 const toPartial = <T,>(object: () => T): (T | undefined) => {
     try {
@@ -36,6 +46,18 @@ const toPartial = <T,>(object: () => T): (T | undefined) => {
         return undefined;
     }
 };
+
+export const getKey = (apiKey: any) => nullableInput(toPartial(() => parseString(apiKey)), toObjectId);
+
+export const toObjectId = (id: string) => new Types.ObjectId(id);
+
+export const parseCriteria = (criteria: any, prop = "") => parseProp<TreeCriteria>(criteria, isEnum(TreeCriteria), prop);
+
+export const parseOrder = (order: any, prop = "") => parseProp<Order>(order, isEnum(Order), prop);
+
+export const parseKeyToDelete = (object: any) => ({
+    apiKeyToDelete: parseString(object.keyToDelete, "API Key")
+});
 
 export const parseRegister = (object: any) => ({
     username: parseString(object.username, "username"),
@@ -49,8 +71,14 @@ export const parseLogin = (object: any) => ({
 
 export const parsePatchUser = (object: any) => ({
     username: toPartial(() => parseString(object.username)),
+    oldPassword: toPartial(() => parseString(object.oldPassword)),
     password: toPartial(() => parseString(object.password))
 });
+
+export const parseNewAdmin = (object: any) => ({
+    adminId: parseString(object.adminId, "adminId"),
+    removeAdmin: toPartial(() => parseBoolean(object.removeAdmin))
+})
 
 const treePartials = (object: any) => ({
     description: toPartial(() => parseString(object.description)),
@@ -81,20 +109,18 @@ export const parsePatchComment = (object: any) => ({
     content: toPartial(() => parseString(object.content))
 });
 
-type SpeciesPartial = Partial<{
+type SpeciesInput = Partial<{
     ancestorId: string;
     apparition: number;
     afterApparition: number;
     description: string;
     descendants: Omit<SpeciesInput, "ancestorId">[];
-}>
-
-type SpeciesInput = SpeciesPartial & {
+}> & {
     name: string;
     duration: number;
 };
 
-const speciesPartials = (object: any): SpeciesPartial => ({
+const speciesPartials = (object: any) => ({
     ancestorId: toPartial(() => parseString(object.ancestorId)),
     apparition: toPartial(() => parseNumber(object.apparition)),
     afterApparition: toPartial(() => parseNumber(object.afterApparition)),
@@ -113,14 +139,6 @@ export const parsePatchSpecies = (object: any): Partial<SpeciesInput> => ({
     duration: toPartial(() => parseNumber(object.duration)),
     ...speciesPartials(object)
 });
-
-const isFun = (fun: any) => Object.values(NotiFunc).includes(fun);
-
-const parseFun = (fun: any, prop: string = "") => parseProp<NotiFunc>(fun, isFun, prop);
-
-const isDate = (date: any) => date instanceof Date;
-
-const parseDate = (date: any, prop: string = "") => parseProp<Date>(date, isDate, prop);
 
 export const parseNewNotification = (data: any) => ({
     fun: toPartial(() => parseFun(data.fun)),

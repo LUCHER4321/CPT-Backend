@@ -1,5 +1,5 @@
-import { Types } from "mongoose";
 import { LikeController, LikeModel } from "../types";
+import { getKey, toObjectId } from "../utils/parser";
 
 export const likeController = ({
     likeModel
@@ -8,8 +8,11 @@ export const likeController = ({
         const { id } = req.params;
         const { token } = req.cookies;
         if (!token) return res.status(401).json({ message: "Unauthorized" });
+        const { apiKey } = req.query;
+        const key = getKey(apiKey);
         try {
-            const like = await likeModel.likePhTree({ token, treeId: new Types.ObjectId(id) });
+            const treeId = toObjectId(id);
+            const like = await likeModel.likePhTree({ token, treeId, key });
             if (!like) return res.status(404).json({ message: "PhTree not found" });
             res.json(like);
         } catch (error: any) {
@@ -20,8 +23,11 @@ export const likeController = ({
         const { id } = req.params;
         const { token } = req.cookies;
         if (!token) return res.status(401).json({ message: "Unauthorized" });
+        const { apiKey } = req.query;
+        const key = getKey(apiKey);
         try {
-            await likeModel.unlikePhTree({ token, treeId: new Types.ObjectId(id) });
+            const treeId = toObjectId(id);
+            await likeModel.unlikePhTree({ token, treeId, key });
             res.status(204).send();
         } catch (error: any) {
             res.status(400).json({ message: error.message });
@@ -42,7 +48,8 @@ export const likeController = ({
         const { id } = req.params;
         const { token } = req.cookies;
         try {
-            const likes = await likeModel.phTreeLikes({ treeId: new Types.ObjectId(id), token });
+            const treeId = toObjectId(id);
+            const likes = await likeModel.phTreeLikes({ treeId, token });
             if (!likes) return res.status(404).json({ message: "PhTree not found" });
             res.json(likes);
         } catch (error: any) {
@@ -53,8 +60,11 @@ export const likeController = ({
         const { id } = req.params;
         const { token } = req.cookies;
         if (!token) return res.status(401).json({ message: "Unauthorized" });
+        const { apiKey } = req.query;
+        const key = getKey(apiKey);
         try {
-            const like = await likeModel.likeComment({ token, commentId: new Types.ObjectId(id) });
+            const commentId = toObjectId(id);
+            const like = await likeModel.likeComment({ token, commentId, key });
             if (!like) return res.status(404).json({ message: "Comment not found" });
             res.json(like);
         } catch (error: any) {
@@ -65,8 +75,11 @@ export const likeController = ({
         const { id } = req.params;
         const { token } = req.cookies;
         if (!token) return res.status(401).json({ message: "Unauthorized" });
+        const { apiKey } = req.query;
+        const key = getKey(apiKey);
         try {
-            await likeModel.unlikeComment({ token, commentId: new Types.ObjectId(id) });
+            const commentId = toObjectId(id);
+            await likeModel.unlikeComment({ token, commentId, key });
             res.status(204).send();
         } catch (error: any) {
             res.status(400).json({ message: error.message });
@@ -87,7 +100,8 @@ export const likeController = ({
         const { id } = req.params;
         const { token } = req.cookies;
         try {
-            const likes = await likeModel.commentLikes({ commentId: new Types.ObjectId(id), token });
+            const commentId = toObjectId(id);
+            const likes = await likeModel.commentLikes({ commentId, token });
             if (!likes) return res.status(404).json({ message: "Comment not found" });
             res.json(likes);
         } catch (error: any) {

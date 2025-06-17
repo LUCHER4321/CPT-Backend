@@ -1,11 +1,14 @@
 import { CommentClass } from "../schemas/comment";
 import { LikeClass } from "../schemas/like";
-import { userByToken } from "../schemas/user";
 import { CommentModel } from "../types";
+import { confirmAPIKey } from "../utils/apiKey";
 import { nullableInput } from "../utils/nullableInput";
+import { userByToken } from "../utils/token";
 
 export const commentModel: CommentModel = {
-    createComment: async ({ token, treeId, content, parentId }) => {
+    createComment: async ({ token, treeId, content, parentId, key }) => {
+        const apiKey = await confirmAPIKey(key);
+        if(!apiKey) return undefined;
         const user = await userByToken(token);
         if (!user) return undefined;
         const parent = await nullableInput(parentId, p => CommentClass.findById(p));
@@ -28,7 +31,9 @@ export const commentModel: CommentModel = {
             updatedAt: newComment.updatedAt
         }
     },
-    updateComment: async ({ token, treeId, id, content }) => {
+    updateComment: async ({ token, treeId, id, content, key }) => {
+        const apiKey = await confirmAPIKey(key);
+        if(!apiKey) return undefined;
         const user = await userByToken(token);
         if (!user) return undefined;
         const comment = await CommentClass.findById(id);
@@ -40,7 +45,9 @@ export const commentModel: CommentModel = {
         await comment.save();
         return await commentModel.getComment({ treeId, id });
     },
-    deleteComment: async ({ token, treeId, id }) => {
+    deleteComment: async ({ token, treeId, id, key }) => {
+        const apiKey = await confirmAPIKey(key);
+        if(!apiKey) return undefined;
         const user = await userByToken(token);
         if (!user) return;
         const comment = await CommentClass.findById(id);

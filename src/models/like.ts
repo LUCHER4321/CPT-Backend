@@ -1,13 +1,16 @@
 import { CommentClass } from "../schemas/comment";
 import { LikeClass } from "../schemas/like";
 import { PhTreeClass } from "../schemas/phTree";
-import { userByToken } from "../schemas/user";
 import { LikeModel } from "../types";
+import { confirmAPIKey } from "../utils/apiKey";
 import { nullableInput } from "../utils/nullableInput";
+import { userByToken } from "../utils/token";
 import { commentModel } from "./comment";
 
 export const likeModel: LikeModel = {
-    likePhTree: async ({token, treeId}) => {
+    likePhTree: async ({ token, treeId, key }) => {
+        const apiKey = await confirmAPIKey(key);
+        if(!apiKey) return undefined;
         const user = await userByToken(token);
         if (!user) return undefined;
         const liked = await PhTreeClass.findById(treeId);
@@ -30,7 +33,9 @@ export const likeModel: LikeModel = {
             createdAt: newLike.createdAt
         };
     },
-    unlikePhTree: async ({token, treeId}) => {
+    unlikePhTree: async ({ token, treeId, key }) => {
+        const apiKey = await confirmAPIKey(key);
+        if(!apiKey) return;
         const user = await userByToken(token);
         if (!user) return;
         const liked = await PhTreeClass.findById(treeId);
@@ -41,7 +46,7 @@ export const likeModel: LikeModel = {
         });
         if(deletedCount === 0) throw new Error(`${user.username} doesn't like ${liked.name}`);
     },
-    likedPhTrees: async ({token}) => {
+    likedPhTrees: async ({ token }) => {
         const user = await userByToken(token);
         if (!user) return undefined;
         const likes = await LikeClass.find({ userId: user._id });
@@ -59,7 +64,7 @@ export const likeModel: LikeModel = {
             collaborators: t.collaborators?.filter(c => c.prototype).map(c => c.prototype!) ?? undefined
         }));
     },
-    phTreeLikes: async ({token, treeId}) => {
+    phTreeLikes: async ({ token, treeId }) => {
         const likes = await LikeClass.find({ treeId });
         const likesCount = likes.length;
         const user = await nullableInput(token, userByToken);
@@ -69,7 +74,9 @@ export const likeModel: LikeModel = {
             myLike
         };
     },
-    likeComment: async ({token, commentId}) => {
+    likeComment: async ({ token, commentId, key}) => {
+        const apiKey = await confirmAPIKey(key);
+        if(!apiKey) return undefined;
         const user = await userByToken(token);
         if (!user) return undefined;
         const liked = await CommentClass.findById(commentId);
@@ -92,7 +99,9 @@ export const likeModel: LikeModel = {
             createdAt: newLike.createdAt
         };
     },
-    unlikeComment: async ({token, commentId}) => {
+    unlikeComment: async ({ token, commentId, key }) => {
+        const apiKey = await confirmAPIKey(key);
+        if(!apiKey) return;
         const user = await userByToken(token);
         if (!user) return;
         const liked = await CommentClass.findById(commentId);
