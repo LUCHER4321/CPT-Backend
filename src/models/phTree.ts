@@ -28,7 +28,7 @@ const myTree = async ({
     if(!readOnly || !phTree.isPublic){
         const user = await nullableInput(token, userByToken);
         if (!user) return undefined;
-        if(![phTree.userId.prototype, ...(mustBeOwner ? [] : phTree.collaborators ?? [])].includes(user._id) && !phTree.isPublic) throw new Error(`${phTree.name} isn't a ${user.username}'s Ph. Tree`);
+        if(![phTree.userId, ...(mustBeOwner ? [] : phTree.collaborators ?? [])].map(i => i.prototype).includes(user._id) && !phTree.isPublic) throw new Error(`${phTree.name} isn't a ${user.username}'s Ph. Tree`);
         return { user, phTree };
     }
     return { phTree };
@@ -104,7 +104,7 @@ const getTrees = async ({
         pipeline.push({ $limit: limit });
     }
     const phTrees = await PhTreeClass.aggregate(pipeline);
-    return phTrees.filter(pt => pt.userId.prototype !== undefined).map(pt => ({
+    return phTrees.filter(pt => pt.userId.prototype instanceof Types.ObjectId).map(pt => ({
         id: pt._id,
         userId: pt.userId.prototype,
         name: pt.name,
@@ -114,7 +114,7 @@ const getTrees = async ({
         createdAt: pt.createdAt,
         updatedAt: pt.updatedAt,
         tags: pt.tags ?? undefined,
-        collaborators: pt.collaborators?.filter((c: any) => c.prototype).map((c: any) => c.prototype!) ?? undefined,
+        collaborators: pt.collaborators?.filter((c: any) => c.prototype instanceof Types.ObjectId).map((c: any) => c.prototype!) ?? undefined,
         commentsCount: pt.commentsCount
     }));
 };
@@ -216,7 +216,6 @@ export const phTreeModel: PhTreeModel = {
         await imageModel.deleteImage({ token, img: phTree.image ?? "" });
         phTree.image = undefined;
         phTree.updatedAt = new Date();
-        phTree.userId.prototype
         await phTree.save();
         return await phTreeModel.getPhTree({ token, id });
     },
@@ -245,7 +244,7 @@ export const phTreeModel: PhTreeModel = {
             createdAt: phTree.createdAt,
             updatedAt: phTree.updatedAt,
             tags: phTree.tags ?? undefined,
-            collaborators: phTree.collaborators?.filter(c => c.prototype).map(c => c.prototype!) ?? undefined
+            collaborators: phTree.collaborators?.filter(c => c.prototype instanceof Types.ObjectId).map(c => c.prototype!) ?? undefined
         }
     }
 }
