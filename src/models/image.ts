@@ -16,15 +16,14 @@ export const imageModel: ImageModel = {
         if (!file) {
             throw new Error("File is required");
         }
-        const originalName = file.originalname.split('.')
-        const extension = originalName.pop();
+        const [_, extension] = file.originalname.split('.')
         if (!extension) {
             throw new Error("File must have an extension");
         }
         if (!["jpg", "jpeg", "png", "gif"].includes(extension)) {
             throw new Error("File must be an image (jpg, jpeg, png, gif)");
         }
-        const fileName = `${user._id.toString}-${Date.now()}.${extension}`;
+        const fileName = `${user._id.toString()}-${Date.now()}.${extension}`;
         const newPath = `${IMAGES}/${fileName}`;
         rename(file.path, newPath, (err) => {
             if (err) throw new Error("Error creating image");
