@@ -100,7 +100,7 @@ class IdSpecies extends Species{
 const spApparition = async (id: Types.ObjectId): Promise<number> => {
     let species = await SpeciesClass.findById(id);
     if(!species) return 0;
-    return (species.afterApparition ?? species.apparition ?? 0) + (await nullableInput(species.ancestorId?.prototype, spApparition) ?? 0);
+    return (species.afterApparition ?? species.apparition ?? 0) + ((await nullableInput(species.ancestorId?.prototype, spApparition)) ?? 0);
 }
 
 export const speciesModel: SpeciesModel = {
@@ -183,7 +183,7 @@ export const speciesModel: SpeciesModel = {
                 species.apparition = undefined;
             }
         } else if(ancestorId === null){
-            const oldAncestor = await SpeciesClass.findById(species.ancestorId?.prototype);
+            const oldAncestor = await SpeciesClass.findById(species.ancestorId);
             if(apparition !== undefined || oldAncestor) {
                 species.ancestorId = undefined;
                 species.afterApparition = undefined;
@@ -191,7 +191,7 @@ export const speciesModel: SpeciesModel = {
             if(apparition !== undefined) species.apparition = apparition;
             else if(oldAncestor) species.apparition = await spApparition(id);
         } else {
-            const oldAncestor = await SpeciesClass.findById(species.ancestorId?.prototype);
+            const oldAncestor = await SpeciesClass.findById(species.ancestorId);
             if(oldAncestor && afterApparition !== undefined) species.afterApparition = Math.max(afterApparition, 0);
             else if(!oldAncestor && apparition !== undefined) species.apparition = apparition
         }
