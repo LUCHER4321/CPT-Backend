@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import { CommentClass } from "../schemas/comment";
 import { LikeClass } from "../schemas/like";
 import { PhTreeClass } from "../schemas/phTree";
@@ -50,8 +51,8 @@ export const likeModel: LikeModel = {
         const user = await userByToken(token);
         if (!user) return undefined;
         const likes = await LikeClass.find({ userId: user._id });
-        const phTrees = (await Promise.all(likes.map(l => nullableInput(l.treeId?.prototype, p => PhTreeClass.findById(p))))).filter(t => t !== null && t !== undefined);
-        return phTrees.filter(t => t.userId.prototype !== null && t.userId.prototype !== undefined).map(t => ({
+        const phTrees = (await Promise.all(likes.map(l => nullableInput(l.treeId, p => PhTreeClass.findById(p))))).filter(t => t !== null && t !== undefined);
+        return phTrees.filter(t => t.userId.prototype instanceof Types.ObjectId).map(t => ({
             id: t._id,
             userId: t.userId.prototype!,
             name: t.name,
@@ -61,7 +62,7 @@ export const likeModel: LikeModel = {
             createdAt: t.createdAt,
             updatedAt: t.updatedAt,
             tags: t.tags ?? undefined,
-            collaborators: t.collaborators?.filter(c => c.prototype).map(c => c.prototype!) ?? undefined
+            collaborators: t.collaborators?.filter(c => c.prototype instanceof Types.ObjectId).map(c => c.prototype!) ?? undefined
         }));
     },
     phTreeLikes: async ({ token, treeId }) => {
@@ -116,7 +117,7 @@ export const likeModel: LikeModel = {
         const user = await userByToken(token);
         if (!user) return undefined;
         const likes = await LikeClass.find({ userId: user._id });
-        const comments = (await Promise.all(likes.map(l => nullableInput(l.commentId?.prototype, p => CommentClass.findById(p))))).filter(c => c !== null && c !== undefined && c.treeId.prototype != undefined).map(c => c!);
+        const comments = (await Promise.all(likes.map(l => nullableInput(l.commentId, p => CommentClass.findById(p))))).filter(c => c !== null && c !== undefined && c.treeId != undefined).map(c => c!);
         return (await Promise.all(comments.map(c => commentModel.getComment({ treeId: c.treeId.prototype!, id: c._id })))).filter(c => c !== undefined);
     },
     commentLikes: async ({token, commentId}) => {
