@@ -19,12 +19,12 @@ export const userController = ({
         }
     },
     login: async (req, res) => {
+        const { apiKey } = req.query;
+        const key = getKey(apiKey);
         try {
             const data = parseLogin(req.body);
-            const { apiKey } = req.query;
-            const key = getKey(apiKey);
             const user = await userModel.login({ ...data, key });
-            if (!user) return res.status(401).json({ message: "Invalid credentials" });
+            if (!user) return res.status(401).json({ message: "User not found" });
             res.status(200).json(user);
         } catch (error: any) {
             res.status(400).json({ message: error.message });
