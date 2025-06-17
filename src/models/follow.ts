@@ -3,6 +3,7 @@ import { UserClass } from "../schemas/user";
 import { FollowClass } from "../schemas/follow";
 import { userByToken } from "../utils/token";
 import { confirmAPIKey } from "../utils/apiKey";
+import { Types } from "mongoose";
 
 export const followModel: FollowModel = {
     followUser: async ({ token, followedUserId, key }) => {
@@ -46,7 +47,7 @@ export const followModel: FollowModel = {
         const user = await UserClass.findById(userId);
         if (!user) return undefined;
         const followers = await FollowClass.find({ followedUserId: userId });
-        return followers.filter(f => f.userId.prototype).map(f => ({
+        return followers.filter(f => f.userId.prototype instanceof Types.ObjectId).map(f => ({
             id: f._id,
             userId: f.userId.prototype!,
             followedUserId: userId
@@ -56,7 +57,7 @@ export const followModel: FollowModel = {
         const user = await UserClass.findById(userId);
         if (!user) return undefined;
         const following = await FollowClass.find({ userId });
-        return following.filter(f => f.followedUserId.prototype).map(f => ({
+        return following.filter(f => f.followedUserId.prototype instanceof Types.ObjectId).map(f => ({
             id: f._id,
             userId,
             followedUserId: f.followedUserId.prototype!
