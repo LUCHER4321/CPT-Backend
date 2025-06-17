@@ -2,13 +2,16 @@ import { rename, unlink } from "node:fs";
 import { ImageModel } from "../types";
 import { IMAGES } from "../config";
 import { userByToken } from "../utils/token";
+import { join } from "node:path";
+
+const toPathList = (path: string, discard = 0) => path.split("/").flatMap(p => p.split("\\")).filter((_, index, array) => index < array.length - discard)
 
 export const imageModel: ImageModel = {
     getImage: async ({ img }) => {
         if (!img) {
             throw new Error("Image name is required");
         }
-        return { path: `${IMAGES}/${img}` };
+        return { path: join(...toPathList(__dirname, 2), ...toPathList(IMAGES), img) };
     },
     createImage: async ({ token, file }) => {
         const user = await userByToken(token);
