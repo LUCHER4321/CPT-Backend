@@ -12,11 +12,7 @@ const UserSchema = new Schema({
         type: String,
         unique: true,
         required: true,
-        lowercase: true,
-        validate: {
-            validator: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test,
-            message: "Invalid email format"
-        }
+        lowercase: true
     },
     password: {
         type: String,
