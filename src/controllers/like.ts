@@ -5,7 +5,7 @@ export const likeController = ({
     likeModel
 }: { likeModel: LikeModel }): LikeController => ({
     likePhTree: async (req, res) => {
-        const { id } = req.params;
+        const { treeId: id } = req.params;
         const { token } = req.cookies;
         if (!token) return res.status(401).json({ message: "Unauthorized" });
         const { apiKey } = req.query;
@@ -20,7 +20,7 @@ export const likeController = ({
         }
     },
     unlikePhTree: async (req, res) => {
-        const { id } = req.params;
+        const { treeId: id } = req.params;
         const { token } = req.cookies;
         if (!token) return res.status(401).json({ message: "Unauthorized" });
         const { apiKey } = req.query;
@@ -45,7 +45,7 @@ export const likeController = ({
         }
     },
     phTreeLikes: async (req, res) => {
-        const { id } = req.params;
+        const { treeId: id } = req.params;
         const { token } = req.cookies;
         try {
             const treeId = toObjectId(id);
@@ -57,7 +57,7 @@ export const likeController = ({
         }
     },
     likeComment: async (req, res) => {
-        const { id } = req.params;
+        const { commentId: id } = req.params;
         const { token } = req.cookies;
         if (!token) return res.status(401).json({ message: "Unauthorized" });
         const { apiKey } = req.query;
@@ -72,7 +72,7 @@ export const likeController = ({
         }
     },
     unlikeComment: async (req, res) => {
-        const { id } = req.params;
+        const { commentId: id } = req.params;
         const { token } = req.cookies;
         if (!token) return res.status(401).json({ message: "Unauthorized" });
         const { apiKey } = req.query;
@@ -97,7 +97,7 @@ export const likeController = ({
         }
     },
     commentLikes: async (req, res) => {
-        const { id } = req.params;
+        const { commentId: id } = req.params;
         const { token } = req.cookies;
         try {
             const commentId = toObjectId(id);
