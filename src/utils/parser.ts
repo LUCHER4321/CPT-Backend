@@ -55,10 +55,6 @@ export const parseCriteria = (criteria: any, prop = "") => parseProp<TreeCriteri
 
 export const parseOrder = (order: any, prop = "") => parseProp<Order>(order, isEnum(Order), prop);
 
-export const parseKeyToDelete = (object: any) => ({
-    apiKeyToDelete: parseString(object.keyToDelete, "API Key")
-});
-
 export const parseRegister = (object: any) => ({
     username: parseString(object.username, "username"),
     ...parseLogin(object)
