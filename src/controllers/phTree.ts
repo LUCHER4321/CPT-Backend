@@ -1,4 +1,5 @@
 import { PhTreeController, PhTreeModel } from "../types";
+import { nullableInput } from "../utils/nullableInput";
 import { getKey, parseCriteria, parseNewTree, parseOrder, parsePatchTree, toObjectId } from "../utils/parser";
 
 export const phTreeController = ({
@@ -30,20 +31,20 @@ export const phTreeController = ({
         const { token } = req.cookies;
         if (!token) return res.status(401).json({ message: "Unauthorized" });
         const {
-            page = 1,
+            page,
             limit = 10,
-            search = "",
+            search,
             criteria = "createdAt",
             order = "desc"
         } = req.query;
         try {
             const phTrees = await phTreeModel.getMyPhTrees({
                 token,
-                page: +page,
+                page: nullableInput(page, p => +p),
                 limit: +limit,
-                search: search as string,
-                criteria: parseCriteria(criteria, "criteria"),
-                order: parseOrder(order, "order")
+                search: nullableInput(search, s => s as string),
+                criteria: parseCriteria(criteria),
+                order: parseOrder(order)
             });
             if (!phTrees) return res.status(404).json({ message: "No Ph. Trees found" });
             res.json(phTrees);
@@ -119,7 +120,7 @@ export const phTreeController = ({
             const id = toObjectId(_id);
             const phTree = await phTreeModel.deletePhTreeImage({ token, id, key });
             if (!phTree) return res.status(404).json({ message: "PhTree not found" });
-            res.status(204).json(phTree);
+            res.json(phTree);
         } catch (error: any) {
             res.status(400).json({ message: error.message });
         }
@@ -127,20 +128,20 @@ export const phTreeController = ({
     getPhTrees: async (req, res) => {
         const { token } = req.cookies;
         const {
-            page = 1,
+            page,
             limit = 10,
-            search = "",
+            search,
             criteria = "createdAt",
             order = "desc"
         } = req.query;
         try {
             const phTrees = await phTreeModel.getPhTrees({
                 token,
-                page: +page,
+                page: nullableInput(page, p => +p),
                 limit: +limit,
-                search: search as string,
-                criteria: parseCriteria(criteria, "criteria"),
-                order: parseOrder(order, "order")
+                search: nullableInput(search, s => s as string),
+                criteria: parseCriteria(criteria),
+                order: parseOrder(order)
             });
             if (!phTrees) return res.status(404).json({ message: "No Ph. Trees found" });
             res.json(phTrees);
