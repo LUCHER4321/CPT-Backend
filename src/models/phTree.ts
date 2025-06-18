@@ -9,6 +9,7 @@ import { LikeClass } from "../schemas/like";
 import { userByToken } from "../utils/token";
 import { confirmAPIKey } from "../utils/apiKey";
 import { Order, TreeCriteria } from "../utils/enums";
+import { UserClass } from "../schemas/user";
 
 interface MyTreeProps {
     token?: string;
@@ -52,70 +53,97 @@ const getTrees = async ({
     criteria,
     order,
     myTrees = false
-}: GetTreesProps): Promise<(PhTree & { commentsCount: number })[]> => {
+}: GetTreesProps): Promise<PhTree[]> => {
     const user = await nullableInput(token, userByToken);
-    const orderN = order === "asc" ? 1 : -1;
-    const filter = {
-        name: nullableInput(search, s => ({ $regex: `.*${s}.*`, $options: "i" })),
-        $or: nullableInput(user, u => [
-            myTrees ? { isPublic: true } : {},
-            { userId: u?._id },
-            { collaborators: u?._id }
-        ]),
-        isPublic: (user && myTrees) ? undefined : true,
-        tags: nullableInput(search, s => ({ $in: s.split(" ").map(word => `.*${word}.*`), $options: "i" }))
-    };
-    const pipeline: any[] = [
-        { $match: filter },
-        {
-            $lookup: {
-                from: "comments",
-                localField: "_id",
-                foreignField: "treeId",
-                as: "comments"
-            }
+    if(myTrees && !user) throw new Error("Invalid Token");
+    const searchRegex = nullableInput(search, s => new RegExp(s, "i"));
+    const users = await UserClass.find({ username: searchRegex });
+    const usersId = users.map(user => user._id.toString());
+    const treesQuery = PhTreeClass.find({
+        ...{
+            $or: [
+                ...searchRegex ? [
+                    { name: searchRegex },
+                    { tags: searchRegex },
+                    {
+                        $expr: {
+                            $in: [
+                                { $toString: "$userId" },
+                                usersId
+                            ]
+                        }
+                    }
+                ] : [],
+                ...(user && !myTrees) ? [
+                    { 
+                        $expr: {
+                            $eq: [
+                                { $toString: "$userId" },
+                                user._id.toString()
+                            ]
+                        }
+                    },
+                    { isPublic: true }
+                ] : []
+            ]
         },
-        {
-            $addFields: {
-                commentsCount: { $size: "$comments" }
+        ...!user ? { isPublic: true } : {},
+        ...user && myTrees ? {
+            $expr: {
+                $eq: [
+                    { $toString: "$userId" },
+                    user._id.toString()
+                ]
             }
-        }
-    ];
-    let sortStage: any = {};
-    switch(criteria) {
-        case "createdAt":
-            sortStage = { $sort: { createdAt: orderN } };
-            break;
-        case "updatedAt":
-            sortStage = { $sort: { updatedAt: orderN } };
-            break;
-        case "name":
-            sortStage = { $sort: { name: orderN } };
-            break;
-        case "comments":
-            sortStage = { $sort: { commentsCount: orderN } };
-            break;
-        default:
-            sortStage = { $sort: { createdAt: -1 } };
-    }
-    pipeline.push(sortStage);
-    if (page !== undefined && limit !== undefined) {
-        pipeline.push({ $skip: page * limit });
-        pipeline.push({ $limit: limit });
-    }
-    const phTrees = await PhTreeClass.aggregate(pipeline);
-    return phTrees.filter(pt => pt.userId instanceof Types.ObjectId).map(pt => ({
-        id: pt._id,
-        userId: pt.userId,
-        name: pt.name,
-        image: pt.image ?? undefined,
-        description: pt.description ?? undefined,
-        isPublic: pt.isPublic,
-        createdAt: pt.createdAt,
-        updatedAt: pt.updatedAt,
-        tags: pt.tags ?? undefined,
-        collaborators: pt.collaborators?.filter((c: any) => c instanceof Types.ObjectId) ?? undefined,
-        commentsCount: pt.commentsCount
+        } : {}
+    });
+    const skip = (page ?? 0) * (limit ?? 0);
+    const query = async () => {
+        switch (criteria) {
+            case TreeCriteria.LIKES:
+                return await treesQuery.lean().then(async (trees) => {
+                    const treesWithLikes = await Promise.all(
+                        trees.map(async (tree) => {
+                            const likeCount = await LikeClass.countDocuments({ treeId: tree._id })
+                            return { ...tree, likeCount };
+                        })
+                    );
+                    return treesWithLikes.sort((a,b) => (a.likeCount - b.likeCount) * (order === Order.ASC ? 1 : -1)).map(t => {
+                        const { likeCount, ...tree } = t;
+                        return tree
+                    }).slice(skip, skip + (limit ?? 0));
+                });
+            case TreeCriteria.COMMENTS:
+                return await treesQuery.lean().then(async (trees) => {
+                    const treesWithComments  = await Promise.all(
+                        trees.map(async (tree) => {
+                            const commentCount = await CommentClass.countDocuments({ treeId: tree._id })
+                            return { ...tree, commentCount };
+                        })
+                    );
+                    return treesWithComments.sort((a,b) => (a.commentCount - b.commentCount) * (order === Order.ASC ? 1 : -1)).map(t => {
+                        const { commentCount, ...tree } = t;
+                        return tree
+                    }).slice(skip, skip + (limit ?? 0));
+                });
+            default:
+                const sortOptions: any = {};
+                if(criteria) sortOptions[criteria] = order === Order.ASC ? 1 : -1;
+                return await treesQuery.sort(sortOptions).skip(skip).limit(limit ?? 0);
+        };
+    };
+    const trees = await query();
+    return trees.map(t => ({
+        id: t._id,
+        userId: t.userId,
+        name: t.name,
+        image: t.image ?? undefined,
+        description: t.description ?? undefined,
+        isPublic: t.isPublic,
+        createdAt: t.createdAt,
+        updatedAt: t.updatedAt,
+        tags: t.tags ?? undefined,
+        collaborators: t.collaborators ?? undefined
     }));
 };
 
