@@ -136,7 +136,7 @@ export const speciesController = ({
         try {
             const treeId = toObjectId(t_id);
             const id = toObjectId(_id);
-            const species = speciesModel.getSpecies({ token, treeId, id });
+            const species = await speciesModel.getSpecies({ token, treeId, id });
             if(!species) return res.status(404).json({ message: "PhTree or Species not found" });
             res.json(species);
         } catch (error: any) {
@@ -148,7 +148,7 @@ export const speciesController = ({
         const { treeId: _id } = req.params;
         try {
             const treeId = toObjectId(_id);
-            const speciesList = speciesModel.getPhTreeSpecies({ token, treeId });
+            const speciesList = await speciesModel.getPhTreeSpecies({ token, treeId });
             if(!speciesList) return res.status(404).json({ message: "PhTree not found" });
             res.json(speciesList);
         } catch (error: any) {
