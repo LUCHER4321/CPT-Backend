@@ -65,10 +65,17 @@ export const likeModel: LikeModel = {
         }));
     },
     phTreeLikes: async ({ token, treeId }) => {
-        const likes = await LikeClass.find({ treeId });
+        const likes = await LikeClass.find({
+            $expr: {
+                $eq: [
+                    { $toString: "$treeId" },
+                    treeId._id.toString()
+                ]
+            }
+        });
         const likesCount = likes.length;
         const user = await nullableInput(token, userByToken);
-        const myLike = nullableInput(user, u => likes.map(l => l.userId).includes(u._id));
+        const myLike = nullableInput(user, u => likes.map(l => l.userId.toString()).includes(u._id.toString()));
         return {
             likesCount,
             myLike
@@ -122,10 +129,17 @@ export const likeModel: LikeModel = {
     commentLikes: async ({token, commentId}) => {
         const comment = await CommentClass.findById(commentId);
         if(!comment?.content) return undefined;
-        const likes = await LikeClass.find({ commentId });
+        const likes = await LikeClass.find({
+            $expr: {
+                $eq: [
+                    { $toString: "$commentId" },
+                    commentId._id.toString()
+                ]
+            }
+        });
         const likesCount = likes.length;
         const user = await nullableInput(token, userByToken);
-        const myLike = nullableInput(user, u => likes.map(l => l.userId).includes(u._id));
+        const myLike = nullableInput(user, u => likes.map(l => l.userId.toString()).includes(u._id.toString()));
         return {
             likesCount,
             myLike
