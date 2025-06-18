@@ -13,6 +13,7 @@ export const createPhTreeRoutes = ({
     router.delete("/:id", phTreeController.deletePhTree);
     router.post("/:id/image", multerMw, phTreeController.setPhTreeImage);
     router.delete("/:id/image", phTreeController.deletePhTreeImage);
+    router.get("/:id", phTreeController.getPhTree);
     allowedMethods({ router });
     return router;
 };
