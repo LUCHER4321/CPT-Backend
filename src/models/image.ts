@@ -4,14 +4,16 @@ import { IMAGES } from "../config";
 import { userByToken } from "../utils/token";
 import { join } from "node:path";
 
-const toPathList = (path: string, discard = 0) => path.split("/").flatMap(p => p.split("\\")).filter((_, index, array) => index < array.length - discard)
+const toPathList = (path: string, discard = 0) => path.split("/").flatMap(p => p.split("\\")).filter((_, index, array) => index < array.length - discard);
+
+const imgPath = (name: string, includeImage = true) => join(...toPathList(__dirname, 2), ...includeImage ? toPathList(IMAGES) : [], name);
 
 export const imageModel: ImageModel = {
     getImage: async ({ img }) => {
         if (!img) {
             throw new Error("Image name is required");
         }
-        return { path: join(...toPathList(__dirname, 2), ...toPathList(IMAGES), img) };
+        return { path: imgPath(img) };
     },
     createImage: async ({ token, file }) => {
         const user = await userByToken(token);
@@ -27,11 +29,10 @@ export const imageModel: ImageModel = {
             throw new Error("File must be an image (jpg, jpeg, png, gif)");
         }
         const fileName = `${user._id.toString()}-${Date.now()}.${extension}`;
-        const newPath = `${IMAGES}/${fileName}`;
-        rename(file.path, newPath, (err) => {
+        rename(file.path, imgPath(fileName), (err) => {
             if (err) throw new Error("Error creating image");
         });
-        return { url: newPath }
+        return { url: `${IMAGES}/${fileName}` }
     },
     deleteImage: async ({ token, img }) => {
         const user = await userByToken(token);
@@ -39,7 +40,7 @@ export const imageModel: ImageModel = {
         if (!img) {
             throw new Error("Image path is required");
         }
-        unlink(`${IMAGES}/${img}`, (err) => {
+        unlink(imgPath(img, false), (err) => {
             if(err) throw new Error("Error deleting image");
         });
     }
