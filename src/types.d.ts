@@ -175,7 +175,7 @@ export interface PhTreeModel {
         search?: string;
         criteria?: TreeCriteria;
         order?: Order;
-    }, (PhTree & { commentsCount: number })[]>;
+    }, PhTree[]>;
     updatePhTree: ModelFuncton<{
         token: string;
         id: Types.ObjectId;
@@ -206,7 +206,7 @@ export interface PhTreeModel {
         search: string;
         criteria: TreeCriteria;
         order: Order;
-    }>, (PhTree & { commentsCount: number })[]>;
+    }>, PhTree[]>;
     getPhTree: ModelFuncton<{
         token?: string;
         id: Types.ObjectId;
