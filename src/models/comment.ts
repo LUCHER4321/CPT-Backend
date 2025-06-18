@@ -12,7 +12,7 @@ export const commentModel: CommentModel = {
         const user = await userByToken(token);
         if (!user) return undefined;
         const parent = await nullableInput(parentId, p => CommentClass.findById(p));
-        if(parent && parent?.treeId !== treeId) throw new Error("Parent comment isn't a tree's comment");
+        if(parent && parent.treeId.toString() !== treeId.toString()) throw new Error("Parent comment isn't a tree's comment");
         const comment = new CommentClass({
             treeId,
             userId: user?._id,
@@ -21,25 +21,25 @@ export const commentModel: CommentModel = {
         });
         const newComment = await comment.save();
         if(!newComment.treeId) throw new Error("Ph. Tree not found");
-        if(!newComment.userId) throw new Error("User not found");
         return {
             id: newComment._id,
             treeId: newComment.treeId,
-            userId: newComment.userId,
+            userId: newComment.userId ?? undefined,
             content: newComment.content ?? undefined,
             createdAt: newComment.createdAt,
             updatedAt: newComment.updatedAt
         }
     },
     updateComment: async ({ token, treeId, id, content, key }) => {
+        if(!content) return undefined;
         const apiKey = await confirmAPIKey(key);
         if(!apiKey) return undefined;
         const user = await userByToken(token);
         if (!user) return undefined;
         const comment = await CommentClass.findById(id);
         if(!comment) return undefined;
-        if(comment.userId !== user._id) throw new Error(`Comment isn't a ${user.username}'s comment`);
-        if(comment.treeId !== treeId) throw new Error("Comment isn't a tree's comment");
+        if(comment.userId?.toString() !== user._id.toString()) throw new Error(`Comment isn't a ${user.username}'s comment`);
+        if(comment.treeId.toString() !== treeId.toString()) throw new Error("Comment isn't a tree's comment");
         comment.content = content;
         comment.updatedAt = new Date();
         await comment.save();
@@ -52,12 +52,12 @@ export const commentModel: CommentModel = {
         if (!user) return;
         const comment = await CommentClass.findById(id);
         if(!comment) return;
-        if(comment.userId !== user._id) throw new Error(`Comment isn't a ${user.username}'s comment`);
-        if(comment.treeId !== treeId) throw new Error("Comment isn't a tree's comment");
+        if(comment.userId?.toString() !== user._id.toString()) throw new Error(`Comment isn't a ${user.username}'s comment`);
+        if(comment.treeId.toString() !== treeId.toString()) throw new Error("Comment isn't a tree's comment");
         const hasReplies = (await CommentClass.find({ parentId: comment._id })).length > 0;
         if(hasReplies) {
-            comment.content = undefined;
-            comment.userId = undefined;
+            comment.content = null;
+            comment.userId = null;
             await comment.save();
         } else await CommentClass.deleteOne({ _id: comment._id });
         await LikeClass.deleteMany({ commentId: comment._id });
@@ -75,14 +75,13 @@ export const commentModel: CommentModel = {
     getComment: async ({ treeId, id }) => {
         const comment = await CommentClass.findById(id);
         if(!comment) return undefined;
-        if(!comment.userId) throw new Error("User ID not found");
-        if(comment.treeId !== treeId) throw new Error("Comment isn't a tree's comment");
+        if(comment.treeId.toString() !== treeId.toString()) throw new Error("Comment isn't a tree's comment");
         const repliesFind = await CommentClass.find({ parentId: comment._id });
         const replies = repliesFind.length > 0 ? (await Promise.all(repliesFind.map(r => commentModel.getComment({ treeId, id: r._id })))).filter(r => r !== undefined) : undefined;
         return {
             id: comment.id,
             treeId: comment.treeId,
-            userId: comment.userId,
+            userId: comment.userId ?? undefined,
             content: comment.content ?? undefined,
             createdAt: comment.createdAt,
             updatedAt: comment.updatedAt,
