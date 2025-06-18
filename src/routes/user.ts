@@ -26,7 +26,7 @@ const createUserMeRoutes = ({
     router.post("/photo", multerMw, userController.photoMe);
     router.delete("/photo", userController.deletePhotoMe);
     router.post("/key", userController.generateKey);
-    router.delete("/key", userController.deleteKey);
+    router.delete("/key/:keyTD", userController.deleteKey);
     allowedMethods({ router });
     return router;
 }
