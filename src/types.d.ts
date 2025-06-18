@@ -216,7 +216,7 @@ export interface PhTreeModel {
 export interface Comment {
     id: Types.ObjectId;
     treeId: Types.ObjectId;
-    userId: Types.ObjectId;
+    userId?: Types.ObjectId;
     content?: string;
     createdAt: Date;
     updatedAt: Date;
