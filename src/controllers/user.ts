@@ -1,5 +1,5 @@
 import { UserController, UserModel } from "../types";
-import { getKey, parseKeyToDelete, parseLogin, parseNewAdmin, parsePatchUser, parseRegister, toObjectId } from "../utils/parser";
+import { getKey, parseLogin, parseNewAdmin, parsePatchUser, parseRegister, toObjectId } from "../utils/parser";
 
 export const userController = ({
     userModel
@@ -147,12 +147,12 @@ export const userController = ({
         const { token } = req.cookies;
         if (!token) return res.status(401).json({ message: "Unauthorized" });
         const { apiKey } = req.query;
+        const { keyTD } = req.params;
         const key = getKey(apiKey);
         try {
-            const { apiKeyToDelete } = parseKeyToDelete(req.body);
-            const keyToDelete = getKey(apiKeyToDelete)!;
-            const apiKey = await userModel.deleteKey({ token, key, keyToDelete });
-            res.status(200).json({ apiKey });
+            const keyToDelete = getKey(keyTD)!;
+            await userModel.deleteKey({ token, key, keyToDelete });
+            res.status(200).json({ message: "Key deleted successfully" });
         } catch (error: any) {
             res.status(400).json({ message: error.message });
         }
