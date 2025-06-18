@@ -27,14 +27,14 @@ const check = async ({
     const user = await nullableInput(token, userByToken);
     const phTree = await PhTreeClass.findById(treeId);
     if(!phTree) throw new Error("Ph. Tree not found");
-    if(!phTree.isPublic && (phTree.userId !== user?._id || !phTree.collaborators?.includes(user?._id))) throw new Error("Access denied to the Ph. Tree");
+    if(!phTree.isPublic && (phTree.userId.toString() !== user?._id.toString() || !phTree.collaborators?.map(c => c.toString())?.includes(user?._id.toString()))) throw new Error("Access denied to the Ph. Tree");
     if(!id) return {
         user,
         phTree
     }
     const species = await SpeciesClass.findById(id);
     if(!species) throw new Error("Species not found");
-    if(species.treeId !== phTree._id) throw new Error(`${species.name} isn't a ${phTree.name}'s Species`);
+    if(species.treeId.toString() !== phTree._id.toString()) throw new Error(`${species.name} isn't a ${phTree.name}'s Species`);
     return {
         user,
         phTree,
@@ -50,10 +50,17 @@ const getSpecies = async ({
 }: GetProps): Promise<SpeciesMongo> => {
     const { species } = mustCheck ? await check({ token, treeId, id }) : { species: await SpeciesClass.findById(id)};
     if(!species) throw new Error("Species not found");
-    const descendants = await Promise.all(
+    const descendants0 = await Promise.all(
         (
             await SpeciesClass
-            .find({ ancestorId: species._id }))
+            .find({
+                $expr: {
+                    $eq: [
+                        { $toString: "$ancestorId" },
+                        species._id.toString()
+                    ]
+                }
+            }))
             .map(d => getSpecies({
                 token,
                 treeId,
@@ -62,6 +69,7 @@ const getSpecies = async ({
             })
         )
     );
+    const descendants = descendants0.length > 0 ? descendants0 : undefined;
     return {
         id: species._id,
         treeId,
@@ -243,12 +251,24 @@ export const speciesModel: SpeciesModel = {
     },
     getPhTreeSpecies: async ({ token, treeId }) => {
         await check({ token, treeId });
-        return await Promise.all((await SpeciesClass.find({
+        return await Promise.all((
+            await SpeciesClass.find({
+                $expr: {
+                    $eq: [
+                        { $toString: "$treeId" },
+                        treeId.toString()
+                    ]
+                },
+                $or: [
+                    { ancestorId: null },
+                    { ancestorId: { $exists: false } }
+                ]
+            })
+        ).map(s => getSpecies({
+            token,
             treeId,
-            $or: [
-                { ancestorId: null },
-                { ancestorId: { $exists: false } }
-            ]
-        })).map(s => getSpecies({ token, treeId, id: s._id, mustCheck: false })));
+            id: s._id,
+            mustCheck: false
+        })));
     }
 };
