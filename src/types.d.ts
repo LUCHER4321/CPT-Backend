@@ -15,7 +15,7 @@ export interface ImageController {
 export interface ImageModel {
     getImage: ModelFuncton<{
         img: string;
-    }, { path: string } | undefined>;
+    }, { path: string }>;
     createImage: ModelFuncton<{
         token: string;
         file: Express.Multer.File;
