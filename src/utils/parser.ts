@@ -51,9 +51,9 @@ export const getKey = (apiKey: any) => nullableInput(toPartial(() => parseString
 
 export const toObjectId = (id: string) => new Types.ObjectId(id);
 
-export const parseCriteria = (criteria: any, prop = "") => parseProp<TreeCriteria>(criteria, isEnum(TreeCriteria), prop);
+export const parseCriteria = (criteria: any) => toPartial(() => parseProp<TreeCriteria>(criteria, isEnum(TreeCriteria), ""));
 
-export const parseOrder = (order: any, prop = "") => parseProp<Order>(order, isEnum(Order), prop);
+export const parseOrder = (order: any) => toPartial(() => parseProp<Order>(order, isEnum(Order), ""));
 
 export const parseRegister = (object: any) => ({
     username: parseString(object.username, "username"),
