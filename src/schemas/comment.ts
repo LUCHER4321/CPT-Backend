@@ -1,11 +1,11 @@
-import { model, Schema, Types } from "mongoose";
+import { model, Schema } from "mongoose";
 
 const CommentSchema = new Schema({
     treeId: {
-        type: Types.ObjectId,
+        type: Schema.Types.ObjectId,
         required: true
     },
-    userId: Types.ObjectId,
+    userId: Schema.Types.ObjectId,
     content: String,
     createdAt: {
         type: Date,
@@ -15,7 +15,7 @@ const CommentSchema = new Schema({
         type: Date,
         default: () => new Date()
     },
-    parentId: Types.ObjectId
+    parentId: Schema.Types.ObjectId
 });
 
 export const CommentClass = model("Comment", CommentSchema);

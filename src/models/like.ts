@@ -1,4 +1,3 @@
-import { Types } from "mongoose";
 import { CommentClass } from "../schemas/comment";
 import { LikeClass } from "../schemas/like";
 import { PhTreeClass } from "../schemas/phTree";
@@ -26,11 +25,11 @@ export const likeModel: LikeModel = {
             treeId: liked._id
         });
         const newLike = await like.save();
-        if(!newLike.userId.prototype || !newLike.treeId?.prototype) throw new Error("IDs not found");
+        if(!newLike.userId || !newLike.treeId) throw new Error("IDs not found");
         return {
             id: newLike._id,
-            userId: newLike.userId.prototype,
-            treeId: newLike.treeId.prototype,
+            userId: newLike.userId,
+            treeId: newLike.treeId,
             createdAt: newLike.createdAt
         };
     },
@@ -52,9 +51,9 @@ export const likeModel: LikeModel = {
         if (!user) return undefined;
         const likes = await LikeClass.find({ userId: user._id });
         const phTrees = (await Promise.all(likes.map(l => nullableInput(l.treeId, p => PhTreeClass.findById(p))))).filter(t => t !== null && t !== undefined);
-        return phTrees.filter(t => t.userId.prototype instanceof Types.ObjectId).map(t => ({
+        return phTrees.map(t => ({
             id: t._id,
-            userId: t.userId.prototype!,
+            userId: t.userId!,
             name: t.name,
             image: t.image ?? undefined,
             description: t.description ?? undefined,
@@ -62,14 +61,14 @@ export const likeModel: LikeModel = {
             createdAt: t.createdAt,
             updatedAt: t.updatedAt,
             tags: t.tags ?? undefined,
-            collaborators: t.collaborators?.filter(c => c.prototype instanceof Types.ObjectId).map(c => c.prototype!) ?? undefined
+            collaborators: t.collaborators ?? undefined
         }));
     },
     phTreeLikes: async ({ token, treeId }) => {
         const likes = await LikeClass.find({ treeId });
         const likesCount = likes.length;
         const user = await nullableInput(token, userByToken);
-        const myLike = nullableInput(user, u => likes.map(l => l.userId.prototype).includes(u._id));
+        const myLike = nullableInput(user, u => likes.map(l => l.userId).includes(u._id));
         return {
             likesCount,
             myLike
@@ -92,11 +91,11 @@ export const likeModel: LikeModel = {
             commentId: liked._id
         });
         const newLike = await like.save();
-        if(!newLike.userId.prototype || !newLike.commentId?.prototype) throw new Error("IDs not found");
+        if(!newLike.userId || !newLike.commentId) throw new Error("IDs not found");
         return {
             id: newLike._id,
-            userId: newLike.userId.prototype,
-            commentId: newLike.commentId.prototype,
+            userId: newLike.userId,
+            commentId: newLike.commentId,
             createdAt: newLike.createdAt
         };
     },
@@ -118,7 +117,7 @@ export const likeModel: LikeModel = {
         if (!user) return undefined;
         const likes = await LikeClass.find({ userId: user._id });
         const comments = (await Promise.all(likes.map(l => nullableInput(l.commentId, p => CommentClass.findById(p))))).filter(c => c !== null && c !== undefined && c.treeId != undefined).map(c => c!);
-        return (await Promise.all(comments.map(c => commentModel.getComment({ treeId: c.treeId.prototype!, id: c._id })))).filter(c => c !== undefined);
+        return (await Promise.all(comments.map(c => commentModel.getComment({ treeId: c.treeId, id: c._id })))).filter(c => c !== undefined);
     },
     commentLikes: async ({token, commentId}) => {
         const comment = await CommentClass.findById(commentId);
@@ -126,7 +125,7 @@ export const likeModel: LikeModel = {
         const likes = await LikeClass.find({ commentId });
         const likesCount = likes.length;
         const user = await nullableInput(token, userByToken);
-        const myLike = nullableInput(user, u => likes.map(l => l.userId.prototype).includes(u._id));
+        const myLike = nullableInput(user, u => likes.map(l => l.userId).includes(u._id));
         return {
             likesCount,
             myLike

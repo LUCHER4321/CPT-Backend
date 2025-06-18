@@ -27,13 +27,13 @@ const notify = async ({
         authorId
     });
     const newNotification = await notification.save();
-    if((newNotification.usersId.length > 0 && !newNotification.usersId.map(i => i.prototype instanceof Types.ObjectId).reduce((a, b) => a && b)) || !newNotification.authorId.prototype) throw new Error("IDs not found");
+    if((newNotification.usersId.length > 0 && !newNotification.usersId.reduce((a, b) => a && b)) || !newNotification.authorId) throw new Error("IDs not found");
     return {
         id: newNotification._id,
         fun: newNotification.fun,
-        usersId: newNotification.usersId.map(i => i.prototype!),
+        usersId: newNotification.usersId,
         inputs: newNotification.inputs,
-        authorId: newNotification.authorId.prototype,
+        authorId: newNotification.authorId,
         seen: newNotification.seen,
         createdAt: newNotification.createdAt
     }
@@ -41,11 +41,11 @@ const notify = async ({
 
 const getParents = async (id: Types.ObjectId): Promise<Types.ObjectId[]> => {
     const comment = await CommentClass.findById(id);
-    if(!comment?.userId?.prototype) return [];
-    if(!comment.parentId?.prototype) return [comment.userId.prototype];
-    const parents = await getParents(comment.parentId.prototype);
-    if(parents.includes(comment.userId.prototype)) return parents;
-    return [comment.userId.prototype, ...parents];
+    if(!comment?.userId) return [];
+    if(!comment.parentId) return [comment.userId];
+    const parents = await getParents(comment.parentId);
+    if(parents.includes(comment.userId)) return parents;
+    return [comment.userId, ...parents];
 };
 
 export const notificationModel: NotificationModel = {
@@ -62,11 +62,11 @@ export const notificationModel: NotificationModel = {
         const user = await userByToken(token);
         if (!user) throw new Error("User not found");
         const phTree = await PhTreeClass.findById(treeId);
-        if(phTree?.userId.prototype !== user._id) throw new Error("Ph. Tree not found");
+        if(phTree?.userId !== user._id) throw new Error("Ph. Tree not found");
         const followers = await FollowClass.find({ followedUserId: user._id });
         return await notify({
             fun: NotiFunc.TREE,
-            usersId: followers.filter(f => f.userId.prototype instanceof Types.ObjectId).map(f => f.userId.prototype!),
+            usersId: followers.map(f => f.userId),
             inputs: [phTree.name],
             authorId: user._id
         });
@@ -75,11 +75,11 @@ export const notificationModel: NotificationModel = {
         const user = await userByToken(token);
         if (!user) throw new Error("User not found");
         const phTree = await PhTreeClass.findById(treeId);
-        if(!phTree?.userId.prototype) throw new Error("Ph. Tree not found");
+        if(!phTree?.userId) throw new Error("Ph. Tree not found");
         const comment = await CommentClass.findById(commentId);
-        if(!comment || comment.treeId.prototype != phTree._id) throw new Error("Parent comment isn't a tree's comment");
+        if(!comment || comment.treeId != phTree._id) throw new Error("Parent comment isn't a tree's comment");
         const commenters = await getParents(commentId);
-        const collaborators = [phTree.userId, ...phTree.collaborators ?? []].filter(i => i.prototype instanceof Types.ObjectId).map(i => i.prototype!);
+        const collaborators = [phTree.userId, ...phTree.collaborators ?? []];
         return await notify({
             fun: NotiFunc.COMMENT,
             usersId: [...commenters, ...collaborators],
@@ -92,7 +92,7 @@ export const notificationModel: NotificationModel = {
         if (!user) throw new Error("User not found");
         const phTree = await PhTreeClass.findById(treeId);
         const comment = await CommentClass.findById(commentId);
-        const usersId = phTree?.userId.prototype ? [phTree.userId, ...phTree.collaborators ?? []].filter(i => i.prototype instanceof Types.ObjectId).map(i => i.prototype!) : comment ? await getParents(comment._id) : []
+        const usersId = phTree?.userId ? [phTree.userId, ...phTree.collaborators ?? []] : comment ? await getParents(comment._id) : [];
         return await notify({
             fun: NotiFunc.LIKE,
             usersId,
@@ -110,12 +110,12 @@ export const notificationModel: NotificationModel = {
             notifications.map(n => n.seen = true);
             await Promise.all(notifications.map(n => n.save()));
         }
-        return notifications.filter(n => n.authorId.prototype instanceof Types.ObjectId).map(n => ({
+        return notifications.map(n => ({
             id: n._id,
             fun: n.fun,
-            usersId: n.usersId.filter(i => i.prototype instanceof Types.ObjectId).map(i => i.prototype!),
+            usersId: n.usersId,
             inputs: n.inputs,
-            authorId: n.authorId.prototype!,
+            authorId: n.authorId,
             seen: n.seen,
             createdAt: n.createdAt
         }));

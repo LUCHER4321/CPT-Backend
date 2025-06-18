@@ -28,7 +28,7 @@ const myTree = async ({
     if(!readOnly || !phTree.isPublic){
         const user = await nullableInput(token, userByToken);
         if (!user) return undefined;
-        if(![phTree.userId, ...(mustBeOwner ? [] : phTree.collaborators ?? [])].map(i => i.prototype).includes(user._id) && !phTree.isPublic) throw new Error(`${phTree.name} isn't a ${user.username}'s Ph. Tree`);
+        if(![phTree.userId, ...(mustBeOwner ? [] : phTree.collaborators ?? [])].map(i => i.toString()).includes(user._id.toString()) && !phTree.isPublic) throw new Error(`${phTree.name} isn't a ${user.username}'s Ph. Tree`);
         return { user, phTree };
     }
     return { phTree };
@@ -104,9 +104,9 @@ const getTrees = async ({
         pipeline.push({ $limit: limit });
     }
     const phTrees = await PhTreeClass.aggregate(pipeline);
-    return phTrees.filter(pt => pt.userId.prototype instanceof Types.ObjectId).map(pt => ({
+    return phTrees.filter(pt => pt.userId instanceof Types.ObjectId).map(pt => ({
         id: pt._id,
-        userId: pt.userId.prototype,
+        userId: pt.userId,
         name: pt.name,
         image: pt.image ?? undefined,
         description: pt.description ?? undefined,
@@ -114,7 +114,7 @@ const getTrees = async ({
         createdAt: pt.createdAt,
         updatedAt: pt.updatedAt,
         tags: pt.tags ?? undefined,
-        collaborators: pt.collaborators?.filter((c: any) => c.prototype instanceof Types.ObjectId).map((c: any) => c.prototype!) ?? undefined,
+        collaborators: pt.collaborators?.filter((c: any) => c instanceof Types.ObjectId) ?? undefined,
         commentsCount: pt.commentsCount
     }));
 };
@@ -134,7 +134,7 @@ export const phTreeModel: PhTreeModel = {
             collaborators: nullableInput(collaborators, c => c.length > 0 ? c : undefined)
         });
         const newPhTree = await phTree.save();
-        if(!newPhTree.userId.prototype) throw new Error("User ID not found");
+        if(!newPhTree.userId) throw new Error("User ID not found");
         return await phTreeModel.getPhTree({ token, id: newPhTree._id });
     },
     getMyPhTrees: async ({ token, page, limit, search, criteria, order }) => {
@@ -168,14 +168,17 @@ export const phTreeModel: PhTreeModel = {
             phTree
         } = mt;
         if(!user) return undefined;
-        if(!phTree.userId.prototype) throw new Error("User ID not found");
+        if(!phTree.userId) throw new Error("User ID not found");
         if(name) phTree.name = name;
         if(description) phTree.description = description;
         if(description === "") phTree.description = undefined;
         if(isPublic !== undefined) phTree.isPublic = isPublic;
         if(tags) phTree.tags = tags.length > 0 ? tags : undefined;
-        if(newCollaborators) phTree.collaborators?.push(...newCollaborators);
-        if(deleteCollaborators && user._id === phTree.userId.prototype) phTree.collaborators?.remove(...deleteCollaborators);
+        if(newCollaborators) {
+            if(!phTree.collaborators) phTree.collaborators = newCollaborators;
+            else phTree.collaborators.push(...newCollaborators);
+        }
+        if(deleteCollaborators && user._id.toString() === phTree.userId.toString()) phTree.collaborators = phTree.collaborators?.filter(c => !deleteCollaborators.includes(c));
         if(phTree.collaborators?.length === 0) phTree.collaborators = undefined;
         phTree.updatedAt = new Date();
         await phTree.save()
@@ -201,7 +204,7 @@ export const phTreeModel: PhTreeModel = {
         if(!mt) return undefined;
         const { user, phTree } = mt;
         if(!user) return undefined;
-        if(!phTree.userId.prototype) throw new Error("User ID not found");
+        if(!phTree.userId) throw new Error("User ID not found");
         phTree.image = (await imageModel.createImage({ token, file: image }))?.url;
         phTree.updatedAt = new Date();
         await phTree.save();
@@ -233,10 +236,9 @@ export const phTreeModel: PhTreeModel = {
         const mt = await myTree({ token, id, readOnly: true });
         if(!mt) return undefined;
         const { phTree } = mt;
-        if(!phTree.userId.prototype) throw new Error("User ID not found");
         return {
             id: phTree._id,
-            userId: phTree.userId.prototype,
+            userId: phTree.userId,
             name: phTree.name,
             image: photoToString(phTree.image),
             description: phTree.description ?? undefined,
@@ -244,7 +246,7 @@ export const phTreeModel: PhTreeModel = {
             createdAt: phTree.createdAt,
             updatedAt: phTree.updatedAt,
             tags: phTree.tags ?? undefined,
-            collaborators: phTree.collaborators?.filter(c => c.prototype instanceof Types.ObjectId).map(c => c.prototype!) ?? undefined
+            collaborators: phTree.collaborators ?? undefined
         }
     }
 }

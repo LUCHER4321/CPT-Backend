@@ -27,18 +27,14 @@ const check = async ({
     const user = await nullableInput(token, userByToken);
     const phTree = await PhTreeClass.findById(treeId);
     if(!phTree) throw new Error("Ph. Tree not found");
-    if(!phTree.isPublic &&
-        (phTree.userId.prototype !== user?._id ||
-            !phTree.collaborators?.map(c => c.prototype).includes(user?._id)
-        )
-    ) throw new Error("Access denied to the Ph. Tree");
+    if(!phTree.isPublic && (phTree.userId !== user?._id || !phTree.collaborators?.includes(user?._id))) throw new Error("Access denied to the Ph. Tree");
     if(!id) return {
         user,
         phTree
     }
     const species = await SpeciesClass.findById(id);
     if(!species) throw new Error("Species not found");
-    if(species.treeId.prototype !== phTree._id) throw new Error(`${species.name} isn't a ${phTree.name}'s Species`);
+    if(species.treeId !== phTree._id) throw new Error(`${species.name} isn't a ${phTree.name}'s Species`);
     return {
         user,
         phTree,
@@ -100,7 +96,7 @@ class IdSpecies extends Species{
 const spApparition = async (id: Types.ObjectId): Promise<number> => {
     let species = await SpeciesClass.findById(id);
     if(!species) return 0;
-    return (species.afterApparition ?? species.apparition ?? 0) + ((await nullableInput(species.ancestorId?.prototype, spApparition)) ?? 0);
+    return (species.afterApparition ?? species.apparition ?? 0) + ((await nullableInput(species.ancestorId, spApparition)) ?? 0);
 }
 
 export const speciesModel: SpeciesModel = {
@@ -133,12 +129,12 @@ export const speciesModel: SpeciesModel = {
             description
         });
         const newSpecies = await species.save();
-        if(!newSpecies.treeId.prototype) throw new Error("Ph. Tree not found");
+        if(!newSpecies.treeId) throw new Error("Ph. Tree not found");
         phTree.updatedAt = new Date();
         await phTree.save();
         return {
             id: newSpecies._id,
-            treeId: newSpecies.treeId.prototype,
+            treeId: newSpecies.treeId,
             name: newSpecies.name,
             apparition: newSpecies.apparition ?? undefined,
             afterApparition: newSpecies.afterApparition ?? undefined,
@@ -177,8 +173,7 @@ export const speciesModel: SpeciesModel = {
                 species.apparition = undefined;
             }
             if(newAncestor) {
-                const { prototype, ...restOfId } = species.ancestorId ?? {};
-                species.ancestorId = { prototype: ancestorId, ...restOfId };
+                species.ancestorId = ancestorId;
                 if(afterApparition) species.afterApparition = Math.max(afterApparition, 0);
                 species.apparition = undefined;
             }

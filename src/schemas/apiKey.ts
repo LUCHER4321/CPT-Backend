@@ -1,8 +1,8 @@
-import { model, Schema, Types } from "mongoose";
+import { model, Schema } from "mongoose";
 
 const APIKeySchema = new Schema({
     userId: {
-        type: Types.ObjectId,
+        type: Schema.Types.ObjectId,
         required: true
     },
     createdAt: {

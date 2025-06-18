@@ -1,12 +1,12 @@
-import { model, Schema, Types } from "mongoose";
+import { model, Schema } from "mongoose";
 
 const FollowSchema = new Schema({
     userId: {
-        type: Types.ObjectId,
+        type: Schema.Types.ObjectId,
         required: true
     },
     followedUserId: {
-        type: Types.ObjectId,
+        type: Schema.Types.ObjectId,
         required: true
     }
 });

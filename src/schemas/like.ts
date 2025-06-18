@@ -1,12 +1,12 @@
-import { model, Schema, Types } from "mongoose";
+import { model, Schema } from "mongoose";
 
 const LikeSchema = new Schema({
     userId: {
-        type: Types.ObjectId,
+        type: Schema.Types.ObjectId,
         required: true
     },
-    treeId: Types.ObjectId,
-    commentId: Types.ObjectId,
+    treeId: Schema.Types.ObjectId,
+    commentId: Schema.Types.ObjectId,
     createdAt: {
         type: Date,
         default: () => new Date()

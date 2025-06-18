@@ -1,9 +1,9 @@
-import { model, Schema, Types } from "mongoose";
+import { model, Schema } from "mongoose";
 
 const SpeciesSchema = new Schema({
-    ancestorId: Types.ObjectId,
+    ancestorId: Schema.Types.ObjectId,
     treeId: {
-        type: Types.ObjectId,
+        type: Schema.Types.ObjectId,
         required: true
     },
     name: {

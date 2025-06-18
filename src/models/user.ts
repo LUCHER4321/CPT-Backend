@@ -151,7 +151,7 @@ export const userModel: UserModel = {
         const user = await userByToken(token);
         if (!user || user.role === Role.USER) return;
         const apiKeyToDelete = await APIKeyClass.findById(keyToDelete);
-        if(apiKeyToDelete?.userId.prototype !== user._id) return;
+        if(apiKeyToDelete?.userId !== user._id) return;
         const { _id } = apiKeyToDelete;
         await APIKeyClass.deleteOne({ _id });
     }

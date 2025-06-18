@@ -12,7 +12,7 @@ export const commentModel: CommentModel = {
         const user = await userByToken(token);
         if (!user) return undefined;
         const parent = await nullableInput(parentId, p => CommentClass.findById(p));
-        if(parent && parent?.treeId.prototype !== treeId) throw new Error("Parent comment isn't a tree's comment");
+        if(parent && parent?.treeId !== treeId) throw new Error("Parent comment isn't a tree's comment");
         const comment = new CommentClass({
             treeId,
             userId: user?._id,
@@ -20,12 +20,12 @@ export const commentModel: CommentModel = {
             parentId: parent?._id
         });
         const newComment = await comment.save();
-        if(!newComment.treeId.prototype) throw new Error("Ph. Tree not found");
-        if(!newComment.userId?.prototype) throw new Error("User not found");
+        if(!newComment.treeId) throw new Error("Ph. Tree not found");
+        if(!newComment.userId) throw new Error("User not found");
         return {
             id: newComment._id,
-            treeId: newComment.treeId.prototype,
-            userId: newComment.userId.prototype,
+            treeId: newComment.treeId,
+            userId: newComment.userId,
             content: newComment.content ?? undefined,
             createdAt: newComment.createdAt,
             updatedAt: newComment.updatedAt
@@ -38,8 +38,8 @@ export const commentModel: CommentModel = {
         if (!user) return undefined;
         const comment = await CommentClass.findById(id);
         if(!comment) return undefined;
-        if(comment.userId?.prototype !== user._id) throw new Error(`Comment isn't a ${user.username}'s comment`);
-        if(comment.treeId.prototype !== treeId) throw new Error("Comment isn't a tree's comment");
+        if(comment.userId !== user._id) throw new Error(`Comment isn't a ${user.username}'s comment`);
+        if(comment.treeId !== treeId) throw new Error("Comment isn't a tree's comment");
         comment.content = content;
         comment.updatedAt = new Date();
         await comment.save();
@@ -52,8 +52,8 @@ export const commentModel: CommentModel = {
         if (!user) return;
         const comment = await CommentClass.findById(id);
         if(!comment) return;
-        if(comment.userId?.prototype !== user._id) throw new Error(`Comment isn't a ${user.username}'s comment`);
-        if(comment.treeId.prototype !== treeId) throw new Error("Comment isn't a tree's comment");
+        if(comment.userId !== user._id) throw new Error(`Comment isn't a ${user.username}'s comment`);
+        if(comment.treeId !== treeId) throw new Error("Comment isn't a tree's comment");
         const hasReplies = (await CommentClass.find({ parentId: comment._id })).length > 0;
         if(hasReplies) {
             comment.content = undefined;
@@ -75,14 +75,14 @@ export const commentModel: CommentModel = {
     getComment: async ({ treeId, id }) => {
         const comment = await CommentClass.findById(id);
         if(!comment) return undefined;
-        if(!comment.userId?.prototype) throw new Error("User ID not found");
-        if(comment.treeId.prototype !== treeId) throw new Error("Comment isn't a tree's comment");
+        if(!comment.userId) throw new Error("User ID not found");
+        if(comment.treeId !== treeId) throw new Error("Comment isn't a tree's comment");
         const repliesFind = await CommentClass.find({ parentId: comment._id });
         const replies = repliesFind.length > 0 ? (await Promise.all(repliesFind.map(r => commentModel.getComment({ treeId, id: r._id })))).filter(r => r !== undefined) : undefined;
         return {
             id: comment.id,
-            treeId: comment.treeId.prototype,
-            userId: comment.userId.prototype,
+            treeId: comment.treeId,
+            userId: comment.userId,
             content: comment.content ?? undefined,
             createdAt: comment.createdAt,
             updatedAt: comment.updatedAt,

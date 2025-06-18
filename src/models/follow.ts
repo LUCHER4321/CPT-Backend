@@ -23,11 +23,11 @@ export const followModel: FollowModel = {
             followedUserId
         });
         const newFollow = await follow.save();
-        if(!newFollow.userId.prototype || !newFollow.followedUserId.prototype) throw new Error("IDs not found");
+        if(!newFollow.userId || !newFollow.followedUserId) throw new Error("IDs not found");
         return {
             id: newFollow._id,
-            userId: newFollow.userId.prototype,
-            followedUserId: newFollow.followedUserId.prototype
+            userId: newFollow.userId,
+            followedUserId: newFollow.followedUserId
         };
     },
     unfollowUser: async ({ token, followedUserId, key }) => {
@@ -47,9 +47,9 @@ export const followModel: FollowModel = {
         const user = await UserClass.findById(userId);
         if (!user) return undefined;
         const followers = await FollowClass.find({ followedUserId: userId });
-        return followers.filter(f => f.userId.prototype instanceof Types.ObjectId).map(f => ({
+        return followers.filter(f => f.userId instanceof Types.ObjectId).map(f => ({
             id: f._id,
-            userId: f.userId.prototype!,
+            userId: f.userId!,
             followedUserId: userId
         }));
     },
@@ -57,10 +57,10 @@ export const followModel: FollowModel = {
         const user = await UserClass.findById(userId);
         if (!user) return undefined;
         const following = await FollowClass.find({ userId });
-        return following.filter(f => f.followedUserId.prototype instanceof Types.ObjectId).map(f => ({
+        return following.filter(f => f.followedUserId instanceof Types.ObjectId).map(f => ({
             id: f._id,
             userId,
-            followedUserId: f.followedUserId.prototype!
+            followedUserId: f.followedUserId!
         }));
     },
     getFollowersCount: async ({ userId }) => {

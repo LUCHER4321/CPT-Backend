@@ -1,4 +1,4 @@
-import { model, Schema, Types } from "mongoose";
+import { model, Schema } from "mongoose";
 import { NotiFunc } from "../utils/enums";
 
 const NotificationSchema = new Schema({
@@ -8,12 +8,12 @@ const NotificationSchema = new Schema({
         required: true
     },
     usersId: {
-        type: [Types.ObjectId],
+        type: [Schema.Types.ObjectId],
         required: true
     },
     inputs: [String],
     authorId: {
-        type: Types.ObjectId,
+        type: Schema.Types.ObjectId,
         required: true
     },
     seen: {

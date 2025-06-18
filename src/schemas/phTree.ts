@@ -1,8 +1,8 @@
-import { model, Schema, Types } from "mongoose";
+import { model, Schema } from "mongoose";
 
 const PhTreeSchema = new Schema({
     userId: {
-        type: Types.ObjectId,
+        type: Schema.Types.ObjectId,
         required: true
     },
     name: {
@@ -28,7 +28,7 @@ const PhTreeSchema = new Schema({
         required: false
     },
     collaborators: {
-        type: [Types.ObjectId],
+        type: [Schema.Types.ObjectId],
         required: false
     }
 });
