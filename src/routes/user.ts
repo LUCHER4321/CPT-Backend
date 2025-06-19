@@ -7,11 +7,11 @@ export const createUserRoutes = ({
     userController,
 }: { userController: UserController }) => {
     const router = Router();
+    router.use("/me", createUserMeRoutes({ userController }));
     router.post("/register", userController.register);
     router.post("/login", userController.login);
     router.post("/logout", userController.logout);
     router.get("/:id", userController.getUser);
-    router.use("/me", createUserMeRoutes({ userController }));
     router.post("/admin", userController.makeAdmin);
     return router;
 }
