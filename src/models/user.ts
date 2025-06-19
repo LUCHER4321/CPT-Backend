@@ -70,7 +70,14 @@ export const userModel: UserModel = {
     getMe: async ({ token }) => {
         const user = await userByToken(token);
         if (!user) return undefined;
-        const apiKeys = user.role !== Role.USER ? (await APIKeyClass.find({ userId: user._id })).map(k => k._id) : undefined;
+        const apiKeys = user.role !== Role.USER ? (await APIKeyClass.find({
+            $expr: {
+                $eq: [
+                    { $toString: "$userId" },
+                    user._id.toString()
+                ]
+            }
+        })).map(k => k._id) : undefined;
         return {
             ...(await userModel.getUser({ id: user._id }))!,
             apiKeys
