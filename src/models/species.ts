@@ -84,20 +84,25 @@ const getSpecies = async ({
 };
 
 class IdSpecies extends Species{
-    id: Types.ObjectId = new Types.ObjectId("");
+    id: Types.ObjectId;
     descendants: IdSpecies[] = [];
     ancestor?: IdSpecies;
     constructor(json: SpeciesMongo, ancestor?: IdSpecies){
         super(
             json.name,
-            json.apparition,
+            json.apparition ?? (ancestor?.apparition ?? 0) + json.afterApparition,
             json.duration,
             ancestor,
             json.descendants?.map(d => new IdSpecies(d, this)),
             json.description,
             json.image
         );
+        this.name = json.name;
         this.id = json.id;
+    }
+    allDescendants(): IdSpecies[] {
+        if(!this.descendants || this.descendants.length === 0) return [this];
+        return [this, ...this.descendants.flatMap(d => d.allDescendants())];
     }
 }
 
@@ -148,7 +153,7 @@ export const speciesModel: SpeciesModel = {
             afterApparition: newSpecies.afterApparition ?? undefined,
             duration: newSpecies.duration,
             description: newSpecies.description ?? undefined,
-            descendants: (await nullableInput(descendants, d => Promise.all(d?.map(desc => speciesModel.createSpecies({ treeId, token, ...desc })))))?.filter(d => d !== undefined)
+            descendants: (await nullableInput(descendants, d => Promise.all(d?.map(desc => speciesModel.createSpecies({ treeId, token, ...desc, ancestorId: newSpecies._id, key })))))?.filter(d => d !== undefined)
         }
     },
     updateSpecies: async ({
@@ -199,8 +204,8 @@ export const speciesModel: SpeciesModel = {
             else if(!oldAncestor && apparition !== undefined) species.apparition = apparition
         }
         if(descendants) {
-            await Promise.all((await SpeciesClass.find({ ancestorId: id })).map(s => speciesModel.deleteSpecies({ token, treeId, id: s._id })));
-            await Promise.all(descendants.map(d => speciesModel.createSpecies({ token, treeId, ancestorId: id, ...d })));
+            await Promise.all((await SpeciesClass.find({ ancestorId: id })).map(s => speciesModel.deleteSpecies({ token, treeId, id: s._id, key })));
+            await Promise.all(descendants.map(d => speciesModel.createSpecies({ token, treeId, ancestorId: id, ...d, key })));
         }
         await species.save()
         phTree.updatedAt = new Date();
@@ -213,8 +218,8 @@ export const speciesModel: SpeciesModel = {
         const { phTree } = await check({ token, treeId, id });
         const json = await getSpecies({ token, treeId, id, mustCheck: false });
         if(!json) return;
-        const _id = new IdSpecies(json).allDescendants(false).map(sp => (sp as IdSpecies).id);
-        await SpeciesClass.deleteMany({ _id });
+        const _id = new IdSpecies(json).allDescendants().map(sp => sp.id);
+        await SpeciesClass.deleteMany({ _id: { $in: _id } });
         phTree.updatedAt = new Date();
         await phTree.save();
     },
@@ -227,6 +232,7 @@ export const speciesModel: SpeciesModel = {
         } = await check({token, treeId, id });
         if(!species) return undefined;
         species.image = (await imageModel.createImage({ token, file: image }))?.url;
+        await species.save();
         phTree.updatedAt = new Date();
         await phTree.save();
         return await getSpecies({ token, treeId, id, mustCheck: false });
