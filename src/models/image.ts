@@ -38,7 +38,7 @@ export const imageModel: ImageModel = {
         const user = await userByToken(token);
         if (!user) throw new Error("User not found");
         if (!img) {
-            throw new Error("Image path is required");
+            return;
         }
         unlink(imgPath(img, false), (err) => {
             if(err) throw new Error("Error deleting image");
