@@ -126,10 +126,10 @@ export interface FollowModel {
     }, void>;
     getFollowers: ModelFuncton<{
         userId: Types.ObjectId;
-    }, Follow[]>;
+    }, User[]>;
     getFollowing: ModelFuncton<{
         userId: Types.ObjectId;
-    }, Follow[]>;
+    }, User[]>;
     getFollowersCount: ModelFuncton<{
         userId: Types.ObjectId;
     }, number>;
