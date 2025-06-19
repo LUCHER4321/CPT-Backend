@@ -4,12 +4,12 @@ import { getKey, parseNewSpecies, parsePatchSpecies, toObjectId } from "../utils
 import { nullableInput, nullableInputCanBeNull } from "../utils/nullableInput";
 
 type Input = Partial<{
-    ancestorId: string;
     apparition: number;
     afterApparition: number;
     description: string;
     descendants: Omit<Input, "ancestorId">[];
 }> & {
+    ancestorId?: string | null;
     name: string;
     duration: number;
 };
@@ -93,7 +93,7 @@ export const speciesController = ({
             const treeId = toObjectId(t_id);
             const id = toObjectId(_id);
             await speciesModel.deleteSpecies({ token, treeId, id, key });
-            res.status(204).send();
+            res.json({ message: "Species deleted successfully" });
         } catch (error: any) {
             res.status(400).json({ message: error.message });
         }
@@ -125,7 +125,9 @@ export const speciesController = ({
         try {
             const treeId = toObjectId(t_id);
             const id = toObjectId(_id);
-            await speciesModel.deleteSpeciesImage({ token, treeId, id, key });
+            const updatedSpecies = await speciesModel.deleteSpeciesImage({ token, treeId, id, key });
+            if(!updatedSpecies) return res.status(404).json({ message: "PhTree or Species not found" });
+            res.json(updatedSpecies);
         } catch (error: any) {
             res.status(400).json({ message: error.message });
         }
