@@ -3,7 +3,7 @@ import { UserClass } from "../schemas/user";
 import { FollowClass } from "../schemas/follow";
 import { userByToken } from "../utils/token";
 import { confirmAPIKey } from "../utils/apiKey";
-import { Types } from "mongoose";
+import { userModel } from "./user";
 
 export const followModel: FollowModel = {
     followUser: async ({ token, followedUserId, key }) => {
@@ -47,26 +47,18 @@ export const followModel: FollowModel = {
         const user = await UserClass.findById(userId);
         if (!user) return undefined;
         const followers = await FollowClass.find({ followedUserId: userId });
-        return followers.filter(f => f.userId instanceof Types.ObjectId).map(f => ({
-            id: f._id,
-            userId: f.userId!,
-            followedUserId: userId
-        }));
+        return (await Promise.all(followers.map(f => userModel.getUser({ id: f.userId })))).filter(u => u !== undefined);
     },
     getFollowing: async ({ userId }) => {
         const user = await UserClass.findById(userId);
         if (!user) return undefined;
         const following = await FollowClass.find({ userId });
-        return following.filter(f => f.followedUserId instanceof Types.ObjectId).map(f => ({
-            id: f._id,
-            userId,
-            followedUserId: f.followedUserId!
-        }));
+        return (await Promise.all(following.map(f => userModel.getUser({ id: f.followedUserId })))).filter(u => u !== undefined);
     },
     getFollowersCount: async ({ userId }) => {
         const user = await UserClass.findById(userId);
         if (!user) return undefined;
-        const { length } = await FollowClass.find({ followedUserId: userId });
+        const length = await FollowClass.countDocuments({ followedUserId: userId });
         return length;
     }
 };
