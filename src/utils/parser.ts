@@ -106,18 +106,17 @@ export const parsePatchComment = (object: any) => ({
 });
 
 type SpeciesInput = Partial<{
-    ancestorId: string;
     apparition: number;
     afterApparition: number;
     description: string;
     descendants: Omit<SpeciesInput, "ancestorId">[];
 }> & {
+    ancestorId?: string | null;
     name: string;
     duration: number;
 };
 
 const speciesPartials = (object: any) => ({
-    ancestorId: toPartial(() => parseString(object.ancestorId)),
     apparition: toPartial(() => parseNumber(object.apparition)),
     afterApparition: toPartial(() => parseNumber(object.afterApparition)),
     description: toPartial(() => parseString(object.afterApparition)),
@@ -127,12 +126,14 @@ const speciesPartials = (object: any) => ({
 export const parseNewSpecies = (object: any): SpeciesInput => ({
     name: parseString(object.name, "name"),
     duration: parseNumber(object.duration, "duration"),
+    ancestorId: toPartial(() => parseString(object.ancestorId)),
     ...speciesPartials(object)
 });
 
 export const parsePatchSpecies = (object: any): Partial<SpeciesInput> => ({
     name: toPartial(() => parseString(object.name)),
     duration: toPartial(() => parseNumber(object.duration)),
+    ancestorId: object.ancestorId === null ? null : toPartial(() => parseString(object.ancestorId)),
     ...speciesPartials(object)
 });
 
