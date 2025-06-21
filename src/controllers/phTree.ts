@@ -88,7 +88,7 @@ export const phTreeController = ({
         try {
             const id = toObjectId(_id);
             await phTreeModel.deletePhTree({ token, id, key });
-            res.status(204).send();
+            res.status(204).json({ message: "Tree deleted successfully" });
         } catch (error: any) {
             res.status(400).json({ message: error.message });
         }
