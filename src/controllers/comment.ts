@@ -31,7 +31,7 @@ export const commentController = ({
             const treeId = toObjectId(t_id);
             const id = toObjectId(_id);
             await commentModel.deleteComment({ token, treeId, id, key });
-            res.status(204).send();
+            res.status(204).json({ message: "Comment deleted successfully" });
         } catch (error: any) {
             res.status(400).json({ message: error.message });
         }
