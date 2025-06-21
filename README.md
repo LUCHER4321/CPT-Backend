@@ -242,6 +242,25 @@ export enum Order {
 }
 ```
 
+## Environment
+
+### Variables
+
+```
+PORT
+JWT_EXPIRATION
+IMAGES_URL
+ACCEPTED_ORIGINS
+BASE_URL
+```
+
+### Secrets
+
+```
+MONGO_URL
+JWT_SECRET
+```
+
 ## Endpoints
 
 **Base Url:**
