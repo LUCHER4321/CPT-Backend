@@ -63,10 +63,10 @@ export const userController = ({
     updateMe: async (req, res) => {
         const { token } = req.cookies;
         if (!token) return res.status(401).json({ message: "Unauthorized" });
+        const { apiKey } = req.query;
+        const key = getKey(apiKey);
         try {
             const data = parsePatchUser(req.body);
-            const { apiKey } = req.query;
-            const key = getKey(apiKey);
             const user = await userModel.updateMe({ ...data, token, key });
             if (!user) return res.status(404).json({ message: "User not found" });
             res.status(200).json(user);
@@ -133,8 +133,8 @@ export const userController = ({
     generateKey: async (req, res) => {
         const { token } = req.cookies;
         if (!token) return res.status(401).json({ message: "Unauthorized" });
-        const { apiKey } = req.query;
-        const key = getKey(apiKey);
+        const { apiKey: defaultAPIKey } = req.query;
+        const key = getKey(defaultAPIKey);
         try {
             const apiKey = await userModel.generateKey({ token, key });
             if(!apiKey) return res.status(404).json({ message: "API Key not found" });
