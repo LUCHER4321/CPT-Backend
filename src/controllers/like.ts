@@ -28,7 +28,7 @@ export const likeController = ({
         try {
             const treeId = toObjectId(id);
             await likeModel.unlikePhTree({ token, treeId, key });
-            res.status(204).send();
+            res.status(204).json({ message: "Like deleted successfully" });
         } catch (error: any) {
             res.status(400).json({ message: error.message });
         }
@@ -80,7 +80,7 @@ export const likeController = ({
         try {
             const commentId = toObjectId(id);
             await likeModel.unlikeComment({ token, commentId, key });
-            res.status(204).send();
+            res.status(204).json({ message: "Like deleted successfully" });
         } catch (error: any) {
             res.status(400).json({ message: error.message });
         }
