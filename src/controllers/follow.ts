@@ -30,7 +30,7 @@ export const followController = ({
         try {
             const followedUserId = toObjectId(id);
             await followModel.unfollowUser({ token, followedUserId, key });
-            res.status(204).send();
+            res.status(204).json({ message: "User unfollowed successfully" });
         } catch (error: any) {
             res.status(400).json({ message: error.message });
         }
