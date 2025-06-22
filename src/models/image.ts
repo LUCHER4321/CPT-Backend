@@ -5,8 +5,8 @@ import { userByToken } from "../utils/token";
 import { join } from "node:path";
 import v2 from "./cloudinary"
 
-const { upload, destroy } = v2.uploader;
-const { url } = v2;
+const { uploader, url } = v2;
+const { upload, destroy } = uploader;
 
 const toPathList = (path: string, discard = 0) => path.split("/").flatMap(p => p.split("\\")).filter((_, index, array) => index < array.length - discard);
 
