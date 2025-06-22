@@ -32,7 +32,7 @@ export const imageModel: ImageModel = {
         if (!["jpg", "jpeg", "png", "gif"].includes(extension)) {
             throw new Error("File must be an image (jpg, jpeg, png, gif)");
         }
-        const fileName = `${user._id.toString()}-${Date.now()}.${extension}`;
+        const fileName = `${user._id.toString()}-${new Date().getTime()}.${extension}`;
         const filePath = imgPath(fileName);
         rename(file.path, filePath, (err) => {
             if (err) throw new Error("Error creating image");
