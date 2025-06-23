@@ -11,8 +11,12 @@ export const userController = ({
         const key = getKey(apiKey);
         try {
             const data = parseRegister(req.body);
-            const user = await userModel.register({ ...data, key });
-            if (!user) return res.status(400).json({ message: "User already exists" });
+            const {
+                token,
+                ...user
+            } = await userModel.register({ ...data, key }) ?? { id: undefined };
+            if (!user.id) return res.status(400).json({ message: "User already exists" });
+            res.cookie("token", token, { httpOnly: true, secure: true });
             res.status(201).json(user);
         } catch (error: any) {
             res.status(400).json({ message: error.message });
@@ -23,8 +27,12 @@ export const userController = ({
         const key = getKey(apiKey);
         try {
             const data = parseLogin(req.body);
-            const user = await userModel.login({ ...data, key });
-            if (!user) return res.status(401).json({ message: "User not found" });
+            const {
+                token,
+                ...user
+            } = await userModel.login({ ...data, key }) ?? { id: undefined };
+            if (!user.id) return res.status(401).json({ message: "User not found" });
+            res.cookie("token", token, { httpOnly: true, secure: true });
             res.status(200).json(user);
         } catch (error: any) {
             res.status(400).json({ message: error.message });
@@ -56,6 +64,21 @@ export const userController = ({
             const user = await userModel.getMe({ token });
             if (!user) return res.status(404).json({ message: "User not found" });
             res.status(200).json(user);
+        } catch (error: any) {
+            res.status(400).json({ message: error.message });
+        }
+    },
+    generateToken: async (req, res) => {
+        const { token: oldToken } = req.cookies;
+        if (!oldToken) return res.status(401).json({ message: "Unauthorized" });
+        const { apiKey } = req.query;
+        const key = getKey(apiKey);
+        const { expiresIn } = req.body;
+        try {
+            const { token } = await userModel.generateToken({ oldToken, expiresIn, key }) ?? {};
+            if (!token) return res.status(404).json({ message: "User not found" });
+            res.cookie("token", token, { httpOnly: true, secure: true });
+            res.status(200).json({ message: "Token generated successfully" });
         } catch (error: any) {
             res.status(400).json({ message: error.message });
         }
