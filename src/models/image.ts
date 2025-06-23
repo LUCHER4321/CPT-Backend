@@ -3,7 +3,7 @@ import { ImageModel } from "../types";
 import { IMAGES } from "../config";
 import { userByToken } from "../utils/token";
 import { join } from "node:path";
-import v2 from "./cloudinary"
+import v2 from "./cloudinary";
 
 const { uploader, url } = v2;
 const { upload, destroy } = uploader;
@@ -32,14 +32,19 @@ export const imageModel: ImageModel = {
         if (!["jpg", "jpeg", "png", "gif"].includes(extension)) {
             throw new Error("File must be an image (jpg, jpeg, png, gif)");
         }
-        const fileName = `${user._id.toString()}-${new Date().getTime()}.${extension}`;
+        const { path } = file;
+        const name = `${user._id.toString()}-${new Date().getTime()}`;
+        const fileName = `${name}.${extension}`;
         const filePath = imgPath(fileName);
-        rename(file.path, filePath, (err) => {
-            if (err) throw new Error("Error creating image");
+        rename(path, filePath, (err) => {
+            if (err) throw new Error(`Error renaming ${path} to ${filePath}`);
         });
         await upload(filePath, {
-            public_id: fileName
+            public_id: name
         });
+        unlink(filePath, (error) => {
+            if (error) throw new Error(`Error deleting file ${filePath}`);
+        })
         return { url: `${IMAGES}/${fileName}` }
     },
     deleteImage: async ({ token, img }) => {
@@ -49,8 +54,5 @@ export const imageModel: ImageModel = {
             return;
         }
         await destroy(img);
-        unlink(imgPath(img, false), (err) => {
-            if(err) throw new Error("Error deleting image");
-        });
     }
 }
