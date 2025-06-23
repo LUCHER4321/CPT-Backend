@@ -15,6 +15,7 @@
     - [`GET /:id`](#get-id)
     - [`POST /logout`](#post-logout)
     - [`POST /admin`](#post-admin)
+    - [`POST /token`](#post-token)
     - [Route `/me`](#route-me)
       - [`GET /`](#get-)
       - [`PATCH /`](#patch-)
@@ -76,7 +77,7 @@ flowchart LR
     base --> root{{"/api/life-tree"}} & socket{"/"}
     root --> use0{{"/user"}} & use1{{"/follow"}} & use2{{"/ph-tree"}} & use3{{"/comment/:treeId"}} & use4{{"/like"}} & use5{{"/species/:treeId"}} & use6{{"/image"}}
     use0 ----> post00[/"/register"/] & post01[/"/login"/] & get02(["/:id"])
-    use0 --> cookie04[/"token"\] ---> post040[/"/logout"/] & post042[/"/admin"/]
+    use0 --> cookie04[/"token"\] ---> post040[/"/logout"/] & post042[/"/admin"/] & post043[/"/token"/]
     cookie04 --> use041{{"/me"}}
     use041 --> get0410(["/"]) & patch0411[\"/"\] & delete0412("/") & post0413[/"/photo"/] & delete0414("/photo") & post0415[/"/key"/] & delete0416("/key/:keyTD")
     use1 ---> cookie10[/"token"\]
@@ -98,7 +99,7 @@ flowchart LR
     use5 --> cookie50[/"token"\] ---> post500[/"/"/] & patch501[\"/:id"\] & delete502("/:id") & post503[/"/:id/image"/] & delete504("/:id/image")
     use5 --> cookie51[/"token?"\] ---> get510(["/"]) & get511(["/:id"])
     use6 ----> get60(["/:img"])
-    socket --> wscookie[/"token"\] --> ws0{set-notification-clie} & ws1{get-notification-server}
+    socket --> wscookie[/"token"\] --> ws0{set-notification-client} & ws1{get-notification-client}
     ws0 ---> ws00{set-notification-server}
     ws1 ---> ws10{get-notification-server}
 ```
@@ -319,10 +320,11 @@ Create a new user
   "role": "Role",
   "lastLogin": "Date | undefined",
   "isActive": "boolean | undefined",
-  "apiKeys": ["ObjectId"],
-  "token": "string"
+  "apiKeys": ["ObjectId"]
 }
 ```
+
+Cookie: `token=`
 
 #### `POST /login`
 
@@ -353,10 +355,11 @@ Log in with an existing account
   "role": "Role",
   "lastLogin": "Date | undefined",
   "isActive": "boolean | undefined",
-  "apiKeys": ["ObjectId"],
-  "token": "string"
+  "apiKeys": ["ObjectId"]
 }
 ```
+
+Cookie: `token=`
 
 #### `GET /:id`
 
@@ -421,6 +424,34 @@ Make an user to be an admin (`admin.role = Role.ADMIN`) or make an admin to be a
   "removeAdmin": "boolean | undefined"
 }
 ```
+
+#### `POST /token`
+
+**Query:**
+
+- `?apiKey`: API Key
+
+**Cookie:**
+
+- `token=`: JSON Web Token
+
+**Body:**
+
+```json
+{
+  "expiresIn": "number | string | undefined"
+}
+```
+
+**Response:**
+
+```json
+{
+  "message": "Token generated successfully"
+}
+```
+
+Cookie: `token=`
 
 #### Route `/me`
 
