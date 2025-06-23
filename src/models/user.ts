@@ -24,7 +24,7 @@ export const userModel: UserModel = {
             username
         });
         const newUser = await user.save();
-        const token = tokenSign({ id: newUser._id, role: newUser.role });
+        const token = tokenSign({ id: newUser._id });
         return {
             ...(await userModel.getUser({ id: newUser._id }))!,
             token
@@ -39,7 +39,7 @@ export const userModel: UserModel = {
         if (!isMatch) throw new Error("Invalid password");
         user.lastLogin = new Date();
         user.isActive = true;
-        const token = tokenSign({ id: user._id, role: user.role });
+        const token = tokenSign({ id: user._id });
         await user.save();
         return {
             ...(await userModel.getUser({ id: user._id }))!,
@@ -84,6 +84,14 @@ export const userModel: UserModel = {
             apiKeys
         };
     },
+    generateToken: async({ oldToken, expiresIn, key }) => {
+        const apiKey = await confirmAPIKey(key);
+        if(!apiKey) return undefined;
+        const user = await userByToken(oldToken);
+        if (!user) return undefined;
+        const token = tokenSign({ id: user._id, expiresIn });
+        return { token }
+    },
     updateMe: async ({ username, oldPassword, password, plan, token, key }) => {
         const apiKey = await confirmAPIKey(key);
         if(!apiKey) return undefined;
@@ -91,12 +99,12 @@ export const userModel: UserModel = {
         if (!user) return undefined;
         const user0 = await UserClass.findOne({ username });
         if (user0 && user0.username !== user.username) throw new Error("Username taken");
-        if (password && oldPassword) {
+        if (password && oldPassword && password !== oldPassword) {
             const isMatch = await comparePassword(oldPassword, user.password);
             if(!isMatch) throw new Error("Invalid password");
             user.password = await encryptPassword(password);
         }
-        if (username) user.username = username;
+        if (username && username !== user.username) user.username = username;
         if(plan) user.plan = plan;
         await user.save();
         return await userModel.getMe({ token });
