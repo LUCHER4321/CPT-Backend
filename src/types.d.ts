@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
 import { Server, Socket } from "socket.io";
-import { NotiFunc, Order, Role, TreeCriteria } from "./utils/enums";
+import { NotiFunc, Order, Plan, Role, TreeCriteria } from "./utils/enums";
 import { SpeciesJSON } from "chrono-phylo-tree";
 
 type ControllerFunction = (req: Request, res: Response) => Promise;
@@ -32,6 +32,7 @@ export interface User {
     username: string;
     photo?: string;
     role: Role;
+    plan: Plan;
     lastLogin?: Date;
     isActive?: boolean;
     apiKeys?: Types.ObjectId[];
@@ -74,6 +75,7 @@ export interface UserModel {
     updateMe: ModelFuncton<{
         token: string;
         username?: string;
+        plan?: Plan;
         oldPassword?: string;
         password?: string;
     }, User>;
