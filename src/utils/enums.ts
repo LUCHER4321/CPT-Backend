@@ -11,6 +11,12 @@ export enum Role {
     BOSS = "boss"
 }
 
+export enum Plan {
+    FREE = "free",
+    PRO = "pro",
+    PREMIUM = "premium"
+}
+
 export enum TreeCriteria {
     CREATED_AT = "createdAt",
     UPDATED_AT = "updatedAt",
