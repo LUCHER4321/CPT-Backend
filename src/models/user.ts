@@ -62,6 +62,7 @@ export const userModel: UserModel = {
             email: user.email,
             username: user.username,
             photo: photoToString(user.photo),
+            plan: user.plan,
             role: user.role,
             lastLogin: user.lastLogin,
             isActive: user.isActive
@@ -83,7 +84,7 @@ export const userModel: UserModel = {
             apiKeys
         };
     },
-    updateMe: async ({ username, oldPassword, password, token, key }) => {
+    updateMe: async ({ username, oldPassword, password, plan, token, key }) => {
         const apiKey = await confirmAPIKey(key);
         if(!apiKey) return undefined;
         const user = await userByToken(token);
@@ -96,6 +97,7 @@ export const userModel: UserModel = {
             user.password = await encryptPassword(password);
         }
         if (username) user.username = username;
+        if(plan) user.plan = plan;
         await user.save();
         return await userModel.getMe({ token });
     },
