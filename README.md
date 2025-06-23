@@ -116,6 +116,7 @@ classDiagram
     string email
     string password
     string? photo
+    Plan plan
     Role role
     Date lastLogin
     boolean isActive
@@ -125,6 +126,12 @@ classDiagram
     ADMIN
     USER
     BOSS
+  }
+  class Plan {
+    <<Enumeration>>
+    FREE
+    PRO
+    PREMIUM
   }
   class Notification {
     <<Interface>>
@@ -199,6 +206,7 @@ classDiagram
     string? image
   }
   User --> Role: role
+  User --> Plan: plan
   Notification --> NotiFunc: fun
   Notification ..> User: usersId
   APIKey ..> User: usersId
@@ -229,6 +237,12 @@ export enum Role {
   ADMIN = "admin",
   USER = "user",
   BOSS = "boss",
+}
+
+export enum Plan {
+  FREE = "free",
+  PRO = "pro",
+  PREMIUM = "premium",
 }
 
 export enum TreeCriteria {
@@ -301,6 +315,7 @@ Create a new user
   "email": "${string}@${string}.${string}",
   "username": "string",
   "photo": "string | undefined",
+  "plan": "Plan",
   "role": "Role",
   "lastLogin": "Date | undefined",
   "isActive": "boolean | undefined",
@@ -334,6 +349,7 @@ Log in with an existing account
   "email": "${string}@${string}.${string}",
   "username": "string",
   "photo": "string | undefined",
+  "plan": "Plan",
   "role": "Role",
   "lastLogin": "Date | undefined",
   "isActive": "boolean | undefined",
@@ -358,6 +374,7 @@ Get info about an specific user
   "email": "${string}@${string}.${string}",
   "username": "string",
   "photo": "string | undefined",
+  "plan": "Plan",
   "role": "Role",
   "lastLogin": "Date | undefined",
   "isActive": "boolean | undefined"
@@ -423,6 +440,7 @@ Get info about your user
   "email": "${string}@${string}.${string}",
   "username": "string",
   "photo": "string | undefined",
+  "plan": "Plan",
   "role": "Role",
   "lastLogin": "Date | undefined",
   "isActive": "boolean | undefined",
@@ -448,7 +466,8 @@ Updates data about your account
 {
   "username": "string | undefined",
   "oldPassword": "string | undefined",
-  "password": "string | undefined"
+  "password": "string | undefined",
+  "plan": "Plan | undefined"
 }
 ```
 
@@ -460,6 +479,7 @@ Updates data about your account
   "email": "${string}@${string}.${string}",
   "username": "string",
   "photo": "string | undefined",
+  "plan": "Plan",
   "role": "Role",
   "lastLogin": "Date | undefined",
   "isActive": "boolean | undefined",
@@ -511,6 +531,7 @@ Set your profile picture
   "email": "${string}@${string}.${string}",
   "username": "string",
   "photo": "string | undefined",
+  "plan": "Plan",
   "role": "Role",
   "lastLogin": "Date | undefined",
   "isActive": "boolean | undefined",
@@ -538,6 +559,7 @@ Set your profile picture as `null | undefined`
   "email": "${string}@${string}.${string}",
   "username": "string",
   "photo": "string | undefined",
+  "plan": "Plan",
   "role": "Role",
   "lastLogin": "Date | undefined",
   "isActive": "boolean | undefined",
