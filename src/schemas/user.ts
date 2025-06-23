@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import { Role } from "../utils/enums";
+import { Plan, Role } from "../utils/enums";
 
 const UserSchema = new Schema({
     username: {
@@ -20,6 +20,11 @@ const UserSchema = new Schema({
         minlength: 6
     },
     photo: String,
+    plan: {
+        type: String,
+        enum: Object.values(Plan),
+        default: Plan.FREE
+    },
     role: {
         type: String,
         enum: Object.values(Role),
