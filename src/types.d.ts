@@ -3,6 +3,7 @@ import { Types } from "mongoose";
 import { Server, Socket } from "socket.io";
 import { NotiFunc, Order, Plan, Role, TreeCriteria } from "./utils/enums";
 import { SpeciesJSON } from "chrono-phylo-tree";
+import { StringValue } from "ms";
 
 type ControllerFunction = (req: Request, res: Response) => Promise;
 
@@ -44,6 +45,7 @@ export interface UserController {
     logout: ControllerFunction;
     getUser: ControllerFunction;
     getMe: ControllerFunction;
+    generateToken: ControllerFunction;
     updateMe: ControllerFunction;
     deleteMe: ControllerFunction;
     photoMe: ControllerFunction;
@@ -72,6 +74,10 @@ export interface UserModel {
     getMe: ModelFuncton<{
         token: string;
     }, User>;
+    generateToken: ModelFuncton<{
+        oldToken: string;
+        expiresIn?: number | StringValue;
+    }, { token: string}>;
     updateMe: ModelFuncton<{
         token: string;
         username?: string;
