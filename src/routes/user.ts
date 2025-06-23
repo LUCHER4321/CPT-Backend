@@ -13,6 +13,7 @@ export const createUserRoutes = ({
     router.post("/logout", userController.logout);
     router.get("/:id", userController.getUser);
     router.post("/admin", userController.makeAdmin);
+    router.post("/token", userController.generateToken);
     return router;
 }
 
