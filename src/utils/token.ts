@@ -2,28 +2,28 @@ import { sign, verify } from "jsonwebtoken";
 import { Types } from "mongoose";
 import { EXPIRATION, SECRET } from "../config";
 import { UserClass } from "../schemas/user";
+import { StringValue } from "ms";
 
 interface TokenPayload {
     id: Types.ObjectId;
-    role: string;
     date?: Date;
+    expiresIn?: number | StringValue;
 }
 
 export const tokenSign = ({
     id,
-    role,
-    date = new Date()
+    date = new Date(),
+    expiresIn = EXPIRATION
 } : TokenPayload): string => {
     return sign({
         id,
-        role,
         date
     }, SECRET, {
-        expiresIn: EXPIRATION
+        expiresIn
     });
 };
 
-export const tokenVerify = (token?: string) => {
+const tokenVerify = (token?: string) => {
     if (!token) throw new Error("Token is required");
     try {
         return verify(token, SECRET) as TokenPayload;
