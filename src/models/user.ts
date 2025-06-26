@@ -64,9 +64,32 @@ export const userModel: UserModel = {
             photo: photoToString(user.photo),
             plan: user.plan,
             role: user.role,
+            createdAt: user.createdAt,
             lastLogin: user.lastLogin,
             isActive: user.isActive
         };
+    },
+    search: async ({ limit, search }) => {
+        const regex = new RegExp(search ?? "", "i");
+        const users = await UserClass.find({
+            $or: [
+                { username: regex },
+                { email: regex }
+            ]
+        })
+        .limit(limit ?? 0)
+        .sort({ username: 1});
+        return users.map(user => ({
+            id: user._id,
+            email: user.email,
+            username: user.username,
+            photo: photoToString(user.photo),
+            plan: user.plan,
+            role: user.role,
+            createdAt: user.createdAt,
+            lastLogin: user.lastLogin,
+            isActive: user.isActive
+        }));
     },
     getMe: async ({ token }) => {
         const user = await userByToken(token);
