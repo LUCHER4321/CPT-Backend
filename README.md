@@ -12,6 +12,7 @@
   - [Route `/user`](#route-user)
     - [`POST /register`](#post-register)
     - [`POST /login`](#post-login)
+    - [`GET /search`](#get-search)
     - [`GET /:id`](#get-id)
     - [`POST /logout`](#post-logout)
     - [`POST /admin`](#post-admin)
@@ -76,7 +77,7 @@ flowchart LR
     sym0{{"USE"}} & sym1(["GET"]) & sym2[/"POST"/] & sym3[\"PATCH"\] & sym4("DELETE") & sym5{"Web Socket"} & sym6[/"Cookie"\] ~~~ base{{"/"}}
     base --> root{{"/api/life-tree"}} & socket{"/"}
     root --> use0{{"/user"}} & use1{{"/follow"}} & use2{{"/ph-tree"}} & use3{{"/comment/:treeId"}} & use4{{"/like"}} & use5{{"/species/:treeId"}} & use6{{"/image"}}
-    use0 ----> post00[/"/register"/] & post01[/"/login"/] & get02(["/:id"])
+    use0 ----> post00[/"/register"/] & post01[/"/login"/] & get02(["/search"]) & get03(["/:id"])
     use0 --> cookie04[/"token"\] ---> post040[/"/logout"/] & post042[/"/admin"/] & post043[/"/token"/]
     cookie04 --> use041{{"/me"}}
     use041 --> get0410(["/"]) & patch0411[\"/"\] & delete0412("/") & post0413[/"/photo"/] & delete0414("/photo") & post0415[/"/key"/] & delete0416("/key/:keyTD")
@@ -119,6 +120,7 @@ classDiagram
     string? photo
     Plan plan
     Role role
+    Date createdAt
     Date lastLogin
     boolean isActive
   }
@@ -318,7 +320,8 @@ Create a new user
   "photo": "string | undefined",
   "plan": "Plan",
   "role": "Role",
-  "lastLogin": "Date | undefined",
+  "createdAt": "Date",
+  "lastLogin": "Date",
   "isActive": "boolean | undefined",
   "apiKeys": ["ObjectId"]
 }
@@ -353,13 +356,41 @@ Log in with an existing account
   "photo": "string | undefined",
   "plan": "Plan",
   "role": "Role",
-  "lastLogin": "Date | undefined",
+  "createdAt": "Date",
+  "lastLogin": "Date",
   "isActive": "boolean | undefined",
   "apiKeys": ["ObjectId"]
 }
 ```
 
 Cookie: `token=`
+
+#### `GET /search`
+
+Search for users
+
+**Query:**
+
+- `?search`: Searching by name
+- `?limit`: Maximum results
+
+**Response:**
+
+```json
+[
+  {
+    "id": "ObjectId",
+    "email": "${string}@${string}.${string}",
+    "username": "string",
+    "photo": "string | undefined",
+    "plan": "Plan",
+    "role": "Role",
+    "createdAt": "Date",
+    "lastLogin": "Date",
+    "isActive": "boolean | undefined"
+  }
+]
+```
 
 #### `GET /:id`
 
@@ -379,7 +410,8 @@ Get info about an specific user
   "photo": "string | undefined",
   "plan": "Plan",
   "role": "Role",
-  "lastLogin": "Date | undefined",
+  "createdAt": "Date",
+  "lastLogin": "Date",
   "isActive": "boolean | undefined"
 }
 ```
@@ -473,7 +505,8 @@ Get info about your user
   "photo": "string | undefined",
   "plan": "Plan",
   "role": "Role",
-  "lastLogin": "Date | undefined",
+  "createdAt": "Date",
+  "lastLogin": "Date",
   "isActive": "boolean | undefined",
   "apiKeys": ["ObjectId"]
 }
@@ -512,7 +545,8 @@ Updates data about your account
   "photo": "string | undefined",
   "plan": "Plan",
   "role": "Role",
-  "lastLogin": "Date | undefined",
+  "createdAt": "Date",
+  "lastLogin": "Date",
   "isActive": "boolean | undefined",
   "apiKeys": ["ObjectId"]
 }
@@ -564,7 +598,8 @@ Set your profile picture
   "photo": "string | undefined",
   "plan": "Plan",
   "role": "Role",
-  "lastLogin": "Date | undefined",
+  "createdAt": "Date",
+  "lastLogin": "Date",
   "isActive": "boolean | undefined",
   "apiKeys": ["ObjectId"]
 }
@@ -592,7 +627,8 @@ Set your profile picture as `null | undefined`
   "photo": "string | undefined",
   "plan": "Plan",
   "role": "Role",
-  "lastLogin": "Date | undefined",
+  "createdAt": "Date",
+  "lastLogin": "Date",
   "isActive": "boolean | undefined",
   "apiKeys": ["ObjectId"]
 }
@@ -797,7 +833,9 @@ Create a new Ph. Tree (Phylogenetic Tree)
   "createdAt": "Date",
   "updatedAt": "Date",
   "tags": ["string"],
-  "collaborators": ["string"]
+  "collaborators": ["string"],
+  "likes": "number",
+  "comments": "number"
 }
 ```
 
@@ -812,6 +850,8 @@ Search your Ph. Trees
 - `?search`: Searching by tags, name or user
 - `?criteria`: Sorting criteria (`"createdAt", "updatedAt", "likes", "comments", "name"`)
 - `?order`: Sorting order (`"asc", "desc"`)
+- `?from`: Minimum createdAt
+- `?to`: Maximum createdAt
 
 **Cookie:**
 
@@ -831,7 +871,9 @@ Search your Ph. Trees
     "createdAt": "Date",
     "updatedAt": "Date",
     "tags": ["string"],
-    "collaborators": ["string"]
+    "collaborators": ["string"],
+    "likes": "number",
+    "comments": "number"
   }
 ]
 ```
@@ -878,7 +920,9 @@ Modify a Ph. Tree
   "createdAt": "Date",
   "updatedAt": "Date",
   "tags": ["string"],
-  "collaborators": ["string"]
+  "collaborators": ["string"],
+  "likes": "number",
+  "comments": "number"
 }
 ```
 
@@ -939,7 +983,9 @@ Set the Ph. Tree's image
   "createdAt": "Date",
   "updatedAt": "Date",
   "tags": ["string"],
-  "collaborators": ["string"]
+  "collaborators": ["string"],
+  "likes": "number",
+  "comments": "number"
 }
 ```
 
@@ -972,7 +1018,9 @@ Set the Ph. Tree's image as `null | undefined`
   "createdAt": "Date",
   "updatedAt": "Date",
   "tags": ["string"],
-  "collaborators": ["string"]
+  "collaborators": ["string"],
+  "likes": "number",
+  "comments": "number"
 }
 ```
 
@@ -1006,7 +1054,9 @@ Search Ph. Trees made by other users
     "createdAt": "Date",
     "updatedAt": "Date",
     "tags": ["string"],
-    "collaborators": ["string"]
+    "collaborators": ["string"],
+    "likes": "number",
+    "comments": "number"
   }
 ]
 ```
@@ -1034,7 +1084,9 @@ Search Ph. Trees made by other users
   "createdAt": "Date",
   "updatedAt": "Date",
   "tags": ["string"],
-  "collaborators": ["string"]
+  "collaborators": ["string"],
+  "likes": "number",
+  "comments": "number"
 }
 ```
 
