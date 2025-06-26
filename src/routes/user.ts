@@ -11,6 +11,7 @@ export const createUserRoutes = ({
     router.post("/register", userController.register);
     router.post("/login", userController.login);
     router.post("/logout", userController.logout);
+    router.get("/search", userController.search);
     router.get("/:id", userController.getUser);
     router.post("/admin", userController.makeAdmin);
     router.post("/token", userController.generateToken);
