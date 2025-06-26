@@ -34,7 +34,8 @@ export interface User {
     photo?: string;
     role: Role;
     plan: Plan;
-    lastLogin?: Date;
+    createdAt: Date;
+    lastLogin: Date;
     isActive?: boolean;
     apiKeys?: Types.ObjectId[];
 }
@@ -44,6 +45,7 @@ export interface UserController {
     login: ControllerFunction;
     logout: ControllerFunction;
     getUser: ControllerFunction;
+    search: ControllerFunction;
     getMe: ControllerFunction;
     generateToken: ControllerFunction;
     updateMe: ControllerFunction;
@@ -71,6 +73,10 @@ export interface UserModel {
     getUser: ModelFuncton<{
         id: Types.ObjectId;
     }, User>;
+    search: ModelFuncton<{
+        limit?: number;
+        search?: string;
+    }, User[]>
     getMe: ModelFuncton<{
         token: string;
     }, User>;
@@ -154,6 +160,8 @@ export interface PhTree {
     updatedAt: Date;
     tags?: string[];
     collaborators?: Types.ObjectId[];
+    likes: number;
+    comments: number;
 }
 
 export interface PhTreeController {
@@ -167,6 +175,16 @@ export interface PhTreeController {
     getPhTree: ControllerFunction;
 }
 
+type TreeSearch = Partial<{
+    page: number;
+    limit: number;
+    search: string;
+    criteria: TreeCriteria;
+    order: Order;
+    from: Date;
+    to: Date;
+}>;
+
 export interface PhTreeModel {
     createPhTree: ModelFuncton<{
         token: string;
@@ -178,12 +196,7 @@ export interface PhTreeModel {
     }, PhTree>;
     getMyPhTrees: ModelFuncton<{
         token: string;
-        page?: number;
-        limit?: number;
-        search?: string;
-        criteria?: TreeCriteria;
-        order?: Order;
-    }, PhTree[]>;
+    } & TreeSearch, PhTree[]>;
     updatePhTree: ModelFuncton<{
         token: string;
         id: Types.ObjectId;
@@ -207,14 +220,9 @@ export interface PhTreeModel {
         token: string;
         id: Types.ObjectId;
     }, PhTree>;
-    getPhTrees: ModelFuncton<Partial<{
-        token: string;
-        page: number;
-        limit: number;
-        search: string;
-        criteria: TreeCriteria;
-        order: Order;
-    }>, PhTree[]>;
+    getPhTrees: ModelFuncton<{
+        token?: string;
+    } & TreeSearch, PhTree[]>;
     getPhTree: ModelFuncton<{
         token?: string;
         id: Types.ObjectId;
