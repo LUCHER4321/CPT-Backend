@@ -42,6 +42,8 @@ interface GetTreesProps {
     search?: string;
     criteria?: TreeCriteria;
     order?: Order;
+    from?: Date;
+    to?: Date;
     myTrees?: boolean;
 }
 
@@ -52,6 +54,8 @@ const getTrees = async ({
     search,
     criteria,
     order,
+    from,
+    to,
     myTrees = false
 }: GetTreesProps): Promise<PhTree[]> => {
     const user = await nullableInput(token, userByToken);
@@ -95,7 +99,9 @@ const getTrees = async ({
                     user._id.toString()
                 ]
             }
-        } : {}
+        } : {},
+        ...from ? { createdAt: { $gte: from } }: {},
+        ...to ? { createdAt: { $lte: to } }: {}
     });
     const skip = (page ?? 0) * (limit ?? 0);
     const query = async () => {
@@ -133,7 +139,7 @@ const getTrees = async ({
         };
     };
     const trees = await query();
-    return trees.map(t => ({
+    return await Promise.all(trees.map(async (t) => ({
         id: t._id,
         userId: t.userId,
         name: t.name,
@@ -143,8 +149,10 @@ const getTrees = async ({
         createdAt: t.createdAt,
         updatedAt: t.updatedAt,
         tags: t.tags ?? undefined,
-        collaborators: t.collaborators ?? undefined
-    }));
+        collaborators: t.collaborators ?? undefined,
+        likes: await LikeClass.countDocuments({ treeId: t._id}),
+        comments: await CommentClass.countDocuments({ treeId: t._id})
+    })));
 };
 
 export const phTreeModel: PhTreeModel = {
@@ -165,7 +173,16 @@ export const phTreeModel: PhTreeModel = {
         if(!newPhTree.userId) throw new Error("User ID not found");
         return await phTreeModel.getPhTree({ token, id: newPhTree._id });
     },
-    getMyPhTrees: async ({ token, page, limit, search, criteria, order }) => {
+    getMyPhTrees: async ({
+        token,
+        page,
+        limit,
+        search,
+        criteria,
+        order,
+        from,
+        to
+    }) => {
         return await getTrees({
             token,
             page,
@@ -173,6 +190,8 @@ export const phTreeModel: PhTreeModel = {
             search,
             criteria,
             order,
+            from,
+            to,
             myTrees: true
         });
     },
@@ -250,14 +269,25 @@ export const phTreeModel: PhTreeModel = {
         await phTree.save();
         return await phTreeModel.getPhTree({ token, id });
     },
-    getPhTrees: async ({ token, page, limit, search, criteria, order }) => {
+    getPhTrees: async ({
+        token,
+        page,
+        limit,
+        search,
+        criteria,
+        order,
+        from,
+        to
+    }) => {
         return await getTrees({
             token,
             page,
             limit,
             search,
             criteria,
-            order
+            order,
+            from,
+            to
         });
     },
     getPhTree: async ({ token, id }) => {
@@ -274,7 +304,9 @@ export const phTreeModel: PhTreeModel = {
             createdAt: phTree.createdAt,
             updatedAt: phTree.updatedAt,
             tags: phTree.tags ?? undefined,
-            collaborators: phTree.collaborators ?? undefined
+            collaborators: phTree.collaborators ?? undefined,
+            likes: await LikeClass.countDocuments({ treeId: phTree._id}),
+            comments: await CommentClass.countDocuments({ treeId: phTree._id})
         }
     }
 }
