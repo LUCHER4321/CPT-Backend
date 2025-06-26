@@ -57,6 +57,19 @@ export const userController = ({
             res.status(400).json({ message: error.message });
         }
     },
+    search: async (req, res) => {
+        const { search, limit } = req.query;
+        try {
+            const users = await userModel.search({
+                search: search ? String(search) : undefined,
+                limit: limit ? Number(limit) : 10
+            });
+            if (!users || users.length === 0) return res.status(404).json({ message: "No users found" });
+            res.status(200).json(users);
+        } catch (error: any) {
+            res.status(400).json({ message: error.message });
+        }
+    },
     getMe: async (req, res) => {
         const { token } = req.cookies;
         if (!token) return res.status(401).json({ message: "Unauthorized" });
