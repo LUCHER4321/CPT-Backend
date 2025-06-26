@@ -35,7 +35,9 @@ export const phTreeController = ({
             limit = 10,
             search,
             criteria = "createdAt",
-            order = "desc"
+            order = "desc",
+            from,
+            to
         } = req.query;
         try {
             const phTrees = await phTreeModel.getMyPhTrees({
@@ -44,7 +46,9 @@ export const phTreeController = ({
                 limit: +limit,
                 search: nullableInput(search, s => s as string),
                 criteria: parseCriteria(criteria),
-                order: parseOrder(order)
+                order: parseOrder(order),
+                from: nullableInput(from, f => new Date(f as string)),
+                to: nullableInput(to, t => new Date(t as string))
             });
             if (!phTrees) return res.status(404).json({ message: "No Ph. Trees found" });
             res.json(phTrees);
@@ -132,7 +136,9 @@ export const phTreeController = ({
             limit = 10,
             search,
             criteria = "createdAt",
-            order = "desc"
+            order = "desc",
+            from,
+            to
         } = req.query;
         try {
             const phTrees = await phTreeModel.getPhTrees({
@@ -141,7 +147,9 @@ export const phTreeController = ({
                 limit: +limit,
                 search: nullableInput(search, s => s as string),
                 criteria: parseCriteria(criteria),
-                order: parseOrder(order)
+                order: parseOrder(order),
+                from: nullableInput(from, f => new Date(f as string)),
+                to: nullableInput(to, t => new Date(t as string))
             });
             if (!phTrees) return res.status(404).json({ message: "No Ph. Trees found" });
             res.json(phTrees);
