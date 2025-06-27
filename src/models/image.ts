@@ -3,7 +3,7 @@ import { ImageModel } from "../types";
 import { IMAGES } from "../config";
 import { userByToken } from "../utils/token";
 import { join } from "node:path";
-import v2 from "./cloudinary";
+import v2 from "../connections/cloudinary";
 
 const { uploader, url } = v2;
 const { upload, destroy } = uploader;
