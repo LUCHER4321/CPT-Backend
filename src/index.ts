@@ -1,5 +1,5 @@
 import { PORT } from "./config";
-import { connectMongo } from "./mongo";
+import { connectMongo } from "./connections/mongo";
 import { baseRouter } from "./server/baseRouter";
 import serverConfig from "./server/serverConfig";
 import express from "express";
