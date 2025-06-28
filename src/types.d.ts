@@ -162,6 +162,7 @@ export interface PhTree {
     collaborators?: Types.ObjectId[];
     likes: number;
     comments: number;
+    views: number;
 }
 
 export interface PhTreeController {
@@ -173,6 +174,7 @@ export interface PhTreeController {
     deletePhTreeImage: ControllerFunction;
     getPhTrees: ControllerFunction;
     getPhTree: ControllerFunction;
+    setView: ControllerFunction;
 }
 
 type TreeSearch = Partial<{
@@ -227,6 +229,10 @@ export interface PhTreeModel {
         token?: string;
         id: Types.ObjectId;
     }, PhTree>;
+    setView: ModelFuncton<{
+        token?: string;
+        id: Types.ObjectId;
+    }, number>
 }
 
 export interface Comment {
