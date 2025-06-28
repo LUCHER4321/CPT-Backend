@@ -151,7 +151,8 @@ const getTrees = async ({
         tags: t.tags ?? undefined,
         collaborators: t.collaborators ?? undefined,
         likes: await LikeClass.countDocuments({ treeId: t._id}),
-        comments: await CommentClass.countDocuments({ treeId: t._id})
+        comments: await CommentClass.countDocuments({ treeId: t._id}),
+        views: t.views.length
     })));
 };
 
@@ -306,7 +307,22 @@ export const phTreeModel: PhTreeModel = {
             tags: phTree.tags ?? undefined,
             collaborators: phTree.collaborators ?? undefined,
             likes: await LikeClass.countDocuments({ treeId: phTree._id}),
-            comments: await CommentClass.countDocuments({ treeId: phTree._id})
+            comments: await CommentClass.countDocuments({ treeId: phTree._id}),
+            views: phTree.views.length
         }
+    },
+    setView: async ({ token, id, key }) => {
+        const apiKey = await confirmAPIKey(key);
+        if(!apiKey) return undefined;
+        const mt = await myTree({ token, id, readOnly: true });
+        if(!mt) return undefined;
+        const { user, phTree } = mt;
+        if(!user) return phTree.views.length;
+        if(!phTree.views.includes(user._id)) {
+            phTree.views.push(user._id);
+            await phTree.save();
+            return phTree.views.length;
+        }
+        return phTree.views.length;
     }
 }
