@@ -169,4 +169,18 @@ export const phTreeController = ({
             res.status(400).json({ message: error.message });
         }
     },
+    setView: async (req, res) => {
+        const { id: _id } = req.params;
+        const { token } = req.cookies;
+        const { apiKey } = req.query;
+        const key = getKey(apiKey);
+        try {
+            const id = toObjectId(_id);
+            const views = await phTreeModel.setView({ token, id, key});
+            if(!views) return res.status(404).json({ message: "Ph. Tree not found" });
+            res.json({ views });
+        } catch (error: any) {
+            res.status(400).json({ message: error.message });
+        }
+    }
 });
