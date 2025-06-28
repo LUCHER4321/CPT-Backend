@@ -22,6 +22,7 @@ export enum TreeCriteria {
     UPDATED_AT = "updatedAt",
     LIKES = "likes",
     COMMENTS = "comments",
+    VIEWS = "views",
     NAME = "name"
 }
 
