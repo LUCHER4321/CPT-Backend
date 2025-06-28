@@ -15,6 +15,7 @@ export const createPhTreeRoutes = ({
     router.delete("/:id/image", phTreeController.deletePhTreeImage);
     router.get("/", phTreeController.getPhTrees);
     router.get("/:id", phTreeController.getPhTree);
+    router.post("/:id/view", phTreeController.setView);
     allowedMethods({ router });
     return router;
 };
