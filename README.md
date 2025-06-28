@@ -86,7 +86,7 @@ flowchart LR
     use1 ----> get11(["/followers/:userId"]) & get12(["/following/:userId"]) & get13(["/count/:userId"])
     use2 --> cookie20[/"token"\] & cookie21[/"token?"\]
     cookie20 ---> post200[/"/"/] & get201(["/me"]) & patch202[\"/:id"\] & delete203("/:id") & post204[/"/:id/image"/] & delete205("/:id/image")
-    cookie21 ---> get21(["/"]) & get22(["/:id"])
+    cookie21 ---> get21(["/"]) & get22(["/:id"]) & post23[/"/:id/view"/]
     use3 --> cookie30[/"token"\]
     cookie30 ---> post300[/"/"/] & patch301[\"/:id"\] & delete302("/:id")
     use3 ----> get31(["/"]) & get32(["/:id"])
@@ -177,6 +177,7 @@ classDiagram
     Date updatedAt
     string[] tags
     ObjectId[] collaborators
+    ObjectId[] views
   }
   class Comment {
     <<Interface>>
@@ -216,6 +217,8 @@ classDiagram
   Follow ..> User: userId
   Follow ..> User: followedUserId
   PhTree ..> User: userId
+  PhTree ..> User: collaborators
+  PhTree ..> User: views
   Comment ..> PhTree: treeId
   Comment ..> User: userId
   Comment ..> Comment: parentId
@@ -835,7 +838,8 @@ Create a new Ph. Tree (Phylogenetic Tree)
   "tags": ["string"],
   "collaborators": ["string"],
   "likes": "number",
-  "comments": "number"
+  "comments": "number",
+  "views": "number"
 }
 ```
 
@@ -873,7 +877,8 @@ Search your Ph. Trees
     "tags": ["string"],
     "collaborators": ["string"],
     "likes": "number",
-    "comments": "number"
+    "comments": "number",
+    "views": "number"
   }
 ]
 ```
@@ -922,7 +927,8 @@ Modify a Ph. Tree
   "tags": ["string"],
   "collaborators": ["string"],
   "likes": "number",
-  "comments": "number"
+  "comments": "number",
+  "views": "number"
 }
 ```
 
@@ -985,7 +991,8 @@ Set the Ph. Tree's image
   "tags": ["string"],
   "collaborators": ["string"],
   "likes": "number",
-  "comments": "number"
+  "comments": "number",
+  "views": "number"
 }
 ```
 
@@ -1020,7 +1027,8 @@ Set the Ph. Tree's image as `null | undefined`
   "tags": ["string"],
   "collaborators": ["string"],
   "likes": "number",
-  "comments": "number"
+  "comments": "number",
+  "views": "number"
 }
 ```
 
@@ -1056,7 +1064,8 @@ Search Ph. Trees made by other users
     "tags": ["string"],
     "collaborators": ["string"],
     "likes": "number",
-    "comments": "number"
+    "comments": "number",
+    "views": "number"
   }
 ]
 ```
@@ -1086,7 +1095,32 @@ Search Ph. Trees made by other users
   "tags": ["string"],
   "collaborators": ["string"],
   "likes": "number",
-  "comments": "number"
+  "comments": "number",
+  "views": "number"
+}
+```
+
+#### `POST /:id/view`
+
+Indicate you've seen a Ph. Tree
+
+**Query:**
+
+- `?apiKey`: API Key
+
+**Params:**
+
+- `/:id`: Id of the tree
+
+**Cookie:**
+
+- `token=`: JSON Web Token
+
+**Response:**
+
+```json
+{
+  "views": "number"
 }
 ```
 
