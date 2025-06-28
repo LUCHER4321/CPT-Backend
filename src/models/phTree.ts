@@ -132,6 +132,10 @@ const getTrees = async ({
                         return tree
                     }).slice(skip, skip + (limit ?? 0));
                 });
+            case TreeCriteria.VIEWS:
+                return await treesQuery.lean().then(async (trees) => {
+                    return trees.sort((a,b) => (a.views.length - b.views.length) * (order === Order.ASC ? 1 : -1)).slice(skip, skip + (limit ?? 0));
+                });
             default:
                 const sortOptions: any = {};
                 if(criteria) sortOptions[criteria] = order === Order.ASC ? 1 : -1;
