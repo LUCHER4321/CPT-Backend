@@ -256,6 +256,7 @@ export enum TreeCriteria {
   UPDATED_AT = "updatedAt",
   LIKES = "likes",
   COMMENTS = "comments",
+  VIEWS = "views",
   NAME = "name",
 }
 
@@ -852,7 +853,7 @@ Search your Ph. Trees
 - `?page`: Page of the result
 - `?limit`: Results per page
 - `?search`: Searching by tags, name or user
-- `?criteria`: Sorting criteria (`"createdAt", "updatedAt", "likes", "comments", "name"`)
+- `?criteria`: Sorting criteria (`"createdAt", "updatedAt", "likes", "comments", "views", "name"`)
 - `?order`: Sorting order (`"asc", "desc"`)
 - `?from`: Minimum createdAt
 - `?to`: Maximum createdAt
@@ -1041,7 +1042,7 @@ Search Ph. Trees made by other users
 - `?page`: Page of the result
 - `?limit`: Results per page
 - `?search`: Searching by tags, name or user
-- `?criteria`: Sorting criteria (`"createdAt", "updatedAt", "likes", "comments", "name"`)
+- `?criteria`: Sorting criteria (`"createdAt", "updatedAt", "likes", "comments", "views", "name"`)
 - `?order`: Sorting order (`"asc", "desc"`)
 
 **Cookie:**
