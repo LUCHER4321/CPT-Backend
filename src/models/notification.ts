@@ -4,7 +4,7 @@ import { NotificationModel } from "../types";
 import { PhTreeClass } from "../schemas/phTree";
 import { FollowClass } from "../schemas/follow";
 import { CommentClass } from "../schemas/comment";
-import { NotiFunc } from "../utils/enums";
+import { NotiFunc } from "../enums";
 import { userByToken } from "../utils/token";
 
 interface NotifyProps {

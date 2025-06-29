@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import { APIKeyClass } from "../schemas/apiKey";
 import { UserClass } from "../schemas/user";
-import { Role } from "./enums";
+import { Role } from "../enums";
 
 export const confirmAPIKey = async (key?: Types.ObjectId) => {
     if(!key) return false;

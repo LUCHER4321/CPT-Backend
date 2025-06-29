@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import { NotiFunc } from "../utils/enums";
+import { NotiFunc } from "../enums";
 
 const NotificationSchema = new Schema({
     fun: {

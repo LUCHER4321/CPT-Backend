@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
 import { Server, Socket } from "socket.io";
-import { NotiFunc, Order, Plan, Role, TreeCriteria } from "./utils/enums";
+import { NotiFunc, Order, Plan, Role, TreeCriteria } from "./enums";
 import { SpeciesJSON } from "chrono-phylo-tree";
 import { StringValue } from "ms";
 

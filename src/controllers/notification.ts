@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 import { Notification, NotificationController, NotificationModel } from "../types";
-import { NotiFunc } from "../utils/enums";
+import { NotiFunc } from "../enums";
 import { parseNewNotification } from "../utils/parser";
 import { Socket } from "socket.io";
 

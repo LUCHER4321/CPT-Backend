@@ -8,7 +8,7 @@ import { CommentClass } from "../schemas/comment";
 import { LikeClass } from "../schemas/like";
 import { userByToken } from "../utils/token";
 import { confirmAPIKey } from "../utils/apiKey";
-import { Order, TreeCriteria } from "../utils/enums";
+import { Order, TreeCriteria } from "../enums";
 import { UserClass } from "../schemas/user";
 
 interface MyTreeProps {

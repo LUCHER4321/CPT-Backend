@@ -6,7 +6,7 @@ import { photoToString } from "../utils/photo";
 import { UserClass } from "../schemas/user";
 import { FollowClass } from "../schemas/follow";
 import { LikeClass } from "../schemas/like";
-import { Role } from "../utils/enums";
+import { Role } from "../enums";
 import { APIKeyClass } from "../schemas/apiKey";
 import { confirmAPIKey } from "../utils/apiKey";
 

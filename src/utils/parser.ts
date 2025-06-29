@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { NotiFunc, Order, TreeCriteria } from "./enums";
+import { NotiFunc, Order, TreeCriteria } from "../enums";
 import { nullableInput } from "./nullableInput";
 
 const isString = (str: any): boolean => typeof str === "string" || str instanceof String;
