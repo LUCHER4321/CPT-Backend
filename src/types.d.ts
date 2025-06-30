@@ -415,11 +415,12 @@ export interface Notification {
 type WSControllerFunction = ModelFuncton<{
     socket: Socket;
     call: string;
-}, void>;
+}, any>;
 
 export interface NotificationController {
     setNotification: WSControllerFunction;
-    getNotifications: WSControllerFunction;
+    getNotifications: ControllerFunction;
+    seeNotification: ControllerFunction;
 }
 
 export interface NotificationModel {
@@ -444,7 +445,11 @@ export interface NotificationModel {
     getNotifications: ModelFuncton<{
         token: string;
         from?: Date;
+        to?: Date;
         limit?: number;
-        see?: boolean
-    }, Notification[]>
+    }, Notification[]>;
+    seeNotification: ModelFuncton<{
+        token: string;
+        id: Types.ObjectId;
+    }, Notification>
 }
