@@ -6,6 +6,7 @@ import { FollowClass } from "../schemas/follow";
 import { CommentClass } from "../schemas/comment";
 import { NotiFunc } from "../enums";
 import { userByToken } from "../utils/token";
+import { confirmAPIKey } from "../utils/apiKey";
 
 interface NotifyProps {
     fun: NotiFunc;
@@ -34,7 +35,7 @@ const notify = async ({
         usersId: newNotification.usersId,
         inputs: newNotification.inputs,
         authorId: newNotification.authorId,
-        seen: newNotification.seen,
+        seen: false,
         createdAt: newNotification.createdAt
     }
 };
@@ -99,25 +100,47 @@ export const notificationModel: NotificationModel = {
             authorId: user._id
         });
     },
-    getNotifications: async ({ token, from, limit, see }) => {
+    getNotifications: async ({ token, from, to, limit }) => {
         const user = await userByToken(token);
         if (!user) throw new Error("User not found");
-        const notifications = await NotificationClass.find({
-            createdAt: { $gte: from },
+        const notifications0 = NotificationClass.find({
+            createdAt: {
+                $and: [
+                    { $gte: from },
+                    { $lte: to }
+                ]
+            },
             usersId: { $in: [user._id] }
-        }).limit(limit ?? Number.MAX_SAFE_INTEGER);
-        if(see){
-            notifications.map(n => n.seen = true);
-            await Promise.all(notifications.map(n => n.save()));
-        }
+        }).sort({ createdAt: -1 });
+        const notifications = await (limit ? notifications0.limit(limit) : notifications0);
         return notifications.map(n => ({
             id: n._id,
             fun: n.fun,
             usersId: n.usersId,
             inputs: n.inputs,
             authorId: n.authorId,
-            seen: n.seen,
+            seen: n.seen.includes(user._id),
             createdAt: n.createdAt
         }));
+    },
+    seeNotification: async ({ token, id, key }) => {
+        const apiKey = await confirmAPIKey(key);
+        if(!apiKey) return undefined;
+        const user = await userByToken(token);
+        if(!user) throw new Error("User not found");
+        const notification = await NotificationClass.findById(id);
+        if(!notification) throw new Error("Notification not found");
+        if(!notification.usersId.includes(user._id)) throw new Error("You can't see this notification");
+        if(!notification.seen.includes(user._id)) notification.seen.push(user._id);
+        const updatedNotification = await notification.save();
+        return {
+            id: updatedNotification._id,
+            fun: updatedNotification.fun,
+            usersId: updatedNotification.usersId,
+            inputs: updatedNotification.inputs,
+            authorId: updatedNotification.authorId,
+            seen: updatedNotification.seen.includes(user._id),
+            createdAt: updatedNotification.createdAt
+        }
     }
 };
