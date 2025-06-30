@@ -76,7 +76,7 @@
 flowchart LR
     sym0{{"USE"}} & sym1(["GET"]) & sym2[/"POST"/] & sym3[\"PATCH"\] & sym4("DELETE") & sym5{"Web Socket"} & sym6[/"Cookie"\] ~~~ base{{"/"}}
     base --> root{{"/api/life-tree"}} & socket{"/"}
-    root --> use0{{"/user"}} & use1{{"/follow"}} & use2{{"/ph-tree"}} & use3{{"/comment/:treeId"}} & use4{{"/like"}} & use5{{"/species/:treeId"}} & use6{{"/image"}}
+    root --> use0{{"/user"}} & use1{{"/follow"}} & use2{{"/ph-tree"}} & use3{{"/comment/:treeId"}} & use4{{"/like"}} & use5{{"/species/:treeId"}} & use6{{"/image"}} & use7{{"/notification"}}
     use0 ----> post00[/"/register"/] & post01[/"/login"/] & get02(["/search"]) & get03(["/:id"])
     use0 --> cookie04[/"token"\] ---> post040[/"/logout"/] & post042[/"/admin"/] & post043[/"/token"/]
     cookie04 --> use041{{"/me"}}
@@ -100,9 +100,8 @@ flowchart LR
     use5 --> cookie50[/"token"\] ---> post500[/"/"/] & patch501[\"/:id"\] & delete502("/:id") & post503[/"/:id/image"/] & delete504("/:id/image")
     use5 --> cookie51[/"token?"\] ---> get510(["/"]) & get511(["/:id"])
     use6 ----> get60(["/:img"])
-    socket --> wscookie[/"token"\] --> ws0{set-notification-client} & ws1{get-notification-client}
-    ws0 ---> ws00{set-notification-server}
-    ws1 ---> ws10{get-notification-server}
+    use7 --> cookie70[/"token"\] ---> get70(["/"]) & patch71[\"/:id"\]
+    socket --> wscookie[/"token"\] --> ws0{set-notification-client} ---> ws00{set-notification-server}
 ```
 
 ## Database Model
@@ -1749,6 +1748,68 @@ Get an image by name
 
 Image file (jpg, jpeg, png, gif)
 
+### Route `/notification`
+
+#### `GET /`
+
+Get your notifications
+
+**Query:**
+
+- `?from`: Starting date
+- `?to`: Final date
+- `?limit`: Max number of notifications
+
+**Cookie:**
+
+- `token=`: JSON Web Token
+
+**Response:**
+
+```json
+[
+  {
+    "id": "ObjectId",
+    "fun": "NotiFunc",
+    "usersId": "ObjectId[]",
+    "inputs": "string[]",
+    "authorId": "ObjectId",
+    "seen": "boolean",
+    "createdAt": "Date"
+  }
+]
+```
+
+#### `PATCH /:id`
+
+Mark a notification as read
+
+**Query:**
+
+- `?apiKey`: API Key
+
+**Params:**
+
+- `/:id`: Id of the notification
+
+**Cookie:**
+
+- `token=`: JSON Web Token
+
+**Response:**
+
+```json
+{
+  "id": "ObjectId",
+  "fun": "NotiFunc",
+  "usersId": "ObjectId[]",
+  "inputs": "string[]",
+  "authorId": "ObjectId",
+  "seen": "boolean",
+  "createdAt": "Date"
+}
+```
+
 ## Web Socket
 
 ### `on("set-notification-client")`
@@ -1768,9 +1829,9 @@ Image file (jpg, jpeg, png, gif)
 }
 ```
 
-**Response:**
+**Emit:**
 
-`emit("set-notification-server")`
+`"set-notification-server"`
 
 ```json
 {
@@ -1782,38 +1843,4 @@ Image file (jpg, jpeg, png, gif)
   "seen": "boolean",
   "createdAt": "Date"
 }
-```
-
-### `on("get-notification-client")`
-
-**Cookie:**
-
-- `token=`: JSON Web Token
-
-**Data:**
-
-```json
-{
-  "from": "Date | undefined",
-  "limit": "number | undefined",
-  "see": "boolean | undefined"
-}
-```
-
-**Response:**
-
-`emit("get-notification-server")`
-
-```json
-[
-  {
-    "id": "ObjectId",
-    "fun": "NotiFunc",
-    "usersId": "ObjectId[]",
-    "inputs": "string[]",
-    "authorId": "ObjectId",
-    "seen": "boolean",
-    "createdAt": "Date"
-  }
-]
 ```
