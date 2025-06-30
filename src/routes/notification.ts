@@ -1,6 +1,7 @@
 import { Server } from "socket.io";
 import { NotificationController } from "../types";
-import { client, getN, server, setN } from "../config";
+import { client, server, setN } from "../config";
+import { Router } from "express";
 
 interface IOProps {
     io: Server;
@@ -13,6 +14,14 @@ export const createNotificationIO = ({
 }: IOProps) => {
     const { on } = io
     on(setN + client, async(socket) => await notificationController.setNotification({ socket, call: setN + server }));
-    on(getN + client, async(socket) => await notificationController.getNotifications({socket, call: getN + server }));
     return io;
+};
+
+export const createNotificationRouter = ({
+    notificationController
+}: Omit<IOProps, "io">) => {
+    const router = Router();
+    router.get("/", notificationController.getNotifications);
+    router.patch("/:id", notificationController.seeNotification)
+    return router;
 };
