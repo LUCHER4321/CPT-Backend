@@ -66,16 +66,17 @@
     - [`GET /:treeId`](#get-treeid-2)
     - [`GET /:treeId/:id`](#get-treeidid-1)
   - [`GET /image/:img`](#get-imageimg)
+  - [Route `/notification`](#route-notification)
+    - [`GET /`](#get--2)
+    - [`PATCH /:id`](#patch-id-1)
 - [Web Socket](#web-socket)
   - [`on("set-notification-client")`](#onset-notification-client)
-  - [`on("get-notification-client")`](#onget-notification-client)
 
 ## Routes Diagram
 
 ```mermaid
-flowchart LR
-    sym0{{"USE"}} & sym1(["GET"]) & sym2[/"POST"/] & sym3[\"PATCH"\] & sym4("DELETE") & sym5{"Web Socket"} & sym6[/"Cookie"\] ~~~ base{{"/"}}
-    base --> root{{"/api/life-tree"}} & socket{"/"}
+flowchart TD
+    sym0{{"USE"}} & sym1(["GET"]) & sym2[/"POST"/] & sym3[\"PATCH"\] & sym4("DELETE") & sym5{"Web Socket"} & sym6[/"Cookie"\] ~~~ BASE_URL(( )) ~~~ root{{"/api/life-tree"}} & socket{"/"}
     root --> use0{{"/user"}} & use1{{"/follow"}} & use2{{"/ph-tree"}} & use3{{"/comment/:treeId"}} & use4{{"/like"}} & use5{{"/species/:treeId"}} & use6{{"/image"}} & use7{{"/notification"}}
     use0 ----> post00[/"/register"/] & post01[/"/login"/] & get02(["/search"]) & get03(["/:id"])
     use0 --> cookie04[/"token"\] ---> post040[/"/logout"/] & post042[/"/admin"/] & post043[/"/token"/]
@@ -142,7 +143,7 @@ classDiagram
     ObjectId[] usersId
     string[] inputs
     ObjectId authorId
-    boolean seen
+    ObjectId[] seen
     Date createdAt
   }
   class NotiFunc {
