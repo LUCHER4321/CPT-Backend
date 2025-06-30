@@ -1,6 +1,8 @@
 import { model, Schema } from "mongoose";
 import { NotiFunc } from "../enums";
 
+const {ObjectId} = Schema.Types;
+
 const NotificationSchema = new Schema({
     fun: {
         type: String,
@@ -8,17 +10,17 @@ const NotificationSchema = new Schema({
         required: true
     },
     usersId: {
-        type: [Schema.Types.ObjectId],
+        type: [ObjectId],
         required: true
     },
     inputs: [String],
     authorId: {
-        type: Schema.Types.ObjectId,
+        type: ObjectId,
         required: true
     },
     seen: {
-        type: Boolean,
-        default: false
+        type: [ObjectId],
+        default: []
     },
     createdAt: {
         type: Date,
