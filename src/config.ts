@@ -11,6 +11,5 @@ export const CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME ?? "";
 export const CLOUD_KEY = process.env.CLOUDINARY_API_KEY ?? "";
 export const CLOUD_SECRET = process.env.CLOUDINARY_SECRET_KEY ?? "";
 export const setN = "set-notification";
-export const getN = "get-notification";
 export const server = "-server";
 export const client = "-client";
