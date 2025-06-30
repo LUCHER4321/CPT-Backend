@@ -35,10 +35,6 @@ const parseNumber = (num: any, prop = "") => parseProp<number>(num, isNumber, pr
 
 const parseFun = (fun: any, prop = "") => parseProp<NotiFunc>(fun, isEnum(NotiFunc), prop);
 
-const isDate = (date: any) => date instanceof Date;
-
-const parseDate = (date: any, prop = "") => parseProp<Date>(date, isDate, prop);
-
 const toPartial = <T,>(object: () => T): (T | undefined) => {
     try {
         return object();
@@ -141,8 +137,5 @@ export const parseNewNotification = (data: any) => ({
     fun: toPartial(() => parseFun(data.fun)),
     followedUserId: toPartial(() => parseString(data.followedUserId)),
     treeId: toPartial(() => parseString(data.treeId)),
-    commentId: toPartial(() => parseString(data.commentId)),
-    from: toPartial(() => parseDate(data.from)),
-    limit: toPartial(() => parseNumber(data.limit)),
-    see: toPartial(() => parseBoolean(data.see))
+    commentId: toPartial(() => parseString(data.commentId))
 });
