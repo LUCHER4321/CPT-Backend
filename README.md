@@ -75,7 +75,7 @@
 ## Routes Diagram
 
 ```mermaid
-flowchart TD
+flowchart LR
     sym0{{"USE"}} & sym1(["GET"]) & sym2[/"POST"/] & sym3[\"PATCH"\] & sym4("DELETE") & sym5{"Web Socket"} & sym6[/"Cookie"\] ~~~ BASE_URL(( )) ~~~ root{{"/api/life-tree"}} & socket{"/"}
     root --> use0{{"/user"}} & use1{{"/follow"}} & use2{{"/ph-tree"}} & use3{{"/comment/:treeId"}} & use4{{"/like"}} & use5{{"/species/:treeId"}} & use6{{"/image"}} & use7{{"/notification"}}
     use0 ----> post00[/"/register"/] & post01[/"/login"/] & get02(["/search"]) & get03(["/:id"])
