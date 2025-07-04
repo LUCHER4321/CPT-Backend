@@ -1722,20 +1722,18 @@ Get a specific species and its descendants
 **Response:**
 
 ```json
-[
-  {
-    "id": "ObjectId",
-    "treeId": "ObjectId",
-    "name": "string",
-    "duration": "number",
-    "ancestorId": "ObjectId | undefined",
-    "apparition": "number | undefined",
-    "afterApparition": "number | undefined",
-    "description": "string | undefined",
-    "image": "string | undefined",
-    "descendants": ["..."]
-  }
-]
+{
+  "id": "ObjectId",
+  "treeId": "ObjectId",
+  "name": "string",
+  "duration": "number",
+  "ancestorId": "ObjectId | undefined",
+  "apparition": "number | undefined",
+  "afterApparition": "number | undefined",
+  "description": "string | undefined",
+  "image": "string | undefined",
+  "descendants": ["..."]
+}
 ```
 
 ### `GET /image/:img`
