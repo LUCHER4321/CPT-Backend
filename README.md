@@ -908,9 +908,9 @@ Modify a Ph. Tree
   "name": "string | undefined",
   "description": "string | undefined",
   "isPublic": "boolean | undefined",
-  "tags": "string[] | undefined",
   "tags": ["string"],
-  "collaborators": ["string"]
+  "newCollaborators": ["string"],
+  "deleteCollaborators": ["string"]
 }
 ```
 
