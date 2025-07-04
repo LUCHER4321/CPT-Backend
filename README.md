@@ -213,6 +213,7 @@ classDiagram
   User --> Plan: plan
   Notification --> NotiFunc: fun
   Notification ..> User: usersId
+  Notification ..> User: authorId
   APIKey ..> User: usersId
   Follow ..> User: userId
   Follow ..> User: followedUserId
