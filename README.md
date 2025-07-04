@@ -1541,7 +1541,7 @@ Update an existing species
 **Params:**
 
 - `/:treeId`: Id of the tree
-- `/:id`: Id of the comment
+- `/:id`: Id of the species
 
 **Cookie:**
 
@@ -1589,7 +1589,7 @@ Delete a species and its descendants permanently
 **Params:**
 
 - `/:treeId`: Id of the tree
-- `/:id`: Id of the comment
+- `/:id`: Id of the species
 
 **Cookie:**
 
@@ -1614,7 +1614,7 @@ Set the species' image
 **Params:**
 
 - `/:treeId`: Id of the tree
-- `/:id`: Id of the comment
+- `/:id`: Id of the species
 
 **Cookie:**
 
@@ -1652,6 +1652,7 @@ Set the species' image as `null | undefined`
 **Params:**
 
 - `/:treeId`: Id of the tree
+- `/:id`: Id of the species
 
 **Cookie:**
 
@@ -1681,7 +1682,6 @@ Get the species of a specific Ph. Tree
 **Params:**
 
 - `/:treeId`: Id of the tree
-- `/:id`: Id of the comment
 
 **Cookie:**
 
@@ -1713,7 +1713,7 @@ Get a specific species and its descendants
 **Params:**
 
 - `/:treeId`: Id of the tree
-- `/:id`: Id of the comment
+- `/:id`: Id of the species
 
 **Cookie:**
 
