@@ -12,8 +12,10 @@ export const createNotificationIO = ({
     io,
     notificationController
 }: IOProps) => {
-    const { on } = io
-    on(setN + client, async(socket) => await notificationController.setNotification({ socket, call: setN + server }));
+    const { on } = io;
+    on("connection", socket => {
+        socket.on(setN + client, async(socket) => await notificationController.setNotification({ socket, call: setN + server }));
+    });
     return io;
 };
 
