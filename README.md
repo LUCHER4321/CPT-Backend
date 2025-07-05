@@ -1771,8 +1771,8 @@ Get your notifications
   {
     "id": "ObjectId",
     "fun": "NotiFunc",
-    "usersId": "ObjectId[]",
-    "inputs": "string[]",
+    "usersId": ["ObjectId"],
+    "inputs": ["string"],
     "authorId": "ObjectId",
     "seen": "boolean",
     "createdAt": "Date"
@@ -1802,8 +1802,8 @@ Mark a notification as read
 {
   "id": "ObjectId",
   "fun": "NotiFunc",
-  "usersId": "ObjectId[]",
-  "inputs": "string[]",
+  "usersId": ["ObjectId"],
+  "inputs": ["string"],
   "authorId": "ObjectId",
   "seen": "boolean",
   "createdAt": "Date"
@@ -1837,8 +1837,8 @@ Mark a notification as read
 {
   "id": "ObjectId",
   "fun": "NotiFunc",
-  "usersId": "ObjectId[]",
-  "inputs": "string[]",
+  "usersId": ["ObjectId"],
+  "inputs": ["string"],
   "authorId": "ObjectId",
   "seen": "boolean",
   "createdAt": "Date"
