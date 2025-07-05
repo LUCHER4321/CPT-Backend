@@ -8,9 +8,7 @@ import v2 from "../connections/cloudinary";
 const { uploader, url } = v2;
 const { upload, destroy } = uploader;
 
-const toPathList = (path: string, discard = 0) => path.split("/").flatMap(p => p.split("\\")).filter((_, index, array) => index < array.length - discard);
-
-const imgPath = (name: string, includeImage = true) => join(...toPathList(__dirname, 2), ...includeImage ? toPathList(IMAGES) : [], name);
+const imgPath = (name: string, includeImage = true) => join(...__dirname, "..", "..", includeImage ? IMAGES : "", name);
 
 export const imageModel: ImageModel = {
     getImage: async ({ img }) => {
