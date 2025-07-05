@@ -238,6 +238,7 @@ export enum NotiFunc {
   TREE = "tree",
   COMMENT = "comment",
   LIKE = "like",
+  COLLABORATE = "collaborate",
 }
 
 export enum Role {
@@ -1823,7 +1824,7 @@ Mark a notification as read
 ```json
 {
   "fun": "NotiFunc",
-  "followedUserId": "string | undefined",
+  "userId": "string | undefined",
   "treeId": "string | undefined",
   "commentId": "string | undefined"
 }
