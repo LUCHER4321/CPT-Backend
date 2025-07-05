@@ -426,7 +426,7 @@ export interface NotificationController {
 export interface NotificationModel {
     newFollower: ModelFuncton<{
         token: string;
-        followedUserId: Types.ObjectId;
+        userId: Types.ObjectId;
     }, Notification>;
     newTree: ModelFuncton<{
         token: string;
@@ -441,6 +441,11 @@ export interface NotificationModel {
         token: string;
         treeId?: Types.ObjectId;
         commentId?: Types.ObjectId;
+    }, Notification>;
+    newCollaborate: ModelFuncton<{
+        token: string;
+        treeId: Types.ObjectId;
+        userId: Types.ObjectId;
     }, Notification>;
     getNotifications: ModelFuncton<{
         token: string;
