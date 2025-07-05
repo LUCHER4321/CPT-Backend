@@ -25,15 +25,15 @@ export const notificationController = ({
             token
         } = getData(socket);
         if(!token) return;
-        const { fun, followedUserId, treeId, commentId } = parseNewNotification(data);
+        const { fun, userId, treeId, commentId } = parseNewNotification(data);
         if(!fun) return;
         let notification: Notification | undefined;
         switch(fun) {
             case NotiFunc.FOLLOW:
-                if(!followedUserId) return emit(call, { error: "followedUserId is required" });
+                if(!userId) return emit(call, { error: "followedUserId is required" });
                 notification = await notificationModel.newFollower({
                     token,
-                    followedUserId: new Types.ObjectId(followedUserId)
+                    userId: new Types.ObjectId(userId)
                 });
                 break;
             case NotiFunc.TREE:
@@ -57,6 +57,14 @@ export const notificationController = ({
                     token,
                     treeId: new Types.ObjectId(treeId),
                     commentId: new Types.ObjectId(commentId)
+                });
+                break;
+            case NotiFunc.COLLABORATE:
+                if(!treeId || !userId) return emit(call, { error: "treeId and userId are required" });
+                notification = await notificationModel.newCollaborate({
+                    token,
+                    treeId: new Types.ObjectId(treeId),
+                    userId: new Types.ObjectId(userId),
                 });
                 break;
         }
