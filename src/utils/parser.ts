@@ -135,7 +135,7 @@ export const parsePatchSpecies = (object: any): Partial<SpeciesInput> => ({
 
 export const parseNewNotification = (data: any) => ({
     fun: toPartial(() => parseFun(data.fun)),
-    followedUserId: toPartial(() => parseString(data.followedUserId)),
+    userId: toPartial(() => parseString(data.userId)),
     treeId: toPartial(() => parseString(data.treeId)),
     commentId: toPartial(() => parseString(data.commentId))
 });
