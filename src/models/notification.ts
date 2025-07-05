@@ -50,12 +50,12 @@ const getParents = async (id: Types.ObjectId): Promise<Types.ObjectId[]> => {
 };
 
 export const notificationModel: NotificationModel = {
-    newFollower: async ({ token, followedUserId }) => {
+    newFollower: async ({ token, userId }) => {
         const user = await userByToken(token);
         if (!user) throw new Error("User not found");
         return await notify({
             fun: NotiFunc.FOLLOW,
-            usersId: [followedUserId],
+            usersId: [userId],
             authorId: user._id
         });
     },
@@ -98,6 +98,19 @@ export const notificationModel: NotificationModel = {
             fun: NotiFunc.LIKE,
             usersId,
             authorId: user._id
+        });
+    },
+    newCollaborate: async ({ token, treeId, userId }) => {
+        const user = await userByToken(token);
+        if (!user) throw new Error("User not found");
+        const phTree = await PhTreeClass.findById(treeId);
+        if(!phTree) throw new Error("Ph. Tree not found");
+        if(phTree.userId.toString() != user._id.toString() && !phTree.collaborators?.map(c => c.toString()).includes(user._id.toString()))
+        return await notify({
+            fun: NotiFunc.LIKE,
+            usersId: [userId],
+            authorId: user._id,
+            inputs: [phTree.name]
         });
     },
     getNotifications: async ({ token, from, to, limit }) => {
