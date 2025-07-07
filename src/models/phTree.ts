@@ -10,6 +10,7 @@ import { userByToken } from "../utils/token";
 import { confirmAPIKey } from "../utils/apiKey";
 import { Order, TreeCriteria } from "../enums";
 import { UserClass } from "../schemas/user";
+import { COMMENTS_P, LIKES_P, VIEWS_P } from "../config";
 
 interface MyTreeProps {
     token?: string;
@@ -17,6 +18,8 @@ interface MyTreeProps {
     mustBeOwner?: boolean;
     readOnly?: boolean;
 }
+
+const inverseLN = (x: number) => 1 / Math.log(x + Math.E);
 
 const myTree = async ({
     token,
@@ -114,9 +117,9 @@ const getTrees = async ({
                             return { ...tree, likeCount };
                         })
                     );
-                    return treesWithLikes.sort((a,b) => (a.likeCount - b.likeCount) * (order === Order.ASC ? 1 : -1)).map(t => {
+                    return treesWithLikes.sort((a, b) => (a.likeCount - b.likeCount) * (order === Order.ASC ? 1 : -1)).map(t => {
                         const { likeCount, ...tree } = t;
-                        return tree
+                        return tree;
                     }).slice(skip, skip + (limit ?? 0));
                 });
             case TreeCriteria.COMMENTS:
@@ -127,14 +130,38 @@ const getTrees = async ({
                             return { ...tree, commentCount };
                         })
                     );
-                    return treesWithComments.sort((a,b) => (a.commentCount - b.commentCount) * (order === Order.ASC ? 1 : -1)).map(t => {
+                    return treesWithComments.sort((a, b) => (a.commentCount - b.commentCount) * (order === Order.ASC ? 1 : -1)).map(t => {
                         const { commentCount, ...tree } = t;
-                        return tree
+                        return tree;
                     }).slice(skip, skip + (limit ?? 0));
                 });
             case TreeCriteria.VIEWS:
                 return await treesQuery.lean().then(async (trees) => {
                     return trees.sort((a,b) => (a.views.length - b.views.length) * (order === Order.ASC ? 1 : -1)).slice(skip, skip + (limit ?? 0));
+                });
+            case TreeCriteria.POPULARITY:
+                return await treesQuery.lean().then(async (trees) => {
+                    const now = Date.now() / 1000;
+                    const treesWithPopularity = await Promise.all(trees.map(async (tree) => {
+                        const viewsP = VIEWS_P * tree.views.map(v => {
+                            const time = now - v.date.getTime() / 1000;
+                            return inverseLN(time);
+                        }).reduce((a, b) => a + b);
+                        const commentsP = COMMENTS_P * (await CommentClass.find({ treeId: tree._id })).map(c => {
+                            const time = now - c.createdAt.getTime() / 1000;
+                            return inverseLN(time);
+                        }).reduce((a, b) => a + b);
+                        const likesP = LIKES_P * (await LikeClass.find({ treeId: tree._id })).map(l => {
+                            const time = now - l.createdAt.getTime() / 1000;
+                            return inverseLN(time);
+                        }).reduce((a, b) => a + b);
+                        const popularity = viewsP + commentsP + likesP;
+                        return { ...tree, popularity };
+                    }));
+                    return treesWithPopularity.sort((a, b) => (a.popularity - b.popularity) * (order === Order.ASC ? 1 : -1)).map(t => {
+                        const { popularity, ...tree} = t;
+                        return tree;
+                    }).slice(skip, skip + (limit ?? 0));
                 });
             default:
                 const sortOptions: any = {};
@@ -322,10 +349,9 @@ export const phTreeModel: PhTreeModel = {
         if(!mt) return undefined;
         const { user, phTree } = mt;
         if(!user) return phTree.views.length;
-        if(!phTree.views.includes(user._id)) {
-            phTree.views.push(user._id);
+        if(!phTree.views.map(v => v.viewerId?.toString()).includes(user._id.toString())) {
+            phTree.views.push({ viewerId: user._id });
             await phTree.save();
-            return phTree.views.length;
         }
         return phTree.views.length;
     }
