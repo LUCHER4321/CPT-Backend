@@ -33,7 +33,13 @@ const PhTreeSchema = new Schema({
         required: false
     },
     views: {
-        type: [ObjectId],
+        type: [{
+            viewerId: ObjectId,
+            date: {
+                type: Date,
+                default: () => new Date()
+            }
+        }],
         default: []
     }
 });
