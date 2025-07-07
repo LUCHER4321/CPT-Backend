@@ -260,6 +260,7 @@ export enum TreeCriteria {
   COMMENTS = "comments",
   VIEWS = "views",
   NAME = "name",
+  POPULARITY = "popularity",
 }
 
 export enum Order {
@@ -280,6 +281,9 @@ ACCEPTED_ORIGINS
 BASE_URL
 CLOUDINARY_CLOUD_NAME
 CLOUDINARY_API_KEY
+VIEWS_PONDERATION
+COMMENTS_PONDERATION
+LIKES_PONDERATION
 ```
 
 ### Secrets
@@ -802,6 +806,16 @@ Get the followers number of a specific user
 
 ### Route `/ph-tree`
 
+Formula used to calculate popularity:
+
+$$
+Popularity = \alpha \times \sum_{S \in \text{Interacions}} \text{Ponderation}_S \sum_{i \in S}\frac{1}{\ln(\text{time since } i + e)}
+$$
+
+$$
+\text{Interacions}=\{\text{Views}, \text{Comments}, \text{Likes}\}
+$$
+
 #### `POST /`
 
 Create a new Ph. Tree (Phylogenetic Tree)
@@ -855,7 +869,7 @@ Search your Ph. Trees
 - `?page`: Page of the result
 - `?limit`: Results per page
 - `?search`: Searching by tags, name or user
-- `?criteria`: Sorting criteria (`"createdAt", "updatedAt", "likes", "comments", "views", "name"`)
+- `?criteria`: Sorting criteria (`"createdAt", "updatedAt", "likes", "comments", "views", "name", "popularity"`)
 - `?order`: Sorting order (`"asc", "desc"`)
 - `?from`: Minimum createdAt
 - `?to`: Maximum createdAt
@@ -1044,7 +1058,7 @@ Search Ph. Trees made by other users
 - `?page`: Page of the result
 - `?limit`: Results per page
 - `?search`: Searching by tags, name or user
-- `?criteria`: Sorting criteria (`"createdAt", "updatedAt", "likes", "comments", "views", "name"`)
+- `?criteria`: Sorting criteria (`"createdAt", "updatedAt", "likes", "comments", "views", "name", "popularity"`)
 - `?order`: Sorting order (`"asc", "desc"`)
 
 **Cookie:**
