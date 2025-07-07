@@ -51,9 +51,9 @@ export const likeModel: LikeModel = {
         if (!user) return undefined;
         const likes = await LikeClass.find({ userId: user._id });
         const phTrees = (await Promise.all(likes.map(l => nullableInput(l.treeId, p => PhTreeClass.findById(p))))).filter(t => t !== null && t !== undefined);
-        return phTrees.map(t => ({
+        return await Promise.all(phTrees.map(async (t) => ({
             id: t._id,
-            userId: t.userId!,
+            userId: t.userId,
             name: t.name,
             image: t.image ?? undefined,
             description: t.description ?? undefined,
@@ -61,8 +61,11 @@ export const likeModel: LikeModel = {
             createdAt: t.createdAt,
             updatedAt: t.updatedAt,
             tags: t.tags ?? undefined,
-            collaborators: t.collaborators ?? undefined
-        }));
+            collaborators: t.collaborators ?? undefined,
+            likes: await LikeClass.countDocuments({ treeId: t._id}),
+            comments: await CommentClass.countDocuments({ treeId: t._id}),
+            views: t.views.length
+        })));
     },
     phTreeLikes: async ({ token, treeId }) => {
         const likes = await LikeClass.find({
