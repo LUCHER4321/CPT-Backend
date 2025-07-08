@@ -596,7 +596,7 @@ Set your profile picture
 
 **File:**
 
-- `image`: Image file (jpg, jpeg, png, gif)
+- `image`: Image file (jpg, jpeg, png, gif, svg)
 
 **Response:**
 
@@ -991,7 +991,7 @@ Set the Ph. Tree's image
 
 **File:**
 
-- `image`: Image file (jpg, jpeg, png, gif)
+- `image`: Image file (jpg, jpeg, png, gif, svg)
 
 **Response:**
 
@@ -1637,7 +1637,7 @@ Set the species' image
 
 **File:**
 
-- `image`: Image file (jpg, jpeg, png, gif)
+- `image`: Image file (jpg, jpeg, png, gif, svg)
 
 **Response:**
 
@@ -1761,7 +1761,7 @@ Get an image by name
 
 **Response:**
 
-Image file (jpg, jpeg, png, gif)
+Image file (jpg, jpeg, png, gif, svg)
 
 ### Route `/notification`
 
