@@ -7,6 +7,7 @@ import v2 from "../connections/cloudinary";
 
 const { uploader, url } = v2;
 const { upload, destroy } = uploader;
+const extensions = ["jpg", "jpeg", "png", "gif", "svg"];
 
 const imgPath = (name: string, includeImage = true) => join(...__dirname, "..", "..", includeImage ? IMAGES : "", name);
 
@@ -27,8 +28,8 @@ export const imageModel: ImageModel = {
         if (!extension) {
             throw new Error("File must have an extension");
         }
-        if (!["jpg", "jpeg", "png", "gif"].includes(extension)) {
-            throw new Error("File must be an image (jpg, jpeg, png, gif)");
+        if (!extensions.includes(extension)) {
+            throw new Error(`File must be an image (${extensions.join(", ")})`);
         }
         const { path } = file;
         const name = `${user._id.toString()}-${new Date().getTime()}`;
