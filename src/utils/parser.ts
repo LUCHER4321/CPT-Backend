@@ -19,7 +19,7 @@ const parseEmail = (str: string) => {
     throw new Error("Invalid Email");
 };
 
-const isEnum = (T: any) => (t: any) => Object.values(T).includes(t)
+const isEnum = (T: any) => (t: any) => Object.values(T).includes(t);
 
 const isBoolean = (bool: any): boolean => typeof bool === "boolean" || bool instanceof Boolean;
 
