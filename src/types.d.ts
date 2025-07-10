@@ -5,9 +5,14 @@ import { NotiFunc, Order, Plan, Role, TreeCriteria } from "./enums";
 import { SpeciesJSON } from "chrono-phylo-tree";
 import { StringValue } from "ms";
 
+export type Email = `${string}@${string}.${string}`;
+
 type ControllerFunction = (req: Request, res: Response) => Promise;
 
-type ModelFuncton<DATA, OUTPUT> = (data: DATA & { key?: Types.ObjectId }) => Promise<OUTPUT | undefined>;
+type ModelFuncton<DATA, OUTPUT> = (data: DATA & {
+    key?: Types.ObjectId;
+    host?: string;
+}) => Promise<OUTPUT | undefined>;
 
 export interface ImageController {
     getImage: ControllerFunction;
@@ -29,7 +34,7 @@ export interface ImageModel {
 
 export interface User {
     id: Types.ObjectId;
-    email: string;
+    email: Email;
     username: string;
     photo?: string;
     role: Role;
@@ -46,6 +51,8 @@ export interface UserController {
     logout: ControllerFunction;
     getUser: ControllerFunction;
     search: ControllerFunction;
+    recover: ControllerFunction;
+    resetPassword: ControllerFunction;
     getMe: ControllerFunction;
     generateToken: ControllerFunction;
     updateMe: ControllerFunction;
@@ -59,12 +66,12 @@ export interface UserController {
 
 export interface UserModel {
     register: ModelFuncton<{
-        email: string;
+        email: Email;
         password: string;
         username: string;
     }, User & { token: string }>;
     login: ModelFuncton<{
-        email: string;
+        email: Email;
         password: string;
     }, User & { token: string }>;
     logout: ModelFuncton<{
@@ -76,7 +83,14 @@ export interface UserModel {
     search: ModelFuncton<{
         limit?: number;
         search?: string;
-    }, User[]>
+    }, User[]>;
+    recover: ModelFuncton<{
+        email: Email;
+    }, string>;
+    resetPassword: ModelFuncton<{
+        token: string;
+        password: string;
+    }, User>,
     getMe: ModelFuncton<{
         token: string;
     }, User>;
