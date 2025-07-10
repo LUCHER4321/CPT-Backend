@@ -12,7 +12,21 @@ const parseProp = <T>(t: any, check: (t: any) => boolean, prop: string): T => {
 
 const parseString = (str: any, prop = "") => parseProp<string>(str, isString, prop);
 
-export const parseEmail = (str: string) => {
+const isURL = (url: string) => {
+    try {
+        new URL(url);
+        return true;
+    } catch {
+        return false;
+    }
+};
+
+const parseURL = (url: any, prop?: string): string => {
+    if(!isString(url) || !isURL(url)) throw new Error(`Incorrect or missing ${prop}`);
+    return url;
+};
+
+const parseEmail = (str: string) => {
     const validate = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(str);
     if(validate) return str as Email;
     throw new Error("Invalid Email");
@@ -59,6 +73,11 @@ export const parseLogin = (object: any) => ({
     email: parseEmail(parseString(object.email, "email")),
     password: parseString(object.password, "password")
 });
+
+export const parseRecover = (object: any) => ({
+    email: parseEmail(parseString(object.email, "email")),
+    url: parseURL(object.url, "url")
+})
 
 export const parsePatchUser = (object: any) => ({
     username: toPartial(() => parseString(object.username)),
