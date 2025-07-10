@@ -1,6 +1,7 @@
 import { Types } from "mongoose";
 import { NotiFunc, Order, TreeCriteria } from "../enums";
 import { nullableInput } from "./nullableInput";
+import { Email } from "../types";
 
 const isString = (str: any): boolean => typeof str === "string" || str instanceof String;
 
@@ -11,9 +12,7 @@ const parseProp = <T>(t: any, check: (t: any) => boolean, prop: string): T => {
 
 const parseString = (str: any, prop = "") => parseProp<string>(str, isString, prop);
 
-type Email = `${string}@${string}.${string}`;
-
-const parseEmail = (str: string) => {
+export const parseEmail = (str: string) => {
     const validate = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(str);
     if(validate) return str as Email;
     throw new Error("Invalid Email");
