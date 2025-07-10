@@ -10,6 +10,7 @@ export const phTreeController = ({
         if(!token) return res.status(401).json({ message: "Unauthorized" });
         const { apiKey } = req.query;
         const key = getKey(apiKey);
+        const { host } = req.headers;
         try {
             const {
                 collaborators,
@@ -19,7 +20,8 @@ export const phTreeController = ({
                 token,
                 ...data,
                 collaborators: collaborators?.map(toObjectId),
-                key
+                key,
+                host
             });
             if (!newPhTree) return res.status(400).json({ message: "Failed to create Ph. Tree" });
             res.json(newPhTree);
@@ -30,6 +32,7 @@ export const phTreeController = ({
     getMyPhTrees: async (req, res) => {
         const { token } = req.cookies;
         if (!token) return res.status(401).json({ message: "Unauthorized" });
+        const { host } = req.headers;
         const {
             page,
             limit = 10,
@@ -48,7 +51,8 @@ export const phTreeController = ({
                 criteria: parseCriteria(criteria),
                 order: parseOrder(order),
                 from: nullableInput(from, f => new Date(f as string)),
-                to: nullableInput(to, t => new Date(t as string))
+                to: nullableInput(to, t => new Date(t as string)),
+                host
             });
             if (!phTrees) return res.status(404).json({ message: "No Ph. Trees found" });
             res.json(phTrees);
@@ -62,6 +66,7 @@ export const phTreeController = ({
         if (!token) return res.status(401).json({ message: "Unauthorized" });
         const { apiKey } = req.query;
         const key = getKey(apiKey);
+        const { host } = req.headers;
         try {
             const id = toObjectId(_id);
             const {
@@ -75,7 +80,8 @@ export const phTreeController = ({
                 ...data,
                 newCollaborators: newCollaborators?.map(toObjectId),
                 deleteCollaborators: deleteCollaborators?.map(toObjectId),
-                key
+                key,
+                host
             });
             if (!updatedPhTree) return res.status(404).json({ message: "Ph. Tree not found" });
             res.json(updatedPhTree);
@@ -105,9 +111,10 @@ export const phTreeController = ({
         if (!image) return res.status(400).json({ message: "Image file is required" });
         const { apiKey } = req.query;
         const key = getKey(apiKey);
+        const { host } = req.headers;
         try {
             const id = toObjectId(_id);
-            const updatedPhTree = await phTreeModel.setPhTreeImage({ id, token, image, key });
+            const updatedPhTree = await phTreeModel.setPhTreeImage({ id, token, image, key, host });
             if (!updatedPhTree) return res.status(404).json({ message: "PhTree not found" });
             res.json(updatedPhTree);
         } catch (error: any) {
@@ -120,9 +127,10 @@ export const phTreeController = ({
         if (!token) return res.status(401).json({ message: "Unauthorized" });
         const { apiKey } = req.query;
         const key = getKey(apiKey);
+        const { host } = req.headers;
         try {
             const id = toObjectId(_id);
-            const phTree = await phTreeModel.deletePhTreeImage({ token, id, key });
+            const phTree = await phTreeModel.deletePhTreeImage({ token, id, key, host });
             if (!phTree) return res.status(404).json({ message: "PhTree not found" });
             res.json(phTree);
         } catch (error: any) {
@@ -140,6 +148,7 @@ export const phTreeController = ({
             from,
             to
         } = req.query;
+        const { host } = req.headers;
         try {
             const phTrees = await phTreeModel.getPhTrees({
                 token,
@@ -149,7 +158,8 @@ export const phTreeController = ({
                 criteria: parseCriteria(criteria),
                 order: parseOrder(order),
                 from: nullableInput(from, f => new Date(f as string)),
-                to: nullableInput(to, t => new Date(t as string))
+                to: nullableInput(to, t => new Date(t as string)),
+                host
             });
             if (!phTrees) return res.status(404).json({ message: "No Ph. Trees found" });
             res.json(phTrees);
@@ -160,9 +170,10 @@ export const phTreeController = ({
     getPhTree: async (req, res) => {
         const { id: _id } = req.params;
         const { token } = req.cookies;
+        const { host } = req.headers;
         try {
             const id = toObjectId(_id)
-            const phTree = await phTreeModel.getPhTree({ token, id });
+            const phTree = await phTreeModel.getPhTree({ token, id, host });
             if (!phTree) return res.status(404).json({ message: "Ph. Tree not found" });
             res.json(phTree);
         } catch (error: any) {
