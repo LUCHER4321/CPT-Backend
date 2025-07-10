@@ -48,6 +48,7 @@ interface GetTreesProps {
     from?: Date;
     to?: Date;
     myTrees?: boolean;
+    host?: string;
 }
 
 const getTrees = async ({
@@ -59,7 +60,8 @@ const getTrees = async ({
     order,
     from,
     to,
-    myTrees = false
+    myTrees = false,
+    host
 }: GetTreesProps): Promise<PhTree[]> => {
     const user = await nullableInput(token, userByToken);
     if(myTrees && !user) throw new Error("Invalid Token");
@@ -174,7 +176,7 @@ const getTrees = async ({
         id: t._id,
         userId: t.userId,
         name: t.name,
-        image: t.image ?? undefined,
+        image: photoToString(t.image, host),
         description: t.description ?? undefined,
         isPublic: t.isPublic,
         createdAt: t.createdAt,
@@ -188,7 +190,7 @@ const getTrees = async ({
 };
 
 export const phTreeModel: PhTreeModel = {
-    createPhTree: async ({ token, name, description, isPublic, tags, collaborators, key }) => {
+    createPhTree: async ({ token, name, description, isPublic, tags, collaborators, key, host }) => {
         const apiKey = await confirmAPIKey(key);
         if(!apiKey) return undefined;
         const user = await nullableInput(token, userByToken);
@@ -203,7 +205,7 @@ export const phTreeModel: PhTreeModel = {
         });
         const newPhTree = await phTree.save();
         if(!newPhTree.userId) throw new Error("User ID not found");
-        return await phTreeModel.getPhTree({ token, id: newPhTree._id });
+        return await phTreeModel.getPhTree({ token, id: newPhTree._id, host });
     },
     getMyPhTrees: async ({
         token,
@@ -213,7 +215,8 @@ export const phTreeModel: PhTreeModel = {
         criteria,
         order,
         from,
-        to
+        to,
+        host
     }) => {
         return await getTrees({
             token,
@@ -224,7 +227,8 @@ export const phTreeModel: PhTreeModel = {
             order,
             from,
             to,
-            myTrees: true
+            myTrees: true,
+            host
         });
     },
     updatePhTree: async ({
@@ -236,7 +240,8 @@ export const phTreeModel: PhTreeModel = {
         tags,
         newCollaborators,
         deleteCollaborators,
-        key
+        key,
+        host
     }) => {
         const apiKey = await confirmAPIKey(key);
         if(!apiKey) return undefined;
@@ -261,7 +266,7 @@ export const phTreeModel: PhTreeModel = {
         if(phTree.collaborators?.length === 0) phTree.collaborators = undefined;
         phTree.updatedAt = new Date();
         await phTree.save()
-        return await phTreeModel.getPhTree({ token, id });
+        return await phTreeModel.getPhTree({ token, id, host });
     },
     deletePhTree: async ({ token, id, key }) => {
         const apiKey = await confirmAPIKey(key);
@@ -276,7 +281,7 @@ export const phTreeModel: PhTreeModel = {
         await LikeClass.deleteMany({ $or: (await CommentClass.find({ treeId: id })).map(c => ({ commentId: c._id })) })
         await CommentClass.deleteMany({ treeId: id });
     },
-    setPhTreeImage: async ({ token, id, image, key }) => {
+    setPhTreeImage: async ({ token, id, image, key, host }) => {
         const apiKey = await confirmAPIKey(key);
         if(!apiKey) return undefined;
         const mt = await myTree({ token, id });
@@ -287,9 +292,9 @@ export const phTreeModel: PhTreeModel = {
         phTree.image = (await imageModel.createImage({ token, file: image }))?.url;
         phTree.updatedAt = new Date();
         await phTree.save();
-        return await phTreeModel.getPhTree({ token, id });
+        return await phTreeModel.getPhTree({ token, id, host });
     },
-    deletePhTreeImage: async ({ token, id, key }) => {
+    deletePhTreeImage: async ({ token, id, key, host }) => {
         const apiKey = await confirmAPIKey(key);
         if(!apiKey) return undefined;
         const mt = await myTree({ token, id });
@@ -299,7 +304,7 @@ export const phTreeModel: PhTreeModel = {
         phTree.image = undefined;
         phTree.updatedAt = new Date();
         await phTree.save();
-        return await phTreeModel.getPhTree({ token, id });
+        return await phTreeModel.getPhTree({ token, id, host });
     },
     getPhTrees: async ({
         token,
@@ -309,7 +314,8 @@ export const phTreeModel: PhTreeModel = {
         criteria,
         order,
         from,
-        to
+        to,
+        host
     }) => {
         return await getTrees({
             token,
@@ -319,10 +325,11 @@ export const phTreeModel: PhTreeModel = {
             criteria,
             order,
             from,
-            to
+            to,
+            host
         });
     },
-    getPhTree: async ({ token, id }) => {
+    getPhTree: async ({ token, id, host }) => {
         const mt = await myTree({ token, id, readOnly: true });
         if(!mt) return undefined;
         const { phTree } = mt;
@@ -330,7 +337,7 @@ export const phTreeModel: PhTreeModel = {
             id: phTree._id,
             userId: phTree.userId,
             name: phTree.name,
-            image: photoToString(phTree.image),
+            image: photoToString(phTree.image, host),
             description: phTree.description ?? undefined,
             isPublic: phTree.isPublic,
             createdAt: phTree.createdAt,
