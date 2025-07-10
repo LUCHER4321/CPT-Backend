@@ -12,7 +12,11 @@ const UserSchema = new Schema({
         type: String,
         unique: true,
         required: true,
-        lowercase: true
+        lowercase: true,
+        validate: {
+            validator: (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
+            message: (props: any) => `${props.value} is not a valid email address!`
+        }
     },
     password: {
         type: String,
@@ -41,6 +45,16 @@ const UserSchema = new Schema({
     isActive: {
         type: Boolean,
         default: true
+    },
+    tokens: {
+        type: [{
+            token: String,
+            expires: {
+                type: Date,
+                default: () => new Date(Date.now() + 36000000)
+            }
+        }],
+        default: []
     }
 });
 
