@@ -1,5 +1,5 @@
 import { UserController, UserModel } from "../types";
-import { getKey, parseEmail, parseLogin, parseNewAdmin, parsePatchUser, parseRegister, toObjectId } from "../utils/parser";
+import { getKey, parseLogin, parseNewAdmin, parsePatchUser, parseRecover, parseRegister, toObjectId } from "../utils/parser";
 
 export const userController = ({
     userModel
@@ -76,15 +76,16 @@ export const userController = ({
         }
     },
     recover: async (req, res) => {
-        const { email: _email } = req.body;
         const { apiKey } = req.query;
         const key = getKey(apiKey);
-        const { host } = req.headers;
         try {
-            const email = parseEmail(_email);
-            const token = await userModel.recover({ email, key });
+            const {
+                email,
+                url
+            } = parseRecover(req.body);
+            const token = await userModel.recover({ email, url, key });
             if(!token) return res.status(404).json({ message: "Token not generated" });
-            res.status(200).json({ url: `http://${host}/api/life-tree/user/reset/${token}` });
+            res.status(200).json({ message: "Check your Email" });
         } catch (error: any) {
             res.status(400).json({ message: error.message });
         }
