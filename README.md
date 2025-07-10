@@ -78,7 +78,7 @@
 flowchart LR
     sym0{{"USE"}} & sym1(["GET"]) & sym2[/"POST"/] & sym3[\"PATCH"\] & sym4("DELETE") & sym5{"Web Socket"} & sym6[/"Cookie"\] ~~~ BASE_URL(( )) ~~~ root{{"/api/life-tree"}} & socket{"/"}
     root --> use0{{"/user"}} & use1{{"/follow"}} & use2{{"/ph-tree"}} & use3{{"/comment/:treeId"}} & use4{{"/like"}} & use5{{"/species/:treeId"}} & use6{{"/image"}} & use7{{"/notification"}}
-    use0 ----> post00[/"/register"/] & post01[/"/login"/] & get02(["/search"]) & get03(["/:id"])
+    use0 ----> post00[/"/register"/] & post01[/"/login"/] & get02(["/search"]) & get03(["/:id"]) & post05[/"/recover"/] & post06[/"/reset/:token"/]
     use0 --> cookie04[/"token"\] ---> post040[/"/logout"/] & post042[/"/admin"/] & post043[/"/token"/]
     cookie04 --> use041{{"/me"}}
     use041 --> get0410(["/"]) & patch0411[\"/"\] & delete0412("/") & post0413[/"/photo"/] & delete0414("/photo") & post0415[/"/key"/] & delete0416("/key/:keyTD")
@@ -123,6 +123,7 @@ classDiagram
     Date createdAt
     Date lastLogin
     boolean isActive
+    Token[] tokens
   }
   class Role {
     <<Enumeration>>
@@ -135,6 +136,11 @@ classDiagram
     FREE
     PRO
     PREMIUM
+  }
+  class Token {
+    <<Interface>>
+    string token
+    Date expires
   }
   class Notification {
     <<Interface>>
@@ -211,6 +217,7 @@ classDiagram
   }
   User --> Role: role
   User --> Plan: plan
+  User --> Token: tokens
   Notification --> NotiFunc: fun
   Notification ..> User: usersId
   Notification ..> User: authorId
@@ -409,6 +416,66 @@ Get info about an specific user
 **Params:**
 
 - `/:id`: Id of the user
+
+**Response:**
+
+```json
+{
+  "id": "ObjectId",
+  "email": "${string}@${string}.${string}",
+  "username": "string",
+  "photo": "string | undefined",
+  "plan": "Plan",
+  "role": "Role",
+  "createdAt": "Date",
+  "lastLogin": "Date",
+  "isActive": "boolean | undefined"
+}
+```
+
+#### `POST /recover`
+
+Get a link to recover password
+
+**Query:**
+
+- `?apiKey`: API Key
+
+**Body:**
+
+```json
+{
+  "email": "${string}@${string}.${string}"
+}
+```
+
+**Response:**
+
+```json
+{
+  "url": "http://${string}/api/life-tree/user/reset/${string}"
+}
+```
+
+#### `POST /reset`
+
+Reset password
+
+**Query:**
+
+- `?apiKey`: API Key
+
+**Params:**
+
+- `/:token`: Hex Token
+
+**Body:**
+
+```json
+{
+  "password": "string"
+}
+```
 
 **Response:**
 
