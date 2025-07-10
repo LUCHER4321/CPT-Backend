@@ -11,6 +11,7 @@ import { APIKeyClass } from "../schemas/apiKey";
 import { confirmAPIKey } from "../utils/apiKey";
 import { randomBytes } from "node:crypto";
 import { Types } from "mongoose";
+import { sendMail } from "../utils/sendMail";
 
 export const userModel: UserModel = {
     register: async ({ email, password, username, key, host }) => {
@@ -93,7 +94,7 @@ export const userModel: UserModel = {
             isActive: user.isActive
         }));
     },
-    recover: async ({ email, key }) => {
+    recover: async ({ email, url, key }) => {
         const apiKey = await confirmAPIKey(key);
         if(!apiKey) return undefined;
         const user = await UserClass.findOne({ email });
@@ -103,6 +104,7 @@ export const userModel: UserModel = {
             token
         });
         await user.save();
+        await sendMail({ token, url, user: userModel.getUser({ id: user._id }) })
         return token;
     },
     resetPassword: async ({ token, password, key }) => {
