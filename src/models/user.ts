@@ -1,4 +1,4 @@
-import { UserModel } from "../types";
+import { Email, UserModel } from "../types";
 import { tokenSign, userByToken } from "../utils/token";
 import { comparePassword, encryptPassword } from "../utils/password";
 import { imageModel } from "./image";
@@ -9,9 +9,11 @@ import { LikeClass } from "../schemas/like";
 import { Role } from "../enums";
 import { APIKeyClass } from "../schemas/apiKey";
 import { confirmAPIKey } from "../utils/apiKey";
+import { randomBytes } from "node:crypto";
+import { Types } from "mongoose";
 
 export const userModel: UserModel = {
-    register: async ({ email, password, username, key }) => {
+    register: async ({ email, password, username, key, host }) => {
         const apiKey = await confirmAPIKey(key);
         if(!apiKey) return undefined;
         const user0 = await UserClass.findOne({ email });
@@ -26,11 +28,11 @@ export const userModel: UserModel = {
         const newUser = await user.save();
         const token = tokenSign({ id: newUser._id });
         return {
-            ...(await userModel.getUser({ id: newUser._id }))!,
+            ...(await userModel.getUser({ id: newUser._id, host }))!,
             token
         };
     },
-    login: async ({ email, password, key }) => {
+    login: async ({ email, password, key, host }) => {
         const apiKey = await confirmAPIKey(key);
         if(!apiKey) return undefined;
         const user = await UserClass.findOne({ email });
@@ -42,7 +44,7 @@ export const userModel: UserModel = {
         const token = tokenSign({ id: user._id });
         await user.save();
         return {
-            ...(await userModel.getUser({ id: user._id }))!,
+            ...(await userModel.getUser({ id: user._id, host }))!,
             token
         };
     },
@@ -54,14 +56,14 @@ export const userModel: UserModel = {
         user.isActive = false;
         await user.save();
     },
-    getUser: async ({ id }) => {
+    getUser: async ({ id, host }) => {
         const user = await UserClass.findById(id);
         if (!user) return undefined;
         return {
             id: user._id,
-            email: user.email,
+            email: user.email as Email,
             username: user.username,
-            photo: photoToString(user.photo),
+            photo: photoToString(user.photo, host),
             plan: user.plan,
             role: user.role,
             createdAt: user.createdAt,
@@ -69,7 +71,7 @@ export const userModel: UserModel = {
             isActive: user.isActive
         };
     },
-    search: async ({ limit, search }) => {
+    search: async ({ limit, search, host }) => {
         const regex = new RegExp(search ?? "", "i");
         const users = await UserClass.find({
             $or: [
@@ -81,9 +83,9 @@ export const userModel: UserModel = {
         .sort({ username: 1});
         return users.map(user => ({
             id: user._id,
-            email: user.email,
+            email: user.email as Email,
             username: user.username,
-            photo: photoToString(user.photo),
+            photo: photoToString(user.photo, host),
             plan: user.plan,
             role: user.role,
             createdAt: user.createdAt,
@@ -91,7 +93,34 @@ export const userModel: UserModel = {
             isActive: user.isActive
         }));
     },
-    getMe: async ({ token }) => {
+    recover: async ({ email, key }) => {
+        const apiKey = await confirmAPIKey(key);
+        if(!apiKey) return undefined;
+        const user = await UserClass.findOne({ email });
+        if(!user) throw new Error("User not found");
+        const token = randomBytes(20).toString("hex");
+        user.tokens.push({
+            token
+        });
+        await user.save();
+        return token;
+    },
+    resetPassword: async ({ token, password, key }) => {
+        const apiKey = await confirmAPIKey(key);
+        if(!apiKey) return;
+        const user = await UserClass.findOne({
+            "tokens.token": token,
+            "tokens.expires": {
+                $gt: new Date()
+            }
+        });
+        if(!user) throw new Error("User not found");
+        user.password = await encryptPassword(password);
+        user.tokens = new Types.DocumentArray([]);
+        await user.save();
+        return await userModel.getUser({ id: user._id });
+    },
+    getMe: async ({ token, host }) => {
         const user = await userByToken(token);
         if (!user) return undefined;
         const apiKeys = user.role !== Role.USER ? (await APIKeyClass.find({
@@ -103,7 +132,7 @@ export const userModel: UserModel = {
             }
         })).map(k => k._id) : undefined;
         return {
-            ...(await userModel.getUser({ id: user._id }))!,
+            ...(await userModel.getUser({ id: user._id, host }))!,
             apiKeys
         };
     },
@@ -115,7 +144,7 @@ export const userModel: UserModel = {
         const token = tokenSign({ id: user._id, expiresIn });
         return { token }
     },
-    updateMe: async ({ username, oldPassword, password, plan, token, key }) => {
+    updateMe: async ({ username, oldPassword, password, plan, token, key, host }) => {
         const apiKey = await confirmAPIKey(key);
         if(!apiKey) return undefined;
         const user = await userByToken(token);
@@ -130,7 +159,7 @@ export const userModel: UserModel = {
         if (username && username !== user.username) user.username = username;
         if(plan) user.plan = plan;
         await user.save();
-        return await userModel.getMe({ token });
+        return await userModel.getMe({ token, host });
     },
     deleteMe: async ({ token, key }) => {
         const apiKey = await confirmAPIKey(key);
@@ -143,16 +172,16 @@ export const userModel: UserModel = {
         await FollowClass.deleteMany({ userId: user._id });
         await LikeClass.deleteMany({ userId: user._id });
     },
-    photoMe: async ({ photo, token, key }) => {
+    photoMe: async ({ photo, token, key, host }) => {
         const apiKey = await confirmAPIKey(key);
         if(!apiKey) return undefined;
         const user = await userByToken(token);
         if (!user) return undefined;
         user.photo = (await imageModel.createImage({ token, file: photo }))?.url;
         await user.save();
-        return await userModel.getMe({ token });
+        return await userModel.getMe({ token, host });
     },
-    deletePhotoMe: async ({ token, key }) => {
+    deletePhotoMe: async ({ token, key, host }) => {
         const apiKey = await confirmAPIKey(key);
         if(!apiKey) return undefined;
         const user = await userByToken(token);
@@ -160,9 +189,9 @@ export const userModel: UserModel = {
         await imageModel.deleteImage({ token, img: user.photo ?? "" });
         user.photo = undefined;
         await user.save();
-        return await userModel.getMe({ token });
+        return await userModel.getMe({ token, host });
     },
-    makeAdmin: async ({ token, adminId, removeAdmin, key }) => {
+    makeAdmin: async ({ token, adminId, removeAdmin, key, host }) => {
         const apiKey = await confirmAPIKey(key);
         if(!apiKey) return undefined;
         const user = await userByToken(token);
@@ -173,7 +202,7 @@ export const userModel: UserModel = {
         const newAPIKey = removeAdmin ? undefined : new APIKeyClass({ userId: admin._id });
         await newAPIKey?.save();
         await admin.save();
-        return await userModel.getUser({ id: adminId });
+        return await userModel.getUser({ id: adminId, host });
     },
     generateKey: async ({ token, key }) => {
         const apiKey = await confirmAPIKey(key);
