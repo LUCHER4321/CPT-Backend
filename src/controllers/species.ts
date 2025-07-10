@@ -47,13 +47,14 @@ export const speciesController = ({
         const { token } = req.cookies;
         const { treeId: t_id } = req.params;
         if (!token) return res.status(401).json({ message: "Unauthorized" });
+        const { host } = req.headers;
         try {
             const parse = parseNewSpecies(req.body);
             if(!parse.ancestorId && !parse.apparition) return res.status(400).json({ message: "Apparition is required if there's no ancestor" });
             if(parse.ancestorId && !parse.afterApparition) return res.status(400).json({ message: "After Apparition is required if there's an ancestor" });
             const output = toOutput(parse);
             const treeId = toObjectId(t_id)
-            const species = await speciesModel.createSpecies({ token, treeId, ...output, key });
+            const species = await speciesModel.createSpecies({ token, treeId, ...output, key, host });
             if(!species) return res.status(404).json({ message: "PhTree not found" });
             res.json(species);
         } catch (error: any) {
@@ -66,6 +67,7 @@ export const speciesController = ({
         const { token } = req.cookies;
         const { treeId: t_id, id: _id } = req.params;
         if (!token) return res.status(401).json({ message: "Unauthorized" });
+        const { host } = req.headers;
         try {
             const treeId = toObjectId(t_id);
             const id = toObjectId(_id);
@@ -75,7 +77,8 @@ export const speciesController = ({
                 treeId,
                 id,
                 ...toPartialOutput(parse),
-                key
+                key,
+                host
             });
             if(!updatedSpecies) return res.status(404).json({ message: "PhTree or Species not found" });
             res.json(updatedSpecies);
@@ -106,10 +109,11 @@ export const speciesController = ({
         const { file: image } = req;
         if (!token) return res.status(401).json({ message: "Unauthorized" });
         if (!image) return res.status(400).json({ message: "Image file is required" });
+        const { host } = req.headers;
         try {
             const treeId = toObjectId(t_id);
             const id = toObjectId(_id);
-            const updatedSpecies = await speciesModel.setSpeciesImage({ token, treeId, id, image, key });
+            const updatedSpecies = await speciesModel.setSpeciesImage({ token, treeId, id, image, key, host });
             if(!updatedSpecies) return res.status(404).json({ message: "PhTree or Species not found" });
             res.json(updatedSpecies);
         } catch (error: any) {
@@ -122,10 +126,11 @@ export const speciesController = ({
         const { token } = req.cookies;
         const { treeId: t_id, id: _id } = req.params;
         if (!token) return res.status(401).json({ message: "Unauthorized" });
+        const { host } = req.headers;
         try {
             const treeId = toObjectId(t_id);
             const id = toObjectId(_id);
-            const updatedSpecies = await speciesModel.deleteSpeciesImage({ token, treeId, id, key });
+            const updatedSpecies = await speciesModel.deleteSpeciesImage({ token, treeId, id, key, host });
             if(!updatedSpecies) return res.status(404).json({ message: "PhTree or Species not found" });
             res.json(updatedSpecies);
         } catch (error: any) {
@@ -135,10 +140,11 @@ export const speciesController = ({
     getSpecies: async (req, res) => {
         const { token } = req.cookies;
         const { treeId: t_id, id: _id } = req.params;
+        const { host } = req.headers;
         try {
             const treeId = toObjectId(t_id);
             const id = toObjectId(_id);
-            const species = await speciesModel.getSpecies({ token, treeId, id });
+            const species = await speciesModel.getSpecies({ token, treeId, id, host });
             if(!species) return res.status(404).json({ message: "PhTree or Species not found" });
             res.json(species);
         } catch (error: any) {
@@ -148,9 +154,10 @@ export const speciesController = ({
     getPhTreeSpecies: async (req, res) => {
         const { token } = req.cookies;
         const { treeId: _id } = req.params;
+        const { host } = req.headers;
         try {
             const treeId = toObjectId(_id);
-            const speciesList = await speciesModel.getPhTreeSpecies({ token, treeId });
+            const speciesList = await speciesModel.getPhTreeSpecies({ token, treeId, host });
             if(!speciesList) return res.status(404).json({ message: "PhTree not found" });
             res.json(speciesList);
         } catch (error: any) {
