@@ -13,6 +13,7 @@ interface CheckProps {
     token?: string;
     treeId: Types.ObjectId;
     id?: Types.ObjectId;
+    host?: string;
 }
 
 interface GetProps extends CheckProps {
@@ -46,7 +47,8 @@ const getSpecies = async ({
     token,
     treeId,
     id,
-    mustCheck = true
+    mustCheck = true,
+    host
 }: GetProps): Promise<SpeciesMongo> => {
     const { species } = mustCheck ? await check({ token, treeId, id }) : { species: await SpeciesClass.findById(id)};
     if(!species) throw new Error("Species not found");
@@ -79,7 +81,7 @@ const getSpecies = async ({
         afterApparition: species.afterApparition ?? undefined,
         duration: species.duration ?? undefined,
         description: species.description ?? undefined,
-        image: photoToString(species.image)
+        image: photoToString(species.image, host)
     };
 };
 
@@ -167,7 +169,8 @@ export const speciesModel: SpeciesModel = {
         duration,
         description,
         descendants,
-        key
+        key,
+        host
     }) => {
         const apiKey = await confirmAPIKey(key);
         if(!apiKey) return undefined;
@@ -210,7 +213,7 @@ export const speciesModel: SpeciesModel = {
         await species.save()
         phTree.updatedAt = new Date();
         await phTree.save();
-        return await getSpecies({ token, treeId, id, mustCheck: false });
+        return await getSpecies({ token, treeId, id, mustCheck: false, host });
     },
     deleteSpecies: async ({ token, treeId, id, key }) => {
         const apiKey = await confirmAPIKey(key);
@@ -223,7 +226,7 @@ export const speciesModel: SpeciesModel = {
         phTree.updatedAt = new Date();
         await phTree.save();
     },
-    setSpeciesImage: async ({ token, treeId, id, image, key }) => {
+    setSpeciesImage: async ({ token, treeId, id, image, key, host }) => {
         const apiKey = await confirmAPIKey(key);
         if(!apiKey) return undefined;
         const {
@@ -235,9 +238,9 @@ export const speciesModel: SpeciesModel = {
         await species.save();
         phTree.updatedAt = new Date();
         await phTree.save();
-        return await getSpecies({ token, treeId, id, mustCheck: false });
+        return await getSpecies({ token, treeId, id, mustCheck: false, host });
     },
-    deleteSpeciesImage: async ({ token, treeId, id, key }) => {
+    deleteSpeciesImage: async ({ token, treeId, id, key, host }) => {
         const apiKey = await confirmAPIKey(key);
         if(!apiKey) return undefined;
         const {
@@ -250,12 +253,12 @@ export const speciesModel: SpeciesModel = {
         phTree.updatedAt = new Date();
         await phTree.save();
         await species.save();
-        return await getSpecies({ token, treeId, id, mustCheck: false });
+        return await getSpecies({ token, treeId, id, mustCheck: false, host });
     },
-    getSpecies: async ({ token, treeId, id }) => {
-        return await getSpecies({ token, treeId, id });
+    getSpecies: async ({ token, treeId, id, host }) => {
+        return await getSpecies({ token, treeId, id, host });
     },
-    getPhTreeSpecies: async ({ token, treeId }) => {
+    getPhTreeSpecies: async ({ token, treeId, host }) => {
         await check({ token, treeId });
         return await Promise.all((
             await SpeciesClass.find({
@@ -274,7 +277,8 @@ export const speciesModel: SpeciesModel = {
             token,
             treeId,
             id: s._id,
-            mustCheck: false
+            mustCheck: false,
+            host
         })));
     }
 };
