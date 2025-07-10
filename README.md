@@ -435,7 +435,7 @@ Get info about an specific user
 
 #### `POST /recover`
 
-Get a link to recover password
+Send an email to recover the password
 
 **Query:**
 
@@ -445,7 +445,8 @@ Get a link to recover password
 
 ```json
 {
-  "email": "${string}@${string}.${string}"
+  "email": "${string}@${string}.${string}",
+  "url": "string"
 }
 ```
 
@@ -453,7 +454,7 @@ Get a link to recover password
 
 ```json
 {
-  "url": "http://${string}/api/life-tree/user/reset/${string}"
+  "message": "Token not generated"
 }
 ```
 
