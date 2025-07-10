@@ -86,6 +86,7 @@ export interface UserModel {
     }, User[]>;
     recover: ModelFuncton<{
         email: Email;
+        url: string;
     }, string>;
     resetPassword: ModelFuncton<{
         token: string;
