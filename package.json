@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "bcrypt": "6.0.0",
-    "chrono-phylo-tree": "1.1.11",
+    "chrono-phylo-tree": "1.2.2",
     "cloudinary": "2.7.0",
     "cookie-parser": "1.4.7",
     "cors": "2.8.5",
