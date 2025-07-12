@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
-import { NotiFunc, Order, TreeCriteria } from "../enums";
+import { NotiFunc, Order, TreeChange, TreeCriteria } from "../enums";
 import { nullableInput } from "./nullableInput";
-import { Email } from "../types";
+import { Email, PhTreeChange, SpeciesMongoInput } from "../types";
 
 const isString = (str: any): boolean => typeof str === "string" || str instanceof String;
 
@@ -47,6 +47,8 @@ const isNumber = (num: any): boolean => typeof num === "number" || num instanceo
 const parseNumber = (num: any, prop = "") => parseProp<number>(num, isNumber, prop);
 
 const parseFun = (fun: any, prop = "") => parseProp<NotiFunc>(fun, isEnum(NotiFunc), prop);
+
+const parseChange = (chan: any, prop = "") => parseProp<TreeChange>(chan, isEnum(TreeChange), prop);
 
 const toPartial = <T,>(object: () => T): (T | undefined) => {
     try {
@@ -156,4 +158,31 @@ export const parseNewNotification = (data: any) => ({
     userId: toPartial(() => parseString(data.userId)),
     treeId: toPartial(() => parseString(data.treeId)),
     commentId: toPartial(() => parseString(data.commentId))
+});
+
+const parseSpeciesMongo = (data: any): SpeciesMongoInput => {
+    const {ancestorId, descendants, ...species} = parseNewSpecies(data);
+    return {
+        id: parseString(data.id),
+        treeId: parseString(data.treeId),
+        ancestorId: toPartial(() =>parseString(data.ancestorId)),
+        descendants: toPartial(() => parseList(data.descendants, parseSpeciesMongo)),
+        ...species
+    }
+};
+
+const parsePhTree = (data: any): PhTreeChange => {
+    const { collaborators, ...tree } = parseNewTree(data);
+    return {
+        id: parseString(data.id),
+        userId: parseString(data.userId),
+        collaborators: toPartial(() =>parseList(data.collaborators, parseString)),
+        ...tree
+    }
+}
+
+export const parsePhTreeChange = (data: any) => ({
+    type: toPartial(() => parseChange(data.type)),
+    species: toPartial(() => parseSpeciesMongo(data.species)),
+    phTree: toPartial(() => parsePhTree(data.phTree))
 });
