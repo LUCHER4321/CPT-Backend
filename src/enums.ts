@@ -28,6 +28,13 @@ export enum TreeCriteria {
     POPULARITY = "popularity"
 }
 
+export enum TreeChange {
+    NEW = "new",
+    EDIT = "edit",
+    DELETE = "delete",
+    TREE = "tree"
+}
+
 export enum Order {
     ASC = "asc",
     DESC = "desc"
