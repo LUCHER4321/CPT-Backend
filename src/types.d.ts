@@ -181,6 +181,7 @@ export interface PhTree {
 }
 
 export interface PhTreeController {
+    setChange: WSControllerFunction;
     createPhTree: ControllerFunction;
     getMyPhTrees: ControllerFunction;
     updatePhTree: ControllerFunction;
@@ -201,6 +202,32 @@ type TreeSearch = Partial<{
     from: Date;
     to: Date;
 }>;
+
+export interface PhTreeChange {
+    id: string;
+    userId: string;
+    name: string;
+    image?: string;
+    description?: string;
+    isPublic: boolean;
+    tags?: string[];
+    collaborators?: string[];
+}
+
+interface SpeciesMongoInput extends Omit<
+    Omit<
+        Omit<
+            Omit<
+                SpeciesMongo, "id"
+            >, "treeId"
+        >, "descendants"
+    >, "ancestorId"
+> {
+    id: string;
+    treeId: string;
+    ancestorId?: string;
+    descendants?: SpeciesMongoInput[];
+}
 
 export interface PhTreeModel {
     createPhTree: ModelFuncton<{
@@ -369,22 +396,13 @@ export interface SpeciesController {
     getPhTreeSpecies: ControllerFunction;
 }
 
-interface SpeciesInput {
-    name: string;
-    ancestorId?: Types.ObjectId;
-    apparition?: number;
-    afterApparition?: number;
-    duration: number;
-    description?: string;
-    descendants?: Omit<SpeciesInput, "ancestorId">[];
-}
-
 export interface SpeciesModel {
-    createSpecies: ModelFuncton<SpeciesInput & {
+    createSpecies: ModelFuncton<SpeciesJSON & {
         treeId: Types.ObjectId;
         token: string;
+        ancestorId?: Types.ObjectId;
     }, SpeciesMongo>;
-    updateSpecies: ModelFuncton<Partial<Omit<SpeciesInput, "ancestorId">> & {
+    updateSpecies: ModelFuncton<Partial<SpeciesJSON> & {
         token: string;
         treeId: Types.ObjectId;
         id: Types.ObjectId;
