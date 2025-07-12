@@ -2,21 +2,13 @@ import { Types } from "mongoose";
 import { SpeciesController, SpeciesModel } from "../types"
 import { getKey, parseNewSpecies, parsePatchSpecies, toObjectId } from "../utils/parser";
 import { nullableInput, nullableInputCanBeNull } from "../utils/nullableInput";
+import { SpeciesJSON } from "chrono-phylo-tree";
 
-type Input = Partial<{
-    apparition: number;
-    afterApparition: number;
-    description: string;
-    descendants: Omit<Input, "ancestorId">[];
-}> & {
-    ancestorId?: string | null;
-    name: string;
-    duration: number;
-};
+type Input = SpeciesJSON & { ancestorId?: string | null; };
 
-type Output = Omit<Input, "ancestorId"> & { ancestorId?: Types.ObjectId };
+type Output = SpeciesJSON & { ancestorId?: Types.ObjectId; };
 
-type PartialOutput = Omit<Partial<Input>, "ancestorId"> & { ancestorId?: Types.ObjectId | null };
+type PartialOutput = Partial<SpeciesJSON> & { ancestorId?: Types.ObjectId | null };
 
 const toOutput = ({
     ancestorId,
