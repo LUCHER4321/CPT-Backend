@@ -14,6 +14,8 @@
     - [`POST /login`](#post-login)
     - [`GET /search`](#get-search)
     - [`GET /:id`](#get-id)
+    - [`POST /recover`](#post-recover)
+    - [`POST /reset/:token`](#post-resettoken)
     - [`POST /logout`](#post-logout)
     - [`POST /admin`](#post-admin)
     - [`POST /token`](#post-token)
@@ -71,12 +73,14 @@
     - [`PATCH /:id`](#patch-id-1)
 - [Web Socket](#web-socket)
   - [`on("set-notification-client")`](#onset-notification-client)
+  - [`on("set-tree-change-client")`](#onset-tree-change-client)
 
 ## Routes Diagram
 
 ```mermaid
 flowchart LR
-    sym0{{"USE"}} & sym1(["GET"]) & sym2[/"POST"/] & sym3[\"PATCH"\] & sym4("DELETE") & sym5{"Web Socket"} & sym6[/"Cookie"\] ~~~ BASE_URL(( )) ~~~ root{{"/api/life-tree"}} & socket{"/"}
+    sym0{{"USE"}} & sym1(["GET"]) & sym2[/"POST"/] & sym3[\"PATCH"\] & sym4("DELETE") & sym5{"Web Socket"} & sym6[/"Cookie"\] ~~~ BASE_URL(("`
+    `")) ~~~ root{{"/api/life-tree"}} & socket{"/"}
     root --> use0{{"/user"}} & use1{{"/follow"}} & use2{{"/ph-tree"}} & use3{{"/comment/:treeId"}} & use4{{"/like"}} & use5{{"/species/:treeId"}} & use6{{"/image"}} & use7{{"/notification"}}
     use0 ----> post00[/"/register"/] & post01[/"/login"/] & get02(["/search"]) & get03(["/:id"]) & post05[/"/recover"/] & post06[/"/reset/:token"/]
     use0 --> cookie04[/"token"\] ---> post040[/"/logout"/] & post042[/"/admin"/] & post043[/"/token"/]
@@ -102,7 +106,9 @@ flowchart LR
     use5 --> cookie51[/"token?"\] ---> get510(["/"]) & get511(["/:id"])
     use6 ----> get60(["/:img"])
     use7 --> cookie70[/"token"\] ---> get70(["/"]) & patch71[\"/:id"\]
-    socket --> wscookie[/"token"\] --> ws0{set-notification-client} ---> ws00{set-notification-server}
+    socket --> wscookie[/"token"\] --> ws0{set-notification-client} & ws1{set-tree-change-client}
+    ws0 ---> ws00{set-notification-server}
+    ws1 ---> ws10{"set-tree-change-server-${treeId}"}
 ```
 
 ## Database Model
@@ -268,6 +274,13 @@ export enum TreeCriteria {
   VIEWS = "views",
   NAME = "name",
   POPULARITY = "popularity",
+}
+
+export enum TreeChange {
+  NEW = "new",
+  EDIT = "edit",
+  DELETE = "delete",
+  TREE = "tree",
 }
 
 export enum Order {
@@ -454,11 +467,11 @@ Send an email to recover the password
 
 ```json
 {
-  "message": "Token not generated"
+  "message": "Check your Email"
 }
 ```
 
-#### `POST /reset`
+#### `POST /reset/:token`
 
 Reset password
 
@@ -1897,6 +1910,8 @@ Mark a notification as read
 
 ### `on("set-notification-client")`
 
+Sends a notification to other users
+
 **Cookie:**
 
 - `token=`: JSON Web Token
@@ -1925,5 +1940,75 @@ Mark a notification as read
   "authorId": "ObjectId",
   "seen": "boolean",
   "createdAt": "Date"
+}
+```
+
+### `on("set-tree-change-client")`
+
+Sends the changes in a Ph. Tree
+
+**Cookie:**
+
+- `token=`: JSON Web Token
+
+**Data:**
+
+```json
+{
+  "type": "TreeChange",
+  "species": {
+    "id": "string",
+    "treeId": "string",
+    "ancestorId": "string | undefined",
+    "name": "string",
+    "apparition": "number | undefined",
+    "duration": "number | undefined",
+    "description": "string | undefined",
+    "afterApparition": "number | undefined",
+    "image": "string | undefined",
+    "descendants": ["..."]
+  },
+  "phTree": {
+    "id": "string",
+    "userId": "string",
+    "name": "string",
+    "image": "string | undefined",
+    "description": "string | undefined",
+    "isPublic": "boolean",
+    "tags": ["string"],
+    "collaborators": ["string"]
+  }
+}
+```
+
+**Emit:**
+
+`"set-notification-server-${treeId}"`
+
+```json
+{
+  "type": "TreeChange",
+  "species": {
+    "id": "string",
+    "treeId": "string",
+    "ancestorId": "string | undefined",
+    "name": "string",
+    "apparition": "number | undefined",
+    "duration": "number | undefined",
+    "description": "string | undefined",
+    "afterApparition": "number | undefined",
+    "image": "string | undefined",
+    "descendants": ["..."]
+  },
+  "phTree": {
+    "id": "string",
+    "userId": "string",
+    "name": "string",
+    "image": "string | undefined",
+    "description": "string | undefined",
+    "isPublic": "boolean",
+    "tags": ["string"],
+    "collaborators": ["string"]
+  }
 }
 ```
