@@ -1,22 +1,17 @@
-import { Server } from "socket.io";
+import { Socket } from "socket.io";
 import { NotificationController } from "../types";
 import { client, server, setN } from "../config";
 import { Router } from "express";
 
 interface IOProps {
-    io: Server;
+    socket: Socket;
     notificationController: NotificationController;
 }
 
 export const createNotificationIO = ({
-    io,
+    socket,
     notificationController
-}: IOProps) => {
-    io.on("connection", socket => {
-        socket.on(setN + client, async() => await notificationController.setNotification({ socket, call: setN + server }));
-    });
-    return io;
-};
+}: IOProps) => socket.on(setN + client, async() => await notificationController.setNotification({ socket, call: setN + server }));
 
 export const createNotificationRouter = ({
     notificationController
