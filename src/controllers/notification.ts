@@ -1,19 +1,7 @@
-import { Types } from "mongoose";
 import { Notification, NotificationController, NotificationModel } from "../types";
 import { NotiFunc } from "../enums";
-import { parseNewNotification } from "../utils/parser";
-import { Socket } from "socket.io";
-
-const getData = (socket: Socket) => {
-    const { data, handshake, emit } = socket;
-    const { cookie } = handshake.headers;
-    const [_, token] = cookie?.split("=") ?? [undefined, undefined];
-    return {
-        data,
-        emit,
-        token
-    }
-}
+import { parseNewNotification, toObjectId } from "../utils/parser";
+import { getSocketData } from "../utils/getSocketData";
 
 export const notificationController = ({
     notificationModel
@@ -23,48 +11,48 @@ export const notificationController = ({
             data,
             emit,
             token
-        } = getData(socket);
+        } = getSocketData(socket);
         if(!token) return;
         const { fun, userId, treeId, commentId } = parseNewNotification(data);
         if(!fun) return;
         let notification: Notification | undefined;
         switch(fun) {
             case NotiFunc.FOLLOW:
-                if(!userId) return emit(call, { error: "followedUserId is required" });
+                if(!userId) return emit(call, { error: "userId is required" });
                 notification = await notificationModel.newFollower({
                     token,
-                    userId: new Types.ObjectId(userId)
+                    userId: toObjectId(userId)
                 });
                 break;
             case NotiFunc.TREE:
                 if(!treeId) return emit(call, { error: "treeId is required" });
                 notification = await notificationModel.newTree({
                     token,
-                    treeId: new Types.ObjectId(treeId)
+                    treeId: toObjectId(treeId)
                 });
                 break;
             case NotiFunc.COMMENT:
                 if(!treeId || !commentId) return emit(call, { error: "treeId and commentId are required" });
                 notification = await notificationModel.newComment({
                     token,
-                    treeId: new Types.ObjectId(treeId),
-                    commentId: new Types.ObjectId(commentId)
+                    treeId: toObjectId(treeId),
+                    commentId: toObjectId(commentId)
                 });
                 break;
             case NotiFunc.LIKE:
                 if(!treeId || !commentId) return emit(call, { error: "treeId and commentId are required" });
                 notification = await notificationModel.newLike({
                     token,
-                    treeId: new Types.ObjectId(treeId),
-                    commentId: new Types.ObjectId(commentId)
+                    treeId: toObjectId(treeId),
+                    commentId: toObjectId(commentId)
                 });
                 break;
             case NotiFunc.COLLABORATE:
                 if(!treeId || !userId) return emit(call, { error: "treeId and userId are required" });
                 notification = await notificationModel.newCollaborate({
                     token,
-                    treeId: new Types.ObjectId(treeId),
-                    userId: new Types.ObjectId(userId),
+                    treeId: toObjectId(treeId),
+                    userId: toObjectId(userId),
                 });
                 break;
         }
@@ -96,7 +84,7 @@ export const notificationController = ({
         if(!token) return res.status(401).json({ message: "Unauthorized" });
         const { id: _id } = req.params;
         try {
-            const id = new Types.ObjectId(_id);
+            const id = toObjectId(_id);
             const notification = await notificationModel.seeNotification({
                 token,
                 id
