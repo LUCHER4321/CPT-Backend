@@ -1,10 +1,48 @@
-import { PhTreeController, PhTreeModel } from "../types";
+import { TreeChange } from "../enums";
+import { PhTreeController, PhTreeModel, SpeciesMongo, SpeciesMongoInput } from "../types";
+import { getSocketData } from "../utils/getSocketData";
 import { nullableInput } from "../utils/nullableInput";
-import { getKey, parseCriteria, parseNewTree, parseOrder, parsePatchTree, toObjectId } from "../utils/parser";
+import { getKey, parseCriteria, parseNewTree, parseOrder, parsePatchTree, parsePhTreeChange, toObjectId } from "../utils/parser";
+
+const toMongo = (sp: SpeciesMongoInput): SpeciesMongo => {
+    const {id, treeId, ancestorId, descendants, ...rest} = sp;
+    return {
+        id: toObjectId(id),
+        treeId: toObjectId(treeId),
+        descendants: descendants?.map(toMongo),
+        ...rest
+    }
+};
 
 export const phTreeController = ({
     phTreeModel
 }: { phTreeModel: PhTreeModel }): PhTreeController => ({
+    setChange: async ({socket, call}) => {
+        const {
+            data,
+            emit,
+            token
+        } = getSocketData(socket);
+        if(!token) return;
+        const { type, species, phTree } = parsePhTreeChange(data);
+        if(!type) return;
+        switch(type) {
+            case TreeChange.TREE:
+                if(!phTree) return;
+                emit(call + "-" + phTree.id, {
+                    ...phTree,
+                    change: type
+                });
+                break;
+            default:
+                if(!species) return;
+                emit(call + "-" + species.treeId, {
+                    ...species,
+                    change: type,
+                });
+                break;
+        }
+    },
     createPhTree: async (req, res) => {
         const { token } = req.cookies;
         if(!token) return res.status(401).json({ message: "Unauthorized" });
