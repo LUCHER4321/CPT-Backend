@@ -2,10 +2,22 @@ import { Router } from "express";
 import { PhTreeController } from "../types";
 import { multerMw } from "../middlewares/multer";
 import { allowedMethods } from "../middlewares/options";
+import { Socket } from "socket.io";
+import { client, server, setC } from "../config";
+
+interface IOProps {
+    socket: Socket;
+    phTreeController: PhTreeController;
+}
+
+export const createPhTreeIO = ({
+    socket,
+    phTreeController
+}: IOProps) => socket.on(setC + client, async() => await phTreeController.setChange({ socket, call: setC + server }));
 
 export const createPhTreeRoutes = ({
     phTreeController
-}: { phTreeController: PhTreeController }) => {
+}: Omit<IOProps, "io">) => {
     const router = Router();
     router.post("/", phTreeController.createPhTree);
     router.get("/me", phTreeController.getMyPhTrees);
