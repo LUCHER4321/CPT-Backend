@@ -16,5 +16,6 @@ export const LIKES_P = +(process.env.LIKES_PONDERATION ?? 1.5);
 export const MAILER_USER = process.env.MAILER_USER;
 export const MAILER_PASS = process.env.MAILER_PASS;
 export const setN = "set-notification";
+export const setC = "set-tree-change"
 export const server = "-server";
 export const client = "-client";
