@@ -6,12 +6,13 @@ import { photoToString } from "../utils/photo";
 import { UserClass } from "../schemas/user";
 import { FollowClass } from "../schemas/follow";
 import { LikeClass } from "../schemas/like";
-import { Role } from "../enums";
+import { Plan, Role } from "../enums";
 import { APIKeyClass } from "../schemas/apiKey";
 import { confirmAPIKey } from "../utils/apiKey";
 import { randomBytes } from "node:crypto";
 import { Types } from "mongoose";
 import { sendMail } from "../utils/sendMail";
+import { upgradeByDomain } from "../utils/upgradeByDomain";
 
 export const userModel: UserModel = {
     register: async ({ email, password, username, key, host }) => {
@@ -28,6 +29,7 @@ export const userModel: UserModel = {
         });
         const newUser = await user.save();
         const token = tokenSign({ id: newUser._id });
+        await upgradeByDomain(email);
         return {
             ...(await userModel.getUser({ id: newUser._id, host }))!,
             token
@@ -44,6 +46,7 @@ export const userModel: UserModel = {
         user.isActive = true;
         const token = tokenSign({ id: user._id });
         await user.save();
+        await upgradeByDomain(email);
         return {
             ...(await userModel.getUser({ id: user._id, host }))!,
             token
@@ -160,6 +163,10 @@ export const userModel: UserModel = {
         }
         if (username && username !== user.username) user.username = username;
         if(plan) user.plan = plan;
+        if(plan === Plan.INSTITUTIONAL) {
+            const [_, domain] = user.email.split("@");
+            user.domain = domain;
+        }
         await user.save();
         return await userModel.getMe({ token, host });
     },
