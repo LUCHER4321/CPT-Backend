@@ -15,7 +15,8 @@ export enum Role {
 export enum Plan {
     FREE = "free",
     PRO = "pro",
-    PREMIUM = "premium"
+    PREMIUM = "premium",
+    INSTITUTIONAL = "institutional"
 }
 
 export enum TreeCriteria {
