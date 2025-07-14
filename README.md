@@ -107,7 +107,7 @@ flowchart LR
     use6 ----> get60(["/:img"])
     use7 --> cookie70[/"token"\] ---> get70(["/"]) & patch71[\"/:id"\]
     socket --> wscookie[/"token"\] --> ws0{set-notification-client} & ws1{set-tree-change-client}
-    ws0 ---> ws00{set-notification-server}
+    ws0 ---> ws00{"set-notification-server-${userId}"}
     ws1 ---> ws10{"set-tree-change-server-${treeId}"}
 ```
 
@@ -130,6 +130,7 @@ classDiagram
     Date lastLogin
     boolean isActive
     Token[] tokens
+    string domain
   }
   class Role {
     <<Enumeration>>
@@ -264,6 +265,7 @@ export enum Plan {
   FREE = "free",
   PRO = "pro",
   PREMIUM = "premium",
+  INSTITUTIONAL = "institutional",
 }
 
 export enum TreeCriteria {
@@ -1929,7 +1931,7 @@ Sends a notification to other users
 
 **Emit:**
 
-`"set-notification-server"`
+`"set-notification-server-${userId}"`
 
 ```json
 {
@@ -1987,7 +1989,7 @@ Sends the changes in a Ph. Tree
 
 ```json
 {
-  "type": "TreeChange",
+  "type": "TreeChange | undefined",
   "species": {
     "id": "string",
     "treeId": "string",
