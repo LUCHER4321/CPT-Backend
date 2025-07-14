@@ -57,7 +57,7 @@ export const notificationController = ({
                 break;
         }
         if(!notification) return;
-        emit(call, notification);
+        notification.usersId.map(u => emit(call + "-" + u, notification));
     },
     getNotifications: async (req, res) => {
         const { token } = req.cookies;
