@@ -55,7 +55,8 @@ const UserSchema = new Schema({
             }
         }],
         default: []
-    }
+    },
+    domain: String
 });
 
 export const UserClass = model("User", UserSchema);
