@@ -79,6 +79,11 @@ export const parseLogin = (object: any) => ({
 export const parseRecover = (object: any) => ({
     email: parseEmail(parseString(object.email, "email")),
     url: parseURL(object.url, "url")
+});
+
+export const parseReset = (object: any) => ({
+    email: parseEmail(parseString(object.email, "email")),
+    password: parseString(object.password, "password")
 })
 
 export const parsePatchUser = (object: any) => ({
