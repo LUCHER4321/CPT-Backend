@@ -489,6 +489,7 @@ Reset password
 
 ```json
 {
+  "email": "${string}@${string}.${string}",
   "password": "string"
 }
 ```
