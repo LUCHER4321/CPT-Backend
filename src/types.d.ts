@@ -90,6 +90,7 @@ export interface UserModel {
     }, string>;
     resetPassword: ModelFuncton<{
         token: string;
+        email: Email;
         password: string;
     }, User>,
     getMe: ModelFuncton<{
