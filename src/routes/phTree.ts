@@ -17,7 +17,7 @@ export const createPhTreeIO = ({
 
 export const createPhTreeRoutes = ({
     phTreeController
-}: Omit<IOProps, "io">) => {
+}: Omit<IOProps, "socket">) => {
     const router = Router();
     router.post("/", phTreeController.createPhTree);
     router.get("/me", phTreeController.getMyPhTrees);
