@@ -1,5 +1,5 @@
 import { UserController, UserModel } from "../types";
-import { getKey, parseLogin, parseNewAdmin, parsePatchUser, parseRecover, parseRegister, toObjectId } from "../utils/parser";
+import { getKey, parseLogin, parseNewAdmin, parsePatchUser, parseRecover, parseRegister, parseReset, toObjectId } from "../utils/parser";
 
 export const userController = ({
     userModel
@@ -92,11 +92,11 @@ export const userController = ({
     },
     resetPassword: async (req, res) => {
         const { token } = req.params;
-        const { password } = req.body;
         const { apiKey } = req.query;
         const key = getKey(apiKey);
         try {
-            const user = await userModel.resetPassword({ token, password, key });
+            const { email, password } = parseReset(req.body);
+            const user = await userModel.resetPassword({ token, email, password, key });
             if(!user) return res.status(404).json({ message: "User not found" });
             res.status(200).json(user);
         } catch (error: any) {
