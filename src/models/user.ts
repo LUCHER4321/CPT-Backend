@@ -110,14 +110,15 @@ export const userModel: UserModel = {
         await sendMail({ token, url, user: userModel.getUser({ id: user._id }) })
         return token;
     },
-    resetPassword: async ({ token, password, key }) => {
+    resetPassword: async ({ token, email, password, key }) => {
         const apiKey = await confirmAPIKey(key);
         if(!apiKey) return;
         const user = await UserClass.findOne({
             "tokens.token": token,
             "tokens.expires": {
                 $gt: new Date()
-            }
+            },
+            email
         });
         if(!user) throw new Error("User not found");
         user.password = await encryptPassword(password);
