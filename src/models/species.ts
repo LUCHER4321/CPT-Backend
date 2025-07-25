@@ -92,7 +92,7 @@ class IdSpecies extends Species{
     constructor(json: SpeciesMongo, ancestor?: IdSpecies){
         super(
             json.name,
-            json.apparition ?? (ancestor?.apparition ?? 0) + json.afterApparition,
+            json.apparition ?? (ancestor?.apparition ?? 0) + (json.afterApparition ?? 0),
             json.duration,
             ancestor,
             json.descendants?.map(d => new IdSpecies(d, this)),
@@ -140,7 +140,7 @@ export const speciesModel: SpeciesModel = {
                     afterApparition,
                     async (aa) => Math.max(...nullableInput((await SpeciesClass.findById(ancestorId))?.duration, ad => [ad, aa]) ?? [aa], 0)
                 ) : undefined,
-            duration: Math.max(duration, 0),
+            duration: Math.max(duration ?? 0, 0),
             description
         });
         const newSpecies = await species.save();
