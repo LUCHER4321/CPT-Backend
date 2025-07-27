@@ -234,8 +234,10 @@ export const phTreeModel: PhTreeModel = {
     getTotalTrees: async ({ token }) => {
         const user = await userByToken(token);
         if(!user) throw new Error("Invalid Token");
-        const total = await PhTreeClass.countDocuments({ userId: user._id });
-        return { total };
+        const myTrees = await PhTreeClass.countDocuments({ userId: user._id });
+        const collabs = await PhTreeClass.countDocuments({ collaborators: user._id });
+        const total = myTrees + collabs;
+        return { total, myTrees, collabs };
     },
     updatePhTree: async ({
         token,
