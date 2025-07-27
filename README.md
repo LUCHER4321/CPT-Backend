@@ -997,7 +997,9 @@ Get the quantity of Ph. Trees
 
 ```json
 {
-  "total": "number"
+  "total": "number",
+  "myTrees": "number",
+  "collabs": "number"
 }
 ```
 
