@@ -98,6 +98,16 @@ export const phTreeController = ({
             res.status(400).json({ message: error.message });
         }
     },
+    getTotalTrees: async (req, res) => {
+        const { token } = req.cookies;
+        if (!token) return res.status(401).json({ message: "Unauthorized" });
+        try {
+            const total = await phTreeModel.getTotalTrees({ token });
+            res.json(total);
+        } catch (error: any) {
+            res.status(400).json({ message: error.message });
+        }
+    },
     updatePhTree: async (req, res) => {
         const { id: _id } = req.params;
         const { token } = req.cookies;
