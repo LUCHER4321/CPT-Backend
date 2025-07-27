@@ -36,6 +36,7 @@
   - [Route `/ph-tree`](#route-ph-tree)
     - [`POST /`](#post-)
     - [`GET /me`](#get-me)
+    - [`GET /me/total`](#get-metotal)
     - [`PATCH /:id`](#patch-id)
     - [`DELETE /:id`](#delete-id-1)
     - [`POST /:id/image`](#post-idimage)
@@ -982,6 +983,22 @@ Search your Ph. Trees
     "views": "number"
   }
 ]
+```
+
+#### `GET /me/total`
+
+Get the quantity of Ph. Trees
+
+**Cookie:**
+
+- `token=`: JSON Web Token
+
+**Response:**
+
+```json
+{
+  "total": "number"
+}
 ```
 
 #### `PATCH /:id`
