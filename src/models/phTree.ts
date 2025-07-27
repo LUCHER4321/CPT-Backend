@@ -231,6 +231,12 @@ export const phTreeModel: PhTreeModel = {
             host
         });
     },
+    getTotalTrees: async ({ token }) => {
+        const user = await userByToken(token);
+        if(!user) throw new Error("Invalid Token");
+        const total = await PhTreeClass.countDocuments({ userId: user._id });
+        return { total };
+    },
     updatePhTree: async ({
         token,
         id,
