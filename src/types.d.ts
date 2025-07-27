@@ -245,7 +245,11 @@ export interface PhTreeModel {
     } & TreeSearch, PhTree[]>;
     getTotalTrees: ModelFuncton<{
         token: string;
-    }, { total: number }>;
+    }, {
+        total: number;
+        myTrees: number;
+        collabs: number;
+    }>;
     updatePhTree: ModelFuncton<{
         token: string;
         id: Types.ObjectId;
