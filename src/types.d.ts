@@ -185,6 +185,7 @@ export interface PhTreeController {
     setChange: WSControllerFunction;
     createPhTree: ControllerFunction;
     getMyPhTrees: ControllerFunction;
+    getTotalTrees: ControllerFunction;
     updatePhTree: ControllerFunction;
     deletePhTree: ControllerFunction;
     setPhTreeImage: ControllerFunction;
@@ -242,6 +243,9 @@ export interface PhTreeModel {
     getMyPhTrees: ModelFuncton<{
         token: string;
     } & TreeSearch, PhTree[]>;
+    getTotalTrees: ModelFuncton<{
+        token: string;
+    }, { total: number }>;
     updatePhTree: ModelFuncton<{
         token: string;
         id: Types.ObjectId;
