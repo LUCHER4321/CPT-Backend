@@ -48,6 +48,7 @@ interface GetTreesProps {
     from?: Date;
     to?: Date;
     myTrees?: boolean;
+    owner?: boolean;
     host?: string;
 }
 
@@ -61,6 +62,7 @@ const getTrees = async ({
     from,
     to,
     myTrees = false,
+    owner,
     host
 }: GetTreesProps): Promise<PhTree[]> => {
     const user = await nullableInput(token, userByToken);
@@ -97,14 +99,26 @@ const getTrees = async ({
             ]
         },
         ...!user ? { isPublic: true } : {},
-        ...user && myTrees ? {
-            $expr: {
-                $eq: [
-                    { $toString: "$userId" },
-                    user._id.toString()
-                ]
-            }
-        } : {},
+        ...(user && myTrees) ? {
+            $or: [
+                {
+                    $expr: [true, undefined].includes(owner) ? {
+                        $eq: [
+                            { $toString: "$userId" },
+                            user._id.toString()
+                        ]
+                    } : {}
+                },
+                {
+                    $expr: [false, undefined].includes(owner) ? {
+                        $eq: [
+                            { $toString: "$collaborators" },
+                            user._id.toString()
+                        ]
+                    } : {}
+                }
+            ]
+        }: {},
         ...from ? { createdAt: { $gte: from } }: {},
         ...to ? { createdAt: { $lte: to } }: {}
     });
@@ -216,6 +230,7 @@ export const phTreeModel: PhTreeModel = {
         order,
         from,
         to,
+        owner,
         host
     }) => {
         return await getTrees({
@@ -228,6 +243,7 @@ export const phTreeModel: PhTreeModel = {
             from,
             to,
             myTrees: true,
+            owner,
             host
         });
     },
