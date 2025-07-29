@@ -958,6 +958,7 @@ Search your Ph. Trees
 - `?order`: Sorting order (`"asc", "desc"`)
 - `?from`: Minimum createdAt
 - `?to`: Maximum createdAt
+- `?owner`: If `true`, only includes the trees where you're the owner, if `false`, only includes the trees where you're a collaborator, in other cases, includes both
 
 **Cookie:**
 
