@@ -78,7 +78,8 @@ export const phTreeController = ({
             criteria = "createdAt",
             order = "desc",
             from,
-            to
+            to,
+            owner
         } = req.query;
         try {
             const phTrees = await phTreeModel.getMyPhTrees({
@@ -90,6 +91,7 @@ export const phTreeController = ({
                 order: parseOrder(order),
                 from: nullableInput(from, f => new Date(f as string)),
                 to: nullableInput(to, t => new Date(t as string)),
+                owner: owner === "true" ? true : owner === "false" ? false : undefined,
                 host
             });
             if (!phTrees) return res.status(404).json({ message: "No Ph. Trees found" });
