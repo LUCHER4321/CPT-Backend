@@ -242,6 +242,7 @@ export interface PhTreeModel {
     }, PhTree>;
     getMyPhTrees: ModelFuncton<{
         token: string;
+        owner?: boolean;
     } & TreeSearch, PhTree[]>;
     getTotalTrees: ModelFuncton<{
         token: string;
