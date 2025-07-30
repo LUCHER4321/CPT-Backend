@@ -2,6 +2,7 @@ import { commentController } from "../controllers/comment";
 import { followController } from "../controllers/follow";
 import { imageController } from "../controllers/image";
 import { likeController } from "../controllers/like";
+import { notificationController } from "../controllers/notification";
 import { phTreeController } from "../controllers/phTree";
 import { speciesController } from "../controllers/species";
 import { userController } from "../controllers/user";
@@ -9,6 +10,7 @@ import { commentModel } from "../models/comment";
 import { followModel } from "../models/follow";
 import { imageModel } from "../models/image";
 import { likeModel } from "../models/like";
+import { notificationModel } from "../models/notification";
 import { phTreeModel } from "../models/phTree";
 import { speciesModel } from "../models/species";
 import { userModel } from "../models/user";
@@ -17,6 +19,7 @@ import { createCommentRoutes } from "../routes/comment";
 import { createFollowRoutes } from "../routes/follow";
 import { createImageRoutes } from "../routes/image";
 import { createLikeRoutes } from "../routes/like";
+import { createNotificationRouter } from "../routes/notification";
 import { createPhTreeRoutes } from "../routes/phTree";
 import { createSpeciesRoutes } from "../routes/species";
 import { createUserRoutes } from "../routes/user";
@@ -71,12 +74,19 @@ export const baseRouter = createBaseRoutes({
                     speciesModel: speciesModel
                 })
             })
+        ], [
+            "/notification",
+            createNotificationRouter({
+                notificationController: notificationController({
+                    notificationModel
+                })
+            })
         ],
         [
             "/image",
             createImageRoutes({
                 imageController: imageController({
-                    imageModel: imageModel
+                    imageModel
                 })
             })
         ],
