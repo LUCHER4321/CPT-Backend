@@ -14,7 +14,7 @@ interface ServerConfigProps {
         url: string;
         router: Router;
     };
-    serverOptions?: ServerOptions
+    serverOptions?: Partial<ServerOptions>
 }
 
 export default ({
