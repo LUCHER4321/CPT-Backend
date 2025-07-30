@@ -1,6 +1,7 @@
 import 'dotenv/config';
 
 export const PORT = +(process.env.PORT ?? 3000);
+export const SOCKET_PORT = +(process.env.SOCKET_PORT ?? 4000);
 export const URL = process.env.MONGO_URL ?? "";
 export const SECRET = process.env.JWT_SECRET ?? "defaultsecret";
 export const EXPIRATION = +(process.env.JWT_EXPIRATION ?? 3600);
