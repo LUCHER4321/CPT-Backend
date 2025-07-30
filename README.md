@@ -91,7 +91,7 @@ flowchart LR
     cookie10 --> post100[/"/:id"/] & delete101("/:id")
     use1 ----> get11(["/followers/:userId"]) & get12(["/following/:userId"]) & get13(["/count/:userId"])
     use2 --> cookie20[/"token"\] & cookie21[/"token?"\]
-    cookie20 ---> post200[/"/"/] & get201(["/me"]) & patch202[\"/:id"\] & delete203("/:id") & post204[/"/:id/image"/] & delete205("/:id/image")
+    cookie20 ---> post200[/"/"/] & get201(["/me"]) & get206(["/me/total"]) & patch202[\"/:id"\] & delete203("/:id") & post204[/"/:id/image"/] & delete205("/:id/image")
     cookie21 ---> get21(["/"]) & get22(["/:id"]) & post23[/"/:id/view"/]
     use3 --> cookie30[/"token"\]
     cookie30 ---> post300[/"/"/] & patch301[\"/:id"\] & delete302("/:id")
