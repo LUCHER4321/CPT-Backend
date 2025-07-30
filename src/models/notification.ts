@@ -118,10 +118,8 @@ export const notificationModel: NotificationModel = {
         if (!user) throw new Error("User not found");
         const notifications0 = NotificationClass.find({
             createdAt: {
-                $and: [
-                    { $gte: from },
-                    { $lte: to }
-                ]
+                $gte: from,
+                $lte: to
             },
             usersId: { $in: [user._id] }
         }).sort({ createdAt: -1 });
