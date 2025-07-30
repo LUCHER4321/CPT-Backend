@@ -73,7 +73,7 @@ export const notificationController = ({
                 to,
                 limit
             });
-            if(!notifications || notifications.length === 0) return res.status(404).json({ message: "No notifications found" });
+            if(!notifications) return res.status(404).json({ message: "No notifications found" });
             res.json(notifications);
         } catch (e: any) {
             res.status(400).json({ message: e.message });
