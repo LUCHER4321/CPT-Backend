@@ -9,7 +9,7 @@ const { uploader, url } = v2;
 const { upload, destroy } = uploader;
 const extensions = ["jpg", "jpeg", "png", "gif", "svg"];
 
-const imgPath = (name: string, includeImage = true) => join(...__dirname, "..", "..", includeImage ? IMAGES : "", name);
+const imgPath = (name: string, includeImage = true) => join(__dirname, "..", "..", includeImage ? IMAGES : "", name);
 
 export const imageModel: ImageModel = {
     getImage: async ({ img }) => {
