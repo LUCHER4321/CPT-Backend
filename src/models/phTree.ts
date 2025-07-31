@@ -159,18 +159,20 @@ const getTrees = async ({
                 return await treesQuery.lean().then(async (trees) => {
                     const now = Date.now() / 1000;
                     const treesWithPopularity = await Promise.all(trees.map(async (tree) => {
-                        const viewsP = VIEWS_P * tree.views.map(v => {
+                        const viewsP = tree.views.length > 0 ? VIEWS_P * tree.views.map(v => {
                             const time = now - v.date.getTime() / 1000;
                             return inverseLN(time);
-                        }).reduce((a, b) => a + b);
-                        const commentsP = COMMENTS_P * (await CommentClass.find({ treeId: tree._id })).map(c => {
+                        }).reduce((a, b) => a + b) : 0;
+                        const comments = await CommentClass.find({ treeId: tree._id });
+                        const commentsP = comments.length > 0 ? COMMENTS_P * comments.map(c => {
                             const time = now - c.createdAt.getTime() / 1000;
                             return inverseLN(time);
-                        }).reduce((a, b) => a + b);
-                        const likesP = LIKES_P * (await LikeClass.find({ treeId: tree._id })).map(l => {
+                        }).reduce((a, b) => a + b) : 0;
+                        const likes = await LikeClass.find({ treeId: tree._id });
+                        const likesP = likes.length > 0 ? LIKES_P * likes.map(l => {
                             const time = now - l.createdAt.getTime() / 1000;
                             return inverseLN(time);
-                        }).reduce((a, b) => a + b);
+                        }).reduce((a, b) => a + b) : 0;
                         const popularity = viewsP + commentsP + likesP;
                         return { ...tree, popularity };
                     }));
