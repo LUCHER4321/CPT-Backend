@@ -30,15 +30,15 @@ export const phTreeController = ({
             case TreeChange.TREE:
                 if(!phTree) return;
                 emit(call + "-" + phTree.id, {
-                    ...phTree,
-                    change: type
+                    change: type,
+                    phTree
                 });
                 break;
             default:
                 if(!species) return;
                 emit(call + "-" + species.treeId, {
-                    ...species,
                     change: type,
+                    species,
                 });
                 break;
         }
