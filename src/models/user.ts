@@ -14,6 +14,16 @@ import { Types } from "mongoose";
 import { sendMail } from "../utils/sendMail";
 import { upgradeByDomain } from "../utils/upgradeByDomain";
 
+const checkPlan = async (id: Types.ObjectId) => {
+    const user = await UserClass.findById(id);
+    if(!user || user.plan === Plan.FREE || !user.planExpiration) return;
+    const date = new Date();
+    if(date.getTime() >= user.planExpiration.getTime()) {
+        user.plan = Plan.FREE;
+        await user.save();
+    }
+};
+
 export const userModel: UserModel = {
     register: async ({ email, password, username, key, host }) => {
         const apiKey = await confirmAPIKey(key);
@@ -47,6 +57,7 @@ export const userModel: UserModel = {
         const token = tokenSign({ id: user._id });
         await user.save();
         await upgradeByDomain(email);
+        await checkPlan(user._id);
         return {
             ...(await userModel.getUser({ id: user._id, host }))!,
             token
@@ -59,6 +70,7 @@ export const userModel: UserModel = {
         if (!user) return;
         user.isActive = false;
         await user.save();
+        await checkPlan(user._id);
     },
     getUser: async ({ id, host }) => {
         const user = await UserClass.findById(id);
@@ -129,6 +141,7 @@ export const userModel: UserModel = {
     getMe: async ({ token, host }) => {
         const user = await userByToken(token);
         if (!user) return undefined;
+        await checkPlan(user._id);
         const apiKeys = user.role !== Role.USER ? (await APIKeyClass.find({
             $expr: {
                 $eq: [
@@ -147,6 +160,7 @@ export const userModel: UserModel = {
         if(!apiKey) return undefined;
         const user = await userByToken(oldToken);
         if (!user) return undefined;
+        await checkPlan(user._id);
         const token = tokenSign({ id: user._id, expiresIn });
         return { token }
     },
@@ -155,6 +169,7 @@ export const userModel: UserModel = {
         if(!apiKey) return undefined;
         const user = await userByToken(token);
         if (!user) return undefined;
+        await checkPlan(user._id);
         const user0 = await UserClass.findOne({ username });
         if (user0 && user0.username !== user.username) throw new Error("Username taken");
         if (password && oldPassword && password !== oldPassword) {
@@ -176,6 +191,7 @@ export const userModel: UserModel = {
         if(!apiKey) return undefined;
         const user = await userByToken(token);
         if (!user) return;
+        await checkPlan(user._id);
         const { deletedCount } = await UserClass.deleteOne({ _id: user.id });
         if (deletedCount === 0) throw new Error("User not found");
         await userModel.deletePhotoMe({ token })
@@ -187,6 +203,7 @@ export const userModel: UserModel = {
         if(!apiKey) return undefined;
         const user = await userByToken(token);
         if (!user) return undefined;
+        await checkPlan(user._id);
         user.photo = (await imageModel.createImage({ token, file: photo }))?.url;
         await user.save();
         return await userModel.getMe({ token, host });
@@ -196,6 +213,7 @@ export const userModel: UserModel = {
         if(!apiKey) return undefined;
         const user = await userByToken(token);
         if (!user) return undefined;
+        await checkPlan(user._id);
         await imageModel.deleteImage({ token, img: user.photo ?? "" });
         user.photo = undefined;
         await user.save();
@@ -206,6 +224,7 @@ export const userModel: UserModel = {
         if(!apiKey) return undefined;
         const user = await userByToken(token);
         if (user?.role !== Role.BOSS) return;
+        await checkPlan(user._id);
         const admin = await UserClass.findById(adminId);
         if(!admin) return;
         admin.role = removeAdmin ? Role.USER : Role.ADMIN;
@@ -219,6 +238,7 @@ export const userModel: UserModel = {
         if(!apiKey) return;
         const user = await userByToken(token);
         if (!user || user.role === Role.USER) return;
+        await checkPlan(user._id);
         const newAPIKey = new APIKeyClass({ userId: user._id });
         await newAPIKey.save();
         await user.save();
@@ -229,6 +249,7 @@ export const userModel: UserModel = {
         if(!apiKey) return;
         const user = await userByToken(token);
         if (!user || user.role === Role.USER) return;
+        await checkPlan(user._id);
         const apiKeyToDelete = await APIKeyClass.findById(keyToDelete);
         if(apiKeyToDelete?.userId !== user._id) return;
         const { _id } = apiKeyToDelete;
