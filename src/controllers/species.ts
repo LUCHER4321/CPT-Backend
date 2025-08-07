@@ -42,14 +42,15 @@ export const speciesController = ({
         const { host } = req.headers;
         try {
             const parse = parseNewSpecies(req.body);
-            if(!parse.ancestorId && !parse.apparition) return res.status(400).json({ message: "Apparition is required if there's no ancestor" });
-            if(parse.ancestorId && !parse.afterApparition) return res.status(400).json({ message: "After Apparition is required if there's an ancestor" });
+            if(!parse.ancestorId && parse.apparition === undefined) return res.status(400).json({ message: "Apparition is required if there's no ancestor" });
+            if(parse.ancestorId && parse.afterApparition === undefined) return res.status(400).json({ message: "After Apparition is required if there's an ancestor" });
             const output = toOutput(parse);
             const treeId = toObjectId(t_id)
             const species = await speciesModel.createSpecies({ token, treeId, ...output, key, host });
             if(!species) return res.status(404).json({ message: "PhTree not found" });
             res.json(species);
         } catch (error: any) {
+            console.log(error)
             res.status(400).json({ message: error.message });
         }
     },
