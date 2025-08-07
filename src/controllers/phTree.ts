@@ -105,6 +105,7 @@ export const phTreeController = ({
         if (!token) return res.status(401).json({ message: "Unauthorized" });
         try {
             const total = await phTreeModel.getTotalTrees({ token });
+            if(!total) res.json({ total: 0, myTrees: 0, collabs: 0 })
             res.json(total);
         } catch (error: any) {
             res.status(400).json({ message: error.message });
@@ -238,7 +239,7 @@ export const phTreeController = ({
         try {
             const id = toObjectId(_id);
             const views = await phTreeModel.setView({ token, id, key});
-            if(!views) return res.status(404).json({ message: "Ph. Tree not found" });
+            if(views === undefined) return res.status(404).json({ message: "Ph. Tree not found" });
             res.json({ views });
         } catch (error: any) {
             res.status(400).json({ message: error.message });
