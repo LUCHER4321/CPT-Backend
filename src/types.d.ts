@@ -106,6 +106,7 @@ export interface UserModel {
         plan?: Plan;
         oldPassword?: string;
         password?: string;
+        planExpiration?: Date;
     }, User>;
     deleteMe: ModelFuncton<{
         token: string;
