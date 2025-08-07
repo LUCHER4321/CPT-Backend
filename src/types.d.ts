@@ -195,10 +195,11 @@ export interface PhTreeController {
     setView: ControllerFunction;
 }
 
-type TreeSearch = Partial<{
+export type TreeSearch = Partial<{
     page: number;
     limit: number;
     search: string;
+    userId: Types.ObjectId;
     criteria: TreeCriteria;
     order: Order;
     from: Date;
@@ -393,6 +394,7 @@ export interface LikeModel {
 export interface SpeciesMongo extends Omit<SpeciesJSON, "descendants"> {
     id: Types.ObjectId;
     treeId: Types.ObjectId;
+    ancestorId?: Types.ObjectId;
     descendants?: SpeciesMongo[];
 }
 
