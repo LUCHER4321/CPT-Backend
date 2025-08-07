@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 import { PhTreeClass } from "../schemas/phTree";
-import { PhTree, PhTreeModel } from "../types";
+import { PhTree, PhTreeModel, TreeSearch } from "../types";
 import { photoToString } from "../utils/photo";
 import { imageModel } from "./image";
 import { nullableInput } from "../utils/nullableInput";
@@ -38,15 +38,8 @@ const myTree = async ({
     return { phTree };
 }
 
-interface GetTreesProps {
+interface GetTreesProps extends TreeSearch {
     token?: string
-    page?: number;
-    limit?: number;
-    search?: string;
-    criteria?: TreeCriteria;
-    order?: Order;
-    from?: Date;
-    to?: Date;
     myTrees?: boolean;
     owner?: boolean;
     host?: string;
@@ -56,6 +49,7 @@ const getTrees = async ({
     token,
     page,
     limit,
+    userId,
     search,
     criteria,
     order,
@@ -71,6 +65,7 @@ const getTrees = async ({
     const users = await UserClass.find({ username: searchRegex });
     const usersId = users.map(user => user._id.toString());
     const treesQuery = PhTreeClass.find({
+        userId,
         ...{
             $or: [
                 ...searchRegex ? [
@@ -285,8 +280,8 @@ export const phTreeModel: PhTreeModel = {
         if(isPublic !== undefined) phTree.isPublic = isPublic;
         if(tags) phTree.tags = tags.length > 0 ? tags : undefined;
         if(newCollaborators) {
-            if(!phTree.collaborators) phTree.collaborators = newCollaborators;
-            else phTree.collaborators.push(...newCollaborators);
+            if(!phTree.collaborators) phTree.collaborators = newCollaborators.filter(c => c.toString() !== user._id.toString());
+            else phTree.collaborators.push(...newCollaborators.filter(c => !phTree.collaborators?.includes(c) && c.toString() !== user._id.toString()));
         }
         if(deleteCollaborators && user._id.toString() === phTree.userId.toString()) phTree.collaborators = phTree.collaborators?.filter(c => !deleteCollaborators.includes(c));
         if(phTree.collaborators?.length === 0) phTree.collaborators = undefined;
@@ -337,6 +332,7 @@ export const phTreeModel: PhTreeModel = {
         page,
         limit,
         search,
+        userId,
         criteria,
         order,
         from,
@@ -348,6 +344,7 @@ export const phTreeModel: PhTreeModel = {
             page,
             limit,
             search,
+            userId,
             criteria,
             order,
             from,
