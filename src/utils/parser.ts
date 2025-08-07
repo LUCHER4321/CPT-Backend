@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { NotiFunc, Order, TreeChange, TreeCriteria } from "../enums";
+import { NotiFunc, Order, Plan, TreeChange, TreeCriteria } from "../enums";
 import { nullableInput } from "./nullableInput";
 import { Email, PhTreeChange, SpeciesMongoInput } from "../types";
 
@@ -42,9 +42,15 @@ const isList = (ls: any): boolean => Array.isArray(ls);
 
 const parseList = <T,>(ls: any, parse: (el: any, pr: string) => T, prop = "", props: string = "") => parseProp<any[]>(ls, isList, props).map(el => parse(el, prop));
 
+const isDate = (date: any): boolean => date instanceof Date;
+
+const parseDate = (date: any, prop = "") => parseProp<Date>(date, isDate, prop);
+
 const isNumber = (num: any): boolean => typeof num === "number" || num instanceof Number;
 
 const parseNumber = (num: any, prop = "") => parseProp<number>(num, isNumber, prop);
+
+const parsePlan = (plan: any, prop = "") => parseProp<Plan>(plan, isEnum(Plan), prop);
 
 const parseFun = (fun: any, prop = "") => parseProp<NotiFunc>(fun, isEnum(NotiFunc), prop);
 
@@ -89,7 +95,9 @@ export const parseReset = (object: any) => ({
 export const parsePatchUser = (object: any) => ({
     username: toPartial(() => parseString(object.username)),
     oldPassword: toPartial(() => parseString(object.oldPassword)),
-    password: toPartial(() => parseString(object.password))
+    password: toPartial(() => parseString(object.password)),
+    plan: toPartial(() => parsePlan(object.plan)),
+    planExpiration: toPartial(() => parseDate(object.planExpiration))
 });
 
 export const parseNewAdmin = (object: any) => ({
