@@ -626,7 +626,8 @@ Updates data about your account
   "username": "string | undefined",
   "oldPassword": "string | undefined",
   "password": "string | undefined",
-  "plan": "Plan | undefined"
+  "plan": "Plan | undefined",
+  "planExpiration": "Date | undefined"
 }
 ```
 
