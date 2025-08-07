@@ -28,7 +28,7 @@ const check = async ({
     const user = await nullableInput(token, userByToken);
     const phTree = await PhTreeClass.findById(treeId);
     if(!phTree) throw new Error("Ph. Tree not found");
-    if(!phTree.isPublic && (phTree.userId.toString() !== user?._id.toString() || !phTree.collaborators?.map(c => c.toString())?.includes(user?._id.toString()))) throw new Error("Access denied to the Ph. Tree");
+    if(!phTree.isPublic && phTree.userId.toString() !== user?._id.toString() && !phTree.collaborators?.map(c => c.toString())?.includes(user?._id.toString() ?? "")) throw new Error("Access denied to the Ph. Tree");
     if(!id) return {
         user,
         phTree
@@ -75,6 +75,7 @@ const getSpecies = async ({
     return {
         id: species._id,
         treeId,
+        ancestorId: species.ancestorId ?? undefined,
         descendants,
         name: species.name,
         apparition: species.apparition ?? undefined,
@@ -150,6 +151,7 @@ export const speciesModel: SpeciesModel = {
         return {
             id: newSpecies._id,
             treeId: newSpecies.treeId,
+            ancestorId: newSpecies.ancestorId ?? undefined,
             name: newSpecies.name,
             apparition: newSpecies.apparition ?? undefined,
             afterApparition: newSpecies.afterApparition ?? undefined,
@@ -180,11 +182,11 @@ export const speciesModel: SpeciesModel = {
         } = await check({token, treeId, id });
         if(!species) return undefined;
         if(name) species.name = name;
-        if(duration) species.duration = Math.max(Math.min(...await Promise.all((await SpeciesClass.find({ ancestorId: id })).map(d => d.afterApparition ?? Number.MAX_SAFE_INTEGER)), duration), 0);
+        if(duration) species.duration = duration;
         if(description) species.description = description !== "" ? description : undefined;
         if(ancestorId){
             const newAncestor = await SpeciesClass.findById(ancestorId);
-            if((species.apparition || species.apparition === 0) && (newAncestor?.apparition || newAncestor?.apparition === 0) && !afterApparition && afterApparition !== 0){
+            if(species.apparition !== undefined && species.apparition !== null && (newAncestor?.apparition || newAncestor?.apparition === 0) && !afterApparition && afterApparition !== 0){
                 species.afterApparition = Math.max(species.apparition - newAncestor.apparition, 0);
                 species.apparition = undefined;
             }
