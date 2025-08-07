@@ -62,7 +62,7 @@ export const followController = ({
         try {
             const userId = toObjectId(id);
             const count = await followModel.getFollowersCount({ userId });
-            if (!count) return res.status(404).json({ message: "User not found" });
+            if (count === undefined) return res.status(404).json({ message: "User not found" });
             res.json({ count });
         } catch (error: any) {
             res.status(400).json({ message: error.message });
