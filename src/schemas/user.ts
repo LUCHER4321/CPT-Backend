@@ -29,6 +29,7 @@ const UserSchema = new Schema({
         enum: Object.values(Plan),
         default: Plan.FREE
     },
+    planExpiration: Date,
     role: {
         type: String,
         enum: Object.values(Role),
