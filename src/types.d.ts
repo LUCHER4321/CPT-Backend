@@ -233,6 +233,11 @@ interface SpeciesMongoInput extends Omit<
     descendants?: SpeciesMongoInput[];
 }
 
+type SearchResult = {
+    trees: PhTree[];
+    count: number;
+}
+
 export interface PhTreeModel {
     createPhTree: ModelFuncton<{
         token: string;
@@ -245,7 +250,7 @@ export interface PhTreeModel {
     getMyPhTrees: ModelFuncton<{
         token: string;
         owner?: boolean;
-    } & TreeSearch, PhTree[]>;
+    } & TreeSearch, SearchResult>;
     getTotalTrees: ModelFuncton<{
         token: string;
     }, {
@@ -278,7 +283,7 @@ export interface PhTreeModel {
     }, PhTree>;
     getPhTrees: ModelFuncton<{
         token?: string;
-    } & TreeSearch, PhTree[]>;
+    } & TreeSearch, SearchResult>;
     getPhTree: ModelFuncton<{
         token?: string;
         id: Types.ObjectId;
