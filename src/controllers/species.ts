@@ -50,7 +50,6 @@ export const speciesController = ({
             if(!species) return res.status(404).json({ message: "PhTree not found" });
             res.json(species);
         } catch (error: any) {
-            console.log(error)
             res.status(400).json({ message: error.message });
         }
     },
