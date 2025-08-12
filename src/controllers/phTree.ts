@@ -72,10 +72,10 @@ export const phTreeController = ({
         if (!token) return res.status(401).json({ message: "Unauthorized" });
         const { host } = req.headers;
         const {
-            page,
+            page = 0,
             limit = 10,
             search,
-            criteria = "createdAt",
+            criteria = "updatedAt",
             order = "desc",
             from,
             to,
@@ -84,13 +84,13 @@ export const phTreeController = ({
         try {
             const phTrees = await phTreeModel.getMyPhTrees({
                 token,
-                page: nullableInput(page, p => +p),
+                page: +page,
                 limit: +limit,
-                search: nullableInput(search, s => s as string),
+                search: search?.toString(),
                 criteria: parseCriteria(criteria),
                 order: parseOrder(order),
-                from: nullableInput(from, f => new Date(f as string)),
-                to: nullableInput(to, t => new Date(t as string)),
+                from: nullableInput(from?.toString(), f => new Date(f)),
+                to: nullableInput(to?.toString(), t => new Date(t)),
                 owner: owner === "true" ? true : owner === "false" ? false : undefined,
                 host
             });
@@ -191,10 +191,11 @@ export const phTreeController = ({
     getPhTrees: async (req, res) => {
         const { token } = req.cookies;
         const {
-            page,
+            page = 0,
             limit = 10,
+            userId,
             search,
-            criteria = "createdAt",
+            criteria = "updatedAt",
             order = "desc",
             from,
             to
@@ -203,13 +204,14 @@ export const phTreeController = ({
         try {
             const phTrees = await phTreeModel.getPhTrees({
                 token,
-                page: nullableInput(page, p => +p),
+                page: +page,
                 limit: +limit,
-                search: nullableInput(search, s => s as string),
+                userId: nullableInput(userId?.toString(), toObjectId),
+                search: search?.toString(),
                 criteria: parseCriteria(criteria),
                 order: parseOrder(order),
-                from: nullableInput(from, f => new Date(f as string)),
-                to: nullableInput(to, t => new Date(t as string)),
+                from: nullableInput(from?.toString(), f => new Date(f)),
+                to: nullableInput(to?.toString(), t => new Date(t)),
                 host
             });
             if (!phTrees) return res.status(404).json({ message: "No Ph. Trees found" });
