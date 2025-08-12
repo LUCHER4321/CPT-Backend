@@ -58,66 +58,37 @@ const getTrees = async ({
     myTrees = false,
     owner,
     host
-}: GetTreesProps): Promise<PhTree[]> => {
+}: GetTreesProps): Promise<{
+    trees: PhTree[];
+    count: number;
+}> => {
     const user = await nullableInput(token, userByToken);
     if(myTrees && !user) throw new Error("Invalid Token");
     const searchRegex = nullableInput(search, s => new RegExp(s, "i"));
     const users = await UserClass.find({ username: searchRegex });
     const usersId = users.map(user => user._id.toString());
-    const treesQuery = PhTreeClass.find({
-        userId,
-        ...{
+    const queries = {
+        ...(userId ? { userId } : {}),
+        ...(searchRegex ? {
             $or: [
-                ...searchRegex ? [
-                    { name: searchRegex },
-                    { tags: searchRegex },
-                    {
-                        $expr: {
-                            $in: [
-                                { $toString: "$userId" },
-                                usersId
-                            ]
-                        }
-                    }
-                ] : [],
-                ...(user && !myTrees) ? [
-                    { 
-                        $expr: {
-                            $eq: [
-                                { $toString: "$userId" },
-                                user._id.toString()
-                            ]
-                        }
-                    },
-                    { isPublic: true }
-                ] : []
+                { name: searchRegex },
+                { tags: searchRegex },
+                { userId: { $in: usersId } }
             ]
-        },
-        ...!user ? { isPublic: true } : {},
-        ...(user && myTrees) ? {
+        } : {}),
+        ...(!user ? { isPublic: true } : {}),
+        ...(user && myTrees ? {
             $or: [
-                {
-                    $expr: [true, undefined].includes(owner) ? {
-                        $eq: [
-                            { $toString: "$userId" },
-                            user._id.toString()
-                        ]
-                    } : {}
-                },
-                {
-                    $expr: [false, undefined].includes(owner) ? {
-                        $eq: [
-                            { $toString: "$collaborators" },
-                            user._id.toString()
-                        ]
-                    } : {}
-                }
-            ]
-        }: {},
-        ...from ? { createdAt: { $gte: from } }: {},
-        ...to ? { createdAt: { $lte: to } }: {}
-    });
-    const skip = (page ?? 0) * (limit ?? 0);
+                ...(owner === true || owner === undefined ? [{ userId: user._id }] : []),
+                ...(owner === false || owner === undefined ? [{ collaborators: user._id }] : [])
+            ].filter(cond => Object.keys(cond).length > 0) // Filtra condiciones vacías
+        } : {}),
+        ...(from ? { createdAt: { $gte: from } } : {}),
+        ...(to ? { createdAt: { $lte: to } } : {})
+    };
+    const treesQuery = PhTreeClass.find(queries);
+    const totalResults = await PhTreeClass.countDocuments(queries);
+    const skip = (page ?? 0) * (limit ?? 10);
     const query = async () => {
         switch (criteria) {
             case TreeCriteria.LIKES:
@@ -131,7 +102,7 @@ const getTrees = async ({
                     return treesWithLikes.sort((a, b) => (a.likeCount - b.likeCount) * (order === Order.ASC ? 1 : -1)).map(t => {
                         const { likeCount, ...tree } = t;
                         return tree;
-                    }).slice(skip, skip + (limit ?? 0));
+                    }).slice(skip, skip + (limit ?? 10));
                 });
             case TreeCriteria.COMMENTS:
                 return await treesQuery.lean().then(async (trees) => {
@@ -144,11 +115,11 @@ const getTrees = async ({
                     return treesWithComments.sort((a, b) => (a.commentCount - b.commentCount) * (order === Order.ASC ? 1 : -1)).map(t => {
                         const { commentCount, ...tree } = t;
                         return tree;
-                    }).slice(skip, skip + (limit ?? 0));
+                    }).slice(skip, skip + (limit ?? 10));
                 });
             case TreeCriteria.VIEWS:
                 return await treesQuery.lean().then(async (trees) => {
-                    return trees.sort((a,b) => (a.views.length - b.views.length) * (order === Order.ASC ? 1 : -1)).slice(skip, skip + (limit ?? 0));
+                    return trees.sort((a,b) => (a.views.length - b.views.length) * (order === Order.ASC ? 1 : -1)).slice(skip, skip + (limit ?? 10));
                 });
             case TreeCriteria.POPULARITY:
                 return await treesQuery.lean().then(async (trees) => {
@@ -174,30 +145,33 @@ const getTrees = async ({
                     return treesWithPopularity.sort((a, b) => (a.popularity - b.popularity) * (order === Order.ASC ? 1 : -1)).map(t => {
                         const { popularity, ...tree} = t;
                         return tree;
-                    }).slice(skip, skip + (limit ?? 0));
+                    }).slice(skip, skip + (limit ?? 10));
                 });
             default:
                 const sortOptions: any = {};
                 if(criteria) sortOptions[criteria] = order === Order.ASC ? 1 : -1;
-                return await treesQuery.sort(sortOptions).skip(skip).limit(limit ?? 0);
+                return await treesQuery.sort(sortOptions).skip(skip).limit(limit ?? 10);
         };
     };
     const trees = await query();
-    return await Promise.all(trees.map(async (t) => ({
-        id: t._id,
-        userId: t.userId,
-        name: t.name,
-        image: photoToString(t.image, host),
-        description: t.description ?? undefined,
-        isPublic: t.isPublic,
-        createdAt: t.createdAt,
-        updatedAt: t.updatedAt,
-        tags: t.tags ?? undefined,
-        collaborators: t.collaborators ?? undefined,
-        likes: await LikeClass.countDocuments({ treeId: t._id}),
-        comments: await CommentClass.countDocuments({ treeId: t._id}),
-        views: t.views.length
-    })));
+    return {
+        trees: await Promise.all(trees.map(async (t) => ({
+            id: t._id,
+            userId: t.userId,
+            name: t.name,
+            image: photoToString(t.image, host),
+            description: t.description ?? undefined,
+            isPublic: t.isPublic,
+            createdAt: t.createdAt,
+            updatedAt: t.updatedAt,
+            tags: t.tags ?? undefined,
+            collaborators: t.collaborators ?? undefined,
+            likes: await LikeClass.countDocuments({ treeId: t._id}),
+            comments: await CommentClass.countDocuments({ treeId: t._id}),
+            views: t.views.length
+        }))),
+        count: totalResults
+    }
 };
 
 export const phTreeModel: PhTreeModel = {
@@ -379,10 +353,12 @@ export const phTreeModel: PhTreeModel = {
         if(!mt) return undefined;
         const { user, phTree } = mt;
         if(!user) return phTree.views.length;
-        if(!phTree.views.map(v => v.viewerId?.toString()).includes(user._id.toString())) {
-            phTree.views.push({ viewerId: user._id });
-            await phTree.save();
+        if(phTree.views.map(({ viewerId }) => viewerId?.toString()).includes(user._id.toString())) {
+            const index = Math.max(...phTree.views.map(({ viewerId }, index) => viewerId?.toString() === user._id.toString() ? index : 0));
+            phTree.views.splice(index, 1);
         }
+        phTree.views.push({ viewerId: user._id });
+        await phTree.save();
         return phTree.views.length;
     }
 }
