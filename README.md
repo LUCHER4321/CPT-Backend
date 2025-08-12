@@ -895,7 +895,7 @@ Get the followers number of a specific user
 Formula used to calculate popularity:
 
 $$
-Popularity = \alpha \times \sum_{S \in \text{Interacions}} \text{Ponderation}_S \sum_{i \in S}\frac{1}{\ln(\text{time since } i + e)}
+\text{Popularity} = \alpha \times \sum_{S \in \text{Interacions}} \text{Ponderation}_S \sum_{i \in S}\frac{1}{\ln(\text{time since } i + e)}
 $$
 
 $$
@@ -968,23 +968,26 @@ Search your Ph. Trees
 **Response:**
 
 ```json
-[
-  {
-    "id": "ObjectId",
-    "userId": "ObjectId",
-    "name": "string",
-    "image": "string | undefined",
-    "description": "string | undefined",
-    "isPublic": "boolean",
-    "createdAt": "Date",
-    "updatedAt": "Date",
-    "tags": ["string"],
-    "collaborators": ["string"],
-    "likes": "number",
-    "comments": "number",
-    "views": "number"
-  }
-]
+{
+  "trees": [
+    {
+      "id": "ObjectId",
+      "userId": "ObjectId",
+      "name": "string",
+      "image": "string | undefined",
+      "description": "string | undefined",
+      "isPublic": "boolean",
+      "createdAt": "Date",
+      "updatedAt": "Date",
+      "tags": ["string"],
+      "collaborators": ["string"],
+      "likes": "number",
+      "comments": "number",
+      "views": "number"
+    }
+  ],
+  "count": "number"
+}
 ```
 
 #### `GET /me/total`
@@ -1165,6 +1168,8 @@ Search Ph. Trees made by other users
 - `?search`: Searching by tags, name or user
 - `?criteria`: Sorting criteria (`"createdAt", "updatedAt", "likes", "comments", "views", "name", "popularity"`)
 - `?order`: Sorting order (`"asc", "desc"`)
+- `?from`: Minimum createdAt
+- `?to`: Maximum createdAt
 
 **Cookie:**
 
@@ -1173,23 +1178,26 @@ Search Ph. Trees made by other users
 **Response:**
 
 ```json
-[
-  {
-    "id": "ObjectId",
-    "userId": "ObjectId",
-    "name": "string",
-    "image": "string | undefined",
-    "description": "string | undefined",
-    "isPublic": "boolean",
-    "createdAt": "Date",
-    "updatedAt": "Date",
-    "tags": ["string"],
-    "collaborators": ["string"],
-    "likes": "number",
-    "comments": "number",
-    "views": "number"
-  }
-]
+{
+  "trees": [
+    {
+      "id": "ObjectId",
+      "userId": "ObjectId",
+      "name": "string",
+      "image": "string | undefined",
+      "description": "string | undefined",
+      "isPublic": "boolean",
+      "createdAt": "Date",
+      "updatedAt": "Date",
+      "tags": ["string"],
+      "collaborators": ["string"],
+      "likes": "number",
+      "comments": "number",
+      "views": "number"
+    }
+  ],
+  "count": "number"
+}
 ```
 
 #### `GET /:id`
