@@ -4,6 +4,7 @@ import { PhTreeClass } from "../schemas/phTree";
 import { LikeModel } from "../types";
 import { confirmAPIKey } from "../utils/apiKey";
 import { nullableInput } from "../utils/nullableInput";
+import { photoToString } from "../utils/photo";
 import { userByToken } from "../utils/token";
 import { commentModel } from "./comment";
 
@@ -46,7 +47,7 @@ export const likeModel: LikeModel = {
         });
         if(deletedCount === 0) throw new Error(`${user.username} doesn't like ${liked.name}`);
     },
-    likedPhTrees: async ({ token }) => {
+    likedPhTrees: async ({ token, host }) => {
         const user = await userByToken(token);
         if (!user) return undefined;
         const likes = await LikeClass.find({ userId: user._id });
@@ -55,7 +56,7 @@ export const likeModel: LikeModel = {
             id: t._id,
             userId: t.userId,
             name: t.name,
-            image: t.image ?? undefined,
+            image: photoToString(t.image, host) ?? undefined,
             description: t.description ?? undefined,
             isPublic: t.isPublic,
             createdAt: t.createdAt,
