@@ -70,14 +70,14 @@ export const commentModel: CommentModel = {
                 { parentId: { $exists: false } }
             ]
         });
-        return parents.length > 0 ? (await Promise.all(parents.map(p => commentModel.getComment({ treeId, id: p._id })))).filter(p => p !== undefined) : undefined;
+        return parents.length > 0 ? (await Promise.all(parents.map(p => commentModel.getComment({ treeId, id: p._id })))).filter(p => p?.content || p?.replies?.length).filter(p => p !== undefined) : undefined;
     },
     getComment: async ({ treeId, id }) => {
         const comment = await CommentClass.findById(id);
         if(!comment) return undefined;
         if(comment.treeId.toString() !== treeId.toString()) throw new Error("Comment isn't a tree's comment");
         const repliesFind = await CommentClass.find({ parentId: comment._id });
-        const replies = repliesFind.length > 0 ? (await Promise.all(repliesFind.map(r => commentModel.getComment({ treeId, id: r._id })))).filter(r => r !== undefined) : undefined;
+        const replies = repliesFind.length > 0 ? (await Promise.all(repliesFind.map(r => commentModel.getComment({ treeId, id: r._id })))).filter(r => r?.content || r?.replies?.length).filter(r => r !== undefined) : undefined;
         return {
             id: comment.id,
             treeId: comment.treeId,
@@ -85,7 +85,7 @@ export const commentModel: CommentModel = {
             content: comment.content ?? undefined,
             createdAt: comment.createdAt,
             updatedAt: comment.updatedAt,
-            replies
+            replies: replies?.length ? replies : undefined
         };
     }
 }
