@@ -36,8 +36,9 @@ export const likeController = ({
     likedPhTrees: async (req, res) => {
         const { token } = req.cookies;
         if (!token) return res.status(401).json({ message: "Unauthorized" });
+        const { host } = req.headers;
         try {
-            const likedPhTrees = await likeModel.likedPhTrees({ token });
+            const likedPhTrees = await likeModel.likedPhTrees({ token, host });
             if (!likedPhTrees) return res.status(404).json({ message: "No liked PhTrees found" });
             res.json(likedPhTrees);
         } catch (error: any) {
