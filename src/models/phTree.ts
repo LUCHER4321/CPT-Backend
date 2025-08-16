@@ -81,7 +81,7 @@ const getTrees = async ({
             $or: [
                 ...(owner === true || owner === undefined ? [{ userId: user._id }] : []),
                 ...(owner === false || owner === undefined ? [{ collaborators: user._id }] : [])
-            ].filter(cond => Object.keys(cond).length > 0) // Filtra condiciones vacías
+            ].filter(cond => Object.keys(cond).length > 0)
         } : {}),
         ...(from ? { createdAt: { $gte: from } } : {}),
         ...(to ? { createdAt: { $lte: to } } : {})
@@ -108,7 +108,7 @@ const getTrees = async ({
                 return await treesQuery.lean().then(async (trees) => {
                     const treesWithComments  = await Promise.all(
                         trees.map(async (tree) => {
-                            const commentCount = await CommentClass.countDocuments({ treeId: tree._id })
+                            const commentCount = await CommentClass.countDocuments({ treeId: tree._id, content: { $exists: true }  })
                             return { ...tree, commentCount };
                         })
                     );
@@ -129,7 +129,7 @@ const getTrees = async ({
                             const time = now - v.date.getTime() / 1000;
                             return inverseLN(time);
                         }).reduce((a, b) => a + b) : 0;
-                        const comments = await CommentClass.find({ treeId: tree._id });
+                        const comments = await CommentClass.find({ treeId: tree._id, content: { $exists: true } });
                         const commentsP = comments.length > 0 ? COMMENTS_P * comments.map(c => {
                             const time = now - c.createdAt.getTime() / 1000;
                             return inverseLN(time);
@@ -166,8 +166,8 @@ const getTrees = async ({
             updatedAt: t.updatedAt,
             tags: t.tags ?? undefined,
             collaborators: t.collaborators ?? undefined,
-            likes: await LikeClass.countDocuments({ treeId: t._id}),
-            comments: await CommentClass.countDocuments({ treeId: t._id}),
+            likes: await LikeClass.countDocuments({ treeId: t._id }),
+            comments: await CommentClass.countDocuments({ treeId: t._id, content: { $exists: true } }),
             views: t.views.length
         }))),
         count: totalResults
@@ -342,7 +342,7 @@ export const phTreeModel: PhTreeModel = {
             tags: phTree.tags ?? undefined,
             collaborators: phTree.collaborators ?? undefined,
             likes: await LikeClass.countDocuments({ treeId: phTree._id}),
-            comments: await CommentClass.countDocuments({ treeId: phTree._id}),
+            comments: await CommentClass.countDocuments({ treeId: phTree._id, content: { $exists: true } }),
             views: phTree.views.length
         }
     },
