@@ -56,8 +56,8 @@ export const commentModel: CommentModel = {
         if(comment.treeId.toString() !== treeId.toString()) throw new Error("Comment isn't a tree's comment");
         const hasReplies = (await CommentClass.find({ parentId: comment._id })).length > 0;
         if(hasReplies) {
-            comment.content = null;
-            comment.userId = null;
+            comment.content = undefined;
+            comment.userId = undefined;
             await comment.save();
         } else await CommentClass.deleteOne({ _id: comment._id });
         await LikeClass.deleteMany({ commentId: comment._id });
