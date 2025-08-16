@@ -63,8 +63,8 @@ export const likeModel: LikeModel = {
             updatedAt: t.updatedAt,
             tags: t.tags ?? undefined,
             collaborators: t.collaborators ?? undefined,
-            likes: await LikeClass.countDocuments({ treeId: t._id}),
-            comments: await CommentClass.countDocuments({ treeId: t._id}),
+            likes: await LikeClass.countDocuments({ treeId: t._id, content: { $exists: true }}),
+            comments: await CommentClass.countDocuments({ treeId: t._id, content: { $exists: true }}),
             views: t.views.length
         })));
     },
