@@ -84,7 +84,8 @@ export const userModel: UserModel = {
             role: user.role,
             createdAt: user.createdAt,
             lastLogin: user.lastLogin,
-            isActive: user.isActive
+            isActive: user.isActive,
+            description: user.description ?? undefined
         };
     },
     search: async ({ limit, search, host }) => {
@@ -106,7 +107,8 @@ export const userModel: UserModel = {
             role: user.role,
             createdAt: user.createdAt,
             lastLogin: user.lastLogin,
-            isActive: user.isActive
+            isActive: user.isActive,
+            description: user.description ?? undefined
         }));
     },
     recover: async ({ email, url, key }) => {
@@ -164,7 +166,7 @@ export const userModel: UserModel = {
         const token = tokenSign({ id: user._id, expiresIn });
         return { token }
     },
-    updateMe: async ({ username, oldPassword, password, plan, token, key, host }) => {
+    updateMe: async ({ username, oldPassword, password, description, plan, token, key, host }) => {
         const apiKey = await confirmAPIKey(key);
         if(!apiKey) return undefined;
         const user = await userByToken(token);
@@ -178,6 +180,7 @@ export const userModel: UserModel = {
             user.password = await encryptPassword(password);
         }
         if (username && username !== user.username) user.username = username;
+        if(description) user.description = description;
         if(plan) user.plan = plan;
         if(plan === Plan.INSTITUTIONAL) {
             const [_, domain] = user.email.split("@");
