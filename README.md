@@ -37,6 +37,7 @@
     - [`POST /`](#post-)
     - [`GET /me`](#get-me)
     - [`GET /me/total`](#get-metotal)
+    - [`GET /:userId/total`](#get-useridtotal)
     - [`PATCH /:id`](#patch-id)
     - [`DELETE /:id`](#delete-id-1)
     - [`POST /:id/image`](#post-idimage)
@@ -356,6 +357,7 @@ Create a new user
   "createdAt": "Date",
   "lastLogin": "Date",
   "isActive": "boolean | undefined",
+  "description": "string | undefined",
   "apiKeys": ["ObjectId"]
 }
 ```
@@ -392,6 +394,7 @@ Log in with an existing account
   "createdAt": "Date",
   "lastLogin": "Date",
   "isActive": "boolean | undefined",
+  "description": "string | undefined",
   "apiKeys": ["ObjectId"]
 }
 ```
@@ -420,7 +423,8 @@ Search for users
     "role": "Role",
     "createdAt": "Date",
     "lastLogin": "Date",
-    "isActive": "boolean | undefined"
+    "isActive": "boolean | undefined",
+    "description": "string | undefined"
   }
 ]
 ```
@@ -445,7 +449,8 @@ Get info about an specific user
   "role": "Role",
   "createdAt": "Date",
   "lastLogin": "Date",
-  "isActive": "boolean | undefined"
+  "isActive": "boolean | undefined",
+  "description": "string | undefined"
 }
 ```
 
@@ -507,7 +512,8 @@ Reset password
   "role": "Role",
   "createdAt": "Date",
   "lastLogin": "Date",
-  "isActive": "boolean | undefined"
+  "isActive": "boolean | undefined",
+  "description": "string | undefined"
 }
 ```
 
@@ -549,6 +555,23 @@ Make an user to be an admin (`admin.role = Role.ADMIN`) or make an admin to be a
 {
   "adminId": "string",
   "removeAdmin": "boolean | undefined"
+}
+```
+
+**Response:**
+
+```json
+{
+  "id": "ObjectId",
+  "email": "${string}@${string}.${string}",
+  "username": "string",
+  "photo": "string | undefined",
+  "plan": "Plan",
+  "role": "Role",
+  "createdAt": "Date",
+  "lastLogin": "Date",
+  "isActive": "boolean | undefined",
+  "description": "string | undefined"
 }
 ```
 
@@ -603,6 +626,7 @@ Get info about your user
   "createdAt": "Date",
   "lastLogin": "Date",
   "isActive": "boolean | undefined",
+  "description": "string | undefined",
   "apiKeys": ["ObjectId"]
 }
 ```
@@ -626,6 +650,7 @@ Updates data about your account
   "username": "string | undefined",
   "oldPassword": "string | undefined",
   "password": "string | undefined",
+  "description": "string | undefined",
   "plan": "Plan | undefined",
   "planExpiration": "Date | undefined"
 }
@@ -644,6 +669,7 @@ Updates data about your account
   "createdAt": "Date",
   "lastLogin": "Date",
   "isActive": "boolean | undefined",
+  "description": "string | undefined",
   "apiKeys": ["ObjectId"]
 }
 ```
@@ -697,6 +723,7 @@ Set your profile picture
   "createdAt": "Date",
   "lastLogin": "Date",
   "isActive": "boolean | undefined",
+  "description": "string | undefined",
   "apiKeys": ["ObjectId"]
 }
 ```
@@ -726,6 +753,7 @@ Set your profile picture as `null | undefined`
   "createdAt": "Date",
   "lastLogin": "Date",
   "isActive": "boolean | undefined",
+  "description": "string | undefined",
   "apiKeys": ["ObjectId"]
 }
 ```
@@ -845,7 +873,8 @@ Get the users who follow a specific user
     "photo": "string | undefined",
     "role": "Role",
     "lastLogin": "Date | undefined",
-    "isActive": "boolean | undefined"
+    "isActive": "boolean | undefined",
+    "description": "string | undefined"
   }
 ]
 ```
@@ -869,7 +898,8 @@ Get the users followed by a specific user
     "photo": "string | undefined",
     "role": "Role",
     "lastLogin": "Date | undefined",
-    "isActive": "boolean | undefined"
+    "isActive": "boolean | undefined",
+    "description": "string | undefined"
   }
 ]
 ```
@@ -992,7 +1022,29 @@ Search your Ph. Trees
 
 #### `GET /me/total`
 
-Get the quantity of Ph. Trees
+Get the quantity of your Ph. Trees
+
+**Cookie:**
+
+- `token=`: JSON Web Token
+
+**Response:**
+
+```json
+{
+  "total": "number",
+  "myTrees": "number",
+  "collabs": "number"
+}
+```
+
+#### `GET /:userId/total`
+
+Get the quantity of a user's Ph. Trees
+
+**Params:**
+
+- `/:userId`: Id of the tree
 
 **Cookie:**
 
