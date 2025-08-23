@@ -218,11 +218,19 @@ export const phTreeModel: PhTreeModel = {
             host
         });
     },
-    getTotalTrees: async ({ token }) => {
+    getMyTotalTrees: async ({ token }) => {
         const user = await userByToken(token);
         if(!user) throw new Error("Invalid Token");
         const myTrees = await PhTreeClass.countDocuments({ userId: user._id });
         const collabs = await PhTreeClass.countDocuments({ collaborators: user._id });
+        const total = myTrees + collabs;
+        return { total, myTrees, collabs };
+    },
+    getTotalTrees: async({ token, userId }) => {
+        const tokenUser = await nullableInput(token, userByToken);
+        const isPublic = tokenUser?._id.toString() === userId.toString() ? {} : { isPublic: true };
+        const myTrees = await PhTreeClass.countDocuments({ userId, ...isPublic });
+        const collabs = await PhTreeClass.countDocuments({ collaborators: userId, ...isPublic });
         const total = myTrees + collabs;
         return { total, myTrees, collabs };
     },
