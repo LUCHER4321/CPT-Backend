@@ -97,7 +97,8 @@ export const parsePatchUser = (object: any) => ({
     oldPassword: toPartial(() => parseString(object.oldPassword)),
     password: toPartial(() => parseString(object.password)),
     plan: toPartial(() => parsePlan(object.plan)),
-    planExpiration: toPartial(() => parseDate(object.planExpiration))
+    planExpiration: toPartial(() => parseDate(object.planExpiration)),
+    description: toPartial(() => parseString(object.description))
 });
 
 export const parseNewAdmin = (object: any) => ({
