@@ -24,6 +24,7 @@ const UserSchema = new Schema({
         minlength: 6
     },
     photo: String,
+    description: String,
     plan: {
         type: String,
         enum: Object.values(Plan),
