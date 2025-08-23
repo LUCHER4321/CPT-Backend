@@ -21,7 +21,8 @@ export const createPhTreeRoutes = ({
     const router = Router();
     router.post("/", phTreeController.createPhTree);
     router.get("/me", phTreeController.getMyPhTrees);
-    router.get("/me/total", phTreeController.getTotalTrees);
+    router.get("/me/total", phTreeController.getMyTotalTrees);
+    router.get("/:userId/total", phTreeController.getTotalTrees);
     router.patch("/:id", phTreeController.updatePhTree);
     router.delete("/:id", phTreeController.deletePhTree);
     router.post("/:id/image", multerMw, phTreeController.setPhTreeImage);
