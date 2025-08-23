@@ -100,11 +100,23 @@ export const phTreeController = ({
             res.status(400).json({ message: error.message });
         }
     },
-    getTotalTrees: async (req, res) => {
+    getMyTotalTrees: async (req, res) => {
         const { token } = req.cookies;
         if (!token) return res.status(401).json({ message: "Unauthorized" });
         try {
-            const total = await phTreeModel.getTotalTrees({ token });
+            const total = await phTreeModel.getMyTotalTrees({ token });
+            if(!total) res.json({ total: 0, myTrees: 0, collabs: 0 })
+            res.json(total);
+        } catch (error: any) {
+            res.status(400).json({ message: error.message });
+        }
+    },
+    getTotalTrees: async (req, res) => {
+        const { userId: uid } = req.params;
+        const { token } = req.cookies;
+        try {
+            const userId = toObjectId(uid);
+            const total = await phTreeModel.getTotalTrees({ token, userId });
             if(!total) res.json({ total: 0, myTrees: 0, collabs: 0 })
             res.json(total);
         } catch (error: any) {
