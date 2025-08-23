@@ -42,6 +42,7 @@ export interface User {
     createdAt: Date;
     lastLogin: Date;
     isActive?: boolean;
+    description?: string;
     apiKeys?: Types.ObjectId[];
 }
 
@@ -104,6 +105,7 @@ export interface UserModel {
         token: string;
         username?: string;
         plan?: Plan;
+        description?: string;
         oldPassword?: string;
         password?: string;
         planExpiration?: Date;
@@ -186,6 +188,7 @@ export interface PhTreeController {
     setChange: WSControllerFunction;
     createPhTree: ControllerFunction;
     getMyPhTrees: ControllerFunction;
+    getMyTotalTrees: ControllerFunction;
     getTotalTrees: ControllerFunction;
     updatePhTree: ControllerFunction;
     deletePhTree: ControllerFunction;
@@ -251,8 +254,16 @@ export interface PhTreeModel {
         token: string;
         owner?: boolean;
     } & TreeSearch, SearchResult>;
-    getTotalTrees: ModelFuncton<{
+    getMyTotalTrees: ModelFuncton<{
         token: string;
+    }, {
+        total: number;
+        myTrees: number;
+        collabs: number;
+    }>;
+    getTotalTrees: ModelFuncton<{
+        token?: string;
+        userId: Types.ObjectId;
     }, {
         total: number;
         myTrees: number;
