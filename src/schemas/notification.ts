@@ -13,6 +13,9 @@ const NotificationSchema = new Schema({
         type: [ObjectId],
         required: true
     },
+    userId: ObjectId,
+    treeId: ObjectId,
+    commentId: ObjectId,
     inputs: [String],
     authorId: {
         type: ObjectId,
