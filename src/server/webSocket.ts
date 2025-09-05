@@ -7,6 +7,7 @@ import { phTreeController } from "../controllers/phTree";
 import { phTreeModel } from "../models/phTree";
 
 export const webSocket = ({io}: {io: Server}) => io.on("connection", socket => {
+    console.log("Connected Client:", socket.id);
     createNotificationIO({
         socket,
         notificationController: notificationController({
