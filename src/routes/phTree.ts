@@ -13,7 +13,7 @@ interface IOProps {
 export const createPhTreeIO = ({
     socket,
     phTreeController
-}: IOProps) => socket.on(setC + client, async() => await phTreeController.setChange({ socket, call: setC + server }));
+}: IOProps) => socket.on(setC + client, async(key) => await phTreeController.setChange({ socket, call: setC + server, key }));
 
 export const createPhTreeRoutes = ({
     phTreeController
