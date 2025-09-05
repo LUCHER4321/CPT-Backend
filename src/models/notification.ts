@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 import { NotificationClass } from "../schemas/notification";
-import { NotificationModel } from "../types";
+import { Notification, NotificationModel } from "../types";
 import { PhTreeClass } from "../schemas/phTree";
 import { FollowClass } from "../schemas/follow";
 import { CommentClass } from "../schemas/comment";
@@ -13,28 +13,45 @@ interface NotifyProps {
     usersId?: Types.ObjectId[];
     inputs?: string[];
     authorId: Types.ObjectId;
+    userId?: Types.ObjectId;
+    treeId?: Types.ObjectId;
+    commentId?: Types.ObjectId;
 }
 
 const notify = async ({
     fun,
     usersId = [],
     inputs,
-    authorId
-}: NotifyProps) => {
+    authorId,
+    userId,
+    treeId,
+    commentId
+}: NotifyProps): Promise<Notification | undefined> => {
+    const oldNotification = await NotificationClass.findOne({
+        fun,
+        authorId,
+        userId,
+        treeId,
+        commentId
+    });
+    if(oldNotification) return undefined;
     const notification = new NotificationClass({
         fun,
         usersId,
         inputs,
-        authorId
+        authorId,
+        userId,
+        treeId,
+        commentId
     });
     const newNotification = await notification.save();
     if((newNotification.usersId.length > 0 && !newNotification.usersId.reduce((a, b) => a && b)) || !newNotification.authorId) throw new Error("IDs not found");
     return {
-        id: newNotification._id,
+        id: newNotification._id.toString(),
         fun: newNotification.fun,
-        usersId: newNotification.usersId,
+        usersId: newNotification.usersId.map(id => id.toString()),
         inputs: newNotification.inputs,
-        authorId: newNotification.authorId,
+        authorId: newNotification.authorId.toString(),
         seen: false,
         createdAt: newNotification.createdAt
     }
@@ -56,7 +73,8 @@ export const notificationModel: NotificationModel = {
         return await notify({
             fun: NotiFunc.FOLLOW,
             usersId: [userId],
-            authorId: user._id
+            authorId: user._id,
+            userId
         });
     },
     newTree: async ({ token, treeId }) => {
@@ -69,7 +87,8 @@ export const notificationModel: NotificationModel = {
             fun: NotiFunc.TREE,
             usersId: followers.map(f => f.userId),
             inputs: [phTree.name],
-            authorId: user._id
+            authorId: user._id,
+            treeId
         });
     },
     newComment: async ({ token, treeId, commentId }) => {
@@ -78,14 +97,16 @@ export const notificationModel: NotificationModel = {
         const phTree = await PhTreeClass.findById(treeId);
         if(!phTree?.userId) throw new Error("Ph. Tree not found");
         const comment = await CommentClass.findById(commentId);
-        if(!comment || comment.treeId != phTree._id) throw new Error("Parent comment isn't a tree's comment");
+        if(comment && comment.treeId != phTree._id) throw new Error("Parent comment isn't a tree's comment");
         const commenters = await getParents(commentId);
         const collaborators = [phTree.userId, ...phTree.collaborators ?? []];
         return await notify({
             fun: NotiFunc.COMMENT,
             usersId: [...commenters, ...collaborators],
-            inputs: [comment.content ?? ""],
-            authorId: user._id
+            inputs: [comment?.content ?? ""],
+            authorId: user._id,
+            treeId,
+            commentId
         });
     },
     newLike: async ({ token, treeId, commentId }) => {
@@ -97,7 +118,9 @@ export const notificationModel: NotificationModel = {
         return await notify({
             fun: NotiFunc.LIKE,
             usersId,
-            authorId: user._id
+            authorId: user._id,
+            treeId,
+            commentId
         });
     },
     newCollaborate: async ({ token, treeId, userId }) => {
@@ -117,20 +140,20 @@ export const notificationModel: NotificationModel = {
         const user = await userByToken(token);
         if (!user) throw new Error("User not found");
         const notifications0 = NotificationClass.find({
-            createdAt: {
+            ...from || to ? {createdAt: {
                 $gte: from,
                 $lte: to
-            },
-            usersId: { $in: [user._id] }
+            }} : {},
+            usersId: user._id
         }).sort({ createdAt: -1 });
         const notifications = await (limit ? notifications0.limit(limit) : notifications0);
         return notifications.map(n => ({
-            id: n._id,
+            id: n._id.toString(),
             fun: n.fun,
-            usersId: n.usersId,
+            usersId: n.usersId.map(id => id.toString()),
             inputs: n.inputs,
-            authorId: n.authorId,
-            seen: n.seen.includes(user._id),
+            authorId: n.authorId.toString(),
+            seen: n.seen.map(id => id.toString()).includes(user._id.toString()),
             createdAt: n.createdAt
         }));
     },
@@ -141,16 +164,16 @@ export const notificationModel: NotificationModel = {
         if(!user) throw new Error("User not found");
         const notification = await NotificationClass.findById(id);
         if(!notification) throw new Error("Notification not found");
-        if(!notification.usersId.includes(user._id)) throw new Error("You can't see this notification");
-        if(!notification.seen.includes(user._id)) notification.seen.push(user._id);
+        if(!notification.usersId.map(id => id.toString()).includes(user._id.toString())) throw new Error("You can't see this notification");
+        if(!notification.seen.map(id => id.toString()).includes(user._id.toString())) notification.seen.push(user._id);
         const updatedNotification = await notification.save();
         return {
-            id: updatedNotification._id,
+            id: updatedNotification._id.toString(),
             fun: updatedNotification.fun,
-            usersId: updatedNotification.usersId,
+            usersId: updatedNotification.usersId.map(id => id.toString()),
             inputs: updatedNotification.inputs,
-            authorId: updatedNotification.authorId,
-            seen: updatedNotification.seen.includes(user._id),
+            authorId: updatedNotification.authorId.toString(),
+            seen: updatedNotification.seen.map(id => id.toString()).includes(user._id.toString()),
             createdAt: updatedNotification.createdAt
         }
     }
