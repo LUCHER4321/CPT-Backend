@@ -2,37 +2,36 @@ import { Notification, NotificationController, NotificationModel } from "../type
 import { NotiFunc } from "../enums";
 import { parseNewNotification, toObjectId } from "../utils/parser";
 import { getSocketData } from "../utils/getSocketData";
+import { nullableInput } from "../utils/nullableInput";
 
 export const notificationController = ({
     notificationModel
 }: {notificationModel: NotificationModel}): NotificationController => ({
-    setNotification: async ({socket, call}) => {
+    setNotification: async ({socket, call, key}) => {
         const {
-            data,
-            emit,
             token
         } = getSocketData(socket);
-        if(!token) return;
-        const { fun, userId, treeId, commentId } = parseNewNotification(data);
+        if(!token || !socket.connected) return;
+        const { fun, userId, treeId, commentId } = parseNewNotification(key);
         if(!fun) return;
         let notification: Notification | undefined;
         switch(fun) {
             case NotiFunc.FOLLOW:
-                if(!userId) return emit(call, { error: "userId is required" });
+                if(!userId) return socket.emit("error", { error: "userId is required" });
                 notification = await notificationModel.newFollower({
                     token,
                     userId: toObjectId(userId)
                 });
                 break;
             case NotiFunc.TREE:
-                if(!treeId) return emit(call, { error: "treeId is required" });
+                if(!treeId) return socket.emit("error", { error: "treeId is required" });
                 notification = await notificationModel.newTree({
                     token,
                     treeId: toObjectId(treeId)
                 });
                 break;
             case NotiFunc.COMMENT:
-                if(!treeId || !commentId) return emit(call, { error: "treeId and commentId are required" });
+                if(!treeId || !commentId) return socket.emit("error", { error: "treeId and commentId are required" });
                 notification = await notificationModel.newComment({
                     token,
                     treeId: toObjectId(treeId),
@@ -40,15 +39,15 @@ export const notificationController = ({
                 });
                 break;
             case NotiFunc.LIKE:
-                if(!treeId || !commentId) return emit(call, { error: "treeId and commentId are required" });
+                if(!treeId && !commentId) return socket.emit("error", { error: "treeId or commentId are required" });
                 notification = await notificationModel.newLike({
                     token,
-                    treeId: toObjectId(treeId),
-                    commentId: toObjectId(commentId)
+                    treeId: nullableInput(treeId, toObjectId),
+                    commentId: nullableInput(commentId, toObjectId)
                 });
                 break;
             case NotiFunc.COLLABORATE:
-                if(!treeId || !userId) return emit(call, { error: "treeId and userId are required" });
+                if(!treeId || !userId) return socket.emit("error", { error: "treeId and userId are required" });
                 notification = await notificationModel.newCollaborate({
                     token,
                     treeId: toObjectId(treeId),
@@ -56,17 +55,16 @@ export const notificationController = ({
                 });
                 break;
         }
-        if(!notification) return;
-        notification.usersId.map(u => emit(call + "-" + u, notification));
+        if(notification) socket.emit(call, notification);
     },
     getNotifications: async (req, res) => {
         const { token } = req.cookies;
         if(!token) return res.status(401).json({ message: "Unauthorized" });
         const { from: _from, to: _to, limit: _limit } = req.query;
         try {
-            const limit = _limit ? +_limit : undefined;
-            const from = _from ? new Date(_from as string) : undefined;
-            const to = _to ? new Date(_to as string) : undefined;
+            const limit = nullableInput(_limit, l => +l);
+            const from = nullableInput(_from, f => new Date(f as string));
+            const to = nullableInput(_to, t => new Date(t as string));
             const notifications = await notificationModel.getNotifications({
                 token,
                 from,
