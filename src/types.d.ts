@@ -465,11 +465,11 @@ export interface SpeciesModel {
 }
 
 export interface Notification {
-    id: Types.ObjectId;
+    id: string;
     fun: NotiFunc;
-    usersId: Types.ObjectId[];
+    usersId: string[];
     inputs: string[];
-    authorId: Types.ObjectId;
+    authorId: string;
     seen: boolean;
     createdAt: Date;
 }
@@ -477,6 +477,7 @@ export interface Notification {
 type WSControllerFunction = ModelFuncton<{
     socket: Socket;
     call: string;
+    key: any;
 }, any>;
 
 export interface NotificationController {
