@@ -11,7 +11,7 @@ interface IOProps {
 export const createNotificationIO = ({
     socket,
     notificationController
-}: IOProps) => socket.on(setN + client, async() => await notificationController.setNotification({ socket, call: setN + server }));
+}: IOProps) => socket.on(setN + client, async(key) => await notificationController.setNotification({ socket, call: setN + server, key }));
 
 export const createNotificationRouter = ({
     notificationController
