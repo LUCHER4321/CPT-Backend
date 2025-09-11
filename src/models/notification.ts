@@ -53,7 +53,10 @@ const notify = async ({
         inputs: newNotification.inputs,
         authorId: newNotification.authorId.toString(),
         seen: false,
-        createdAt: newNotification.createdAt
+        createdAt: newNotification.createdAt,
+        userId: newNotification.userId ?? undefined,
+        treeId: newNotification.treeId ?? undefined,
+        commentId: newNotification.commentId ?? undefined
     }
 };
 
@@ -97,7 +100,7 @@ export const notificationModel: NotificationModel = {
         const phTree = await PhTreeClass.findById(treeId);
         if(!phTree?.userId) throw new Error("Ph. Tree not found");
         const comment = await CommentClass.findById(commentId);
-        if(comment && comment.treeId != phTree._id) throw new Error("Parent comment isn't a tree's comment");
+        if(!comment || comment?.treeId != phTree._id) throw new Error("Parent comment isn't a tree's comment");
         const commenters = await getParents(commentId);
         const collaborators = [phTree.userId, ...phTree.collaborators ?? []];
         return await notify({
@@ -130,10 +133,11 @@ export const notificationModel: NotificationModel = {
         if(!phTree) throw new Error("Ph. Tree not found");
         if(phTree.userId.toString() != user._id.toString() && !phTree.collaborators?.map(c => c.toString()).includes(user._id.toString()))
         return await notify({
-            fun: NotiFunc.LIKE,
+            fun: NotiFunc.COLLABORATE,
             usersId: [userId],
             authorId: user._id,
-            inputs: [phTree.name]
+            inputs: [phTree.name],
+            treeId: phTree._id
         });
     },
     getNotifications: async ({ token, from, to, limit }) => {
@@ -154,7 +158,10 @@ export const notificationModel: NotificationModel = {
             inputs: n.inputs,
             authorId: n.authorId.toString(),
             seen: n.seen.map(id => id.toString()).includes(user._id.toString()),
-            createdAt: n.createdAt
+            createdAt: n.createdAt,
+            userId: n.userId ?? undefined,
+            treeId: n.treeId ?? undefined,
+            commentId: n.commentId ?? undefined
         }));
     },
     seeNotification: async ({ token, id, key }) => {
@@ -174,7 +181,10 @@ export const notificationModel: NotificationModel = {
             inputs: updatedNotification.inputs,
             authorId: updatedNotification.authorId.toString(),
             seen: updatedNotification.seen.map(id => id.toString()).includes(user._id.toString()),
-            createdAt: updatedNotification.createdAt
+            createdAt: updatedNotification.createdAt,
+            userId: updatedNotification.userId ?? undefined,
+            treeId: updatedNotification.treeId ?? undefined,
+            commentId: updatedNotification.commentId ?? undefined
         }
     }
 };
