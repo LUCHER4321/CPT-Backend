@@ -27,7 +27,8 @@ export const commentModel: CommentModel = {
             userId: newComment.userId ?? undefined,
             content: newComment.content ?? undefined,
             createdAt: newComment.createdAt,
-            updatedAt: newComment.updatedAt
+            updatedAt: newComment.updatedAt,
+            parentId: newComment.parentId ?? undefined,
         }
     },
     updateComment: async ({ token, treeId, id, content, key }) => {
@@ -85,6 +86,7 @@ export const commentModel: CommentModel = {
             content: comment.content ?? undefined,
             createdAt: comment.createdAt,
             updatedAt: comment.updatedAt,
+            parentId: comment.parentId ?? undefined,
             replies: replies?.length ? replies : undefined
         };
     }
