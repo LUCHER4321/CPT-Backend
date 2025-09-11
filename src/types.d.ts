@@ -312,6 +312,7 @@ export interface Comment {
     content?: string;
     createdAt: Date;
     updatedAt: Date;
+    parentId?: Types.ObjectId;
     replies?: Comment[];
 }
 
@@ -472,6 +473,9 @@ export interface Notification {
     authorId: string;
     seen: boolean;
     createdAt: Date;
+    userId?: Types.ObjectId;
+    treeId?: Types.ObjectId;
+    commentId?: Types.ObjectId;
 }
 
 type WSControllerFunction = ModelFuncton<{
