@@ -18,6 +18,6 @@ export const createNotificationRouter = ({
 }: Omit<IOProps, "socket">) => {
     const router = Router();
     router.get("/", notificationController.getNotifications);
-    router.patch("/:id", notificationController.seeNotification)
+    router.patch("/:id", notificationController.seeNotification);
     return router;
 };
