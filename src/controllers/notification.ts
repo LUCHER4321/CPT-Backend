@@ -1,6 +1,6 @@
 import { Notification, NotificationController, NotificationModel } from "../types";
 import { NotiFunc } from "../enums";
-import { parseNewNotification, toObjectId } from "../utils/parser";
+import { getKey, parseNewNotification, toObjectId } from "../utils/parser";
 import { getSocketData } from "../utils/getSocketData";
 import { nullableInput } from "../utils/nullableInput";
 
@@ -81,11 +81,14 @@ export const notificationController = ({
         const { token } = req.cookies;
         if(!token) return res.status(401).json({ message: "Unauthorized" });
         const { id: _id } = req.params;
+        const { apiKey } = req.query;
+        const key = getKey(apiKey);
         try {
             const id = toObjectId(_id);
             const notification = await notificationModel.seeNotification({
                 token,
-                id
+                id,
+                key
             });
             if(!notification) return res.status(404).json({ message: "Notification not found" });
             res.json(notification);
