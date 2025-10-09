@@ -17,8 +17,8 @@ export const commentController = ({
             const newComment = await commentModel.createComment({ token, treeId, content, parentId, key });
             if (!newComment) return res.status(404).json({ message: "PhTree not found" });
             res.json(newComment);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     deleteComment: async (req, res) => {
@@ -32,8 +32,8 @@ export const commentController = ({
             const id = toObjectId(_id);
             await commentModel.deleteComment({ token, treeId, id, key });
             res.status(204).json({ message: "Comment deleted successfully" });
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     updateComment: async (req, res) => {
@@ -50,8 +50,8 @@ export const commentController = ({
             const updatedComment = await commentModel.updateComment({ token, treeId, id, content, key });
             if (!updatedComment) return res.status(404).json({ message: "Comment not found" });
             res.json(updatedComment);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     getComments: async (req, res) => {
@@ -61,8 +61,8 @@ export const commentController = ({
             const comments = await commentModel.getComments({ treeId });
             if (!comments) return res.status(404).json({ message: "PhTree not found" });
             res.json(comments);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     getComment: async (req, res) => {
@@ -73,8 +73,8 @@ export const commentController = ({
             const replies = await commentModel.getComment({ treeId, id });
             if (!replies) return res.status(404).json({ message: "Parent comment not found" });
             res.json(replies);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     }
 });
