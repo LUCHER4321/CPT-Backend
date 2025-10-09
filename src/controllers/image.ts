@@ -19,7 +19,7 @@ export const imageController = ({
             if (contentType) res.set('Content-Type', contentType);
             res.send(buffer);
         } catch(e) {
-            return res.status(500).json({ message: "Error fetching image" });
+            res.status(400).json({ error: (e as Error).message });
         }
     }
 });
