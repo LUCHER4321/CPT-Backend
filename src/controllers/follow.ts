@@ -17,8 +17,8 @@ export const followController = ({
             const follow = await followModel.followUser({ token, followedUserId, key });
             if (!follow) return res.status(404).json({ message: "User not found" });
             res.json(follow);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     unfollowUser: async (req, res) => {
@@ -31,8 +31,8 @@ export const followController = ({
             const followedUserId = toObjectId(id);
             await followModel.unfollowUser({ token, followedUserId, key });
             res.status(204).json({ message: "User unfollowed successfully" });
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     getFollowers: async (req, res) => {
@@ -42,8 +42,8 @@ export const followController = ({
             const followers = await followModel.getFollowers({ userId });
             if (!followers) return res.status(404).json({ message: "No followers found" });
             res.json(followers);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     getFollowing: async (req, res) => {
@@ -53,8 +53,8 @@ export const followController = ({
             const following = await followModel.getFollowing({ userId });
             if (!following) return res.status(404).json({ message: "No following found" });
             res.json(following);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     getFollowersCount: async (req, res) => {
@@ -64,8 +64,8 @@ export const followController = ({
             const count = await followModel.getFollowersCount({ userId });
             if (count === undefined) return res.status(404).json({ message: "User not found" });
             res.json({ count });
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
 });
