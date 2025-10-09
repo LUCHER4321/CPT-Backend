@@ -63,8 +63,8 @@ export const phTreeController = ({
             });
             if (!newPhTree) return res.status(400).json({ message: "Failed to create Ph. Tree" });
             res.json(newPhTree);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     getMyPhTrees: async (req, res) => {
@@ -96,8 +96,8 @@ export const phTreeController = ({
             });
             if (!phTrees) return res.status(404).json({ message: "No Ph. Trees found" });
             res.json(phTrees);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     getMyTotalTrees: async (req, res) => {
@@ -107,8 +107,8 @@ export const phTreeController = ({
             const total = await phTreeModel.getMyTotalTrees({ token });
             if(!total) res.json({ total: 0, myTrees: 0, collabs: 0 })
             res.json(total);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     getTotalTrees: async (req, res) => {
@@ -119,8 +119,8 @@ export const phTreeController = ({
             const total = await phTreeModel.getTotalTrees({ token, userId });
             if(!total) res.json({ total: 0, myTrees: 0, collabs: 0 })
             res.json(total);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     updatePhTree: async (req, res) => {
@@ -148,8 +148,8 @@ export const phTreeController = ({
             });
             if (!updatedPhTree) return res.status(404).json({ message: "Ph. Tree not found" });
             res.json(updatedPhTree);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     deletePhTree: async (req, res) => {
@@ -162,8 +162,8 @@ export const phTreeController = ({
             const id = toObjectId(_id);
             await phTreeModel.deletePhTree({ token, id, key });
             res.status(204).json({ message: "Tree deleted successfully" });
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     setPhTreeImage: async (req, res) => {
@@ -180,8 +180,8 @@ export const phTreeController = ({
             const updatedPhTree = await phTreeModel.setPhTreeImage({ id, token, image, key, host });
             if (!updatedPhTree) return res.status(404).json({ message: "PhTree not found" });
             res.json(updatedPhTree);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     deletePhTreeImage: async (req, res) => {
@@ -196,8 +196,8 @@ export const phTreeController = ({
             const phTree = await phTreeModel.deletePhTreeImage({ token, id, key, host });
             if (!phTree) return res.status(404).json({ message: "PhTree not found" });
             res.json(phTree);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     getPhTrees: async (req, res) => {
@@ -228,8 +228,8 @@ export const phTreeController = ({
             });
             if (!phTrees) return res.status(404).json({ message: "No Ph. Trees found" });
             res.json(phTrees);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     getPhTree: async (req, res) => {
@@ -241,8 +241,8 @@ export const phTreeController = ({
             const phTree = await phTreeModel.getPhTree({ token, id, host });
             if (!phTree) return res.status(404).json({ message: "Ph. Tree not found" });
             res.json(phTree);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     setView: async (req, res) => {
@@ -255,8 +255,8 @@ export const phTreeController = ({
             const views = await phTreeModel.setView({ token, id, key});
             if(views === undefined) return res.status(404).json({ message: "Ph. Tree not found" });
             res.json({ views });
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     }
 });
