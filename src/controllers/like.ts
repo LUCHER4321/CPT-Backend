@@ -15,8 +15,8 @@ export const likeController = ({
             const like = await likeModel.likePhTree({ token, treeId, key });
             if (!like) return res.status(404).json({ message: "PhTree not found" });
             res.json(like);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     unlikePhTree: async (req, res) => {
@@ -29,8 +29,8 @@ export const likeController = ({
             const treeId = toObjectId(id);
             await likeModel.unlikePhTree({ token, treeId, key });
             res.status(204).json({ message: "Like deleted successfully" });
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     likedPhTrees: async (req, res) => {
@@ -41,8 +41,8 @@ export const likeController = ({
             const likedPhTrees = await likeModel.likedPhTrees({ token, host });
             if (!likedPhTrees) return res.status(404).json({ message: "No liked PhTrees found" });
             res.json(likedPhTrees);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     phTreeLikes: async (req, res) => {
@@ -53,8 +53,8 @@ export const likeController = ({
             const likes = await likeModel.phTreeLikes({ treeId, token });
             if (!likes) return res.status(404).json({ message: "PhTree not found" });
             res.json(likes);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     likeComment: async (req, res) => {
@@ -68,8 +68,8 @@ export const likeController = ({
             const like = await likeModel.likeComment({ token, commentId, key });
             if (!like) return res.status(404).json({ message: "Comment not found" });
             res.json(like);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     unlikeComment: async (req, res) => {
@@ -82,8 +82,8 @@ export const likeController = ({
             const commentId = toObjectId(id);
             await likeModel.unlikeComment({ token, commentId, key });
             res.status(204).json({ message: "Like deleted successfully" });
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     likedComments: async (req, res) => {
@@ -93,8 +93,8 @@ export const likeController = ({
             const likedComments = await likeModel.likedComments({ token });
             if (!likedComments) return res.status(404).json({ message: "No liked comments found" });
             res.json(likedComments);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     commentLikes: async (req, res) => {
@@ -105,8 +105,8 @@ export const likeController = ({
             const likes = await likeModel.commentLikes({ commentId, token });
             if (!likes) return res.status(404).json({ message: "Comment not found" });
             res.json(likes);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
 });
