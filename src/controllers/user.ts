@@ -19,8 +19,8 @@ export const userController = ({
             if (!user.id) return res.status(400).json({ message: "User already exists" });
             res.cookie("token", token, { httpOnly: true });
             res.status(201).json(user);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     login: async (req, res) => {
@@ -36,8 +36,8 @@ export const userController = ({
             if (!user.id) return res.status(401).json({ message: "User not found" });
             res.cookie("token", token, { httpOnly: true });
             res.status(200).json(user);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     logout: async (req, res) => {
@@ -56,8 +56,8 @@ export const userController = ({
             const user = await userModel.getUser({ id, host });
             if (!user) return res.status(404).json({ message: "User not found" });
             res.status(200).json(user);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     search: async (req, res) => {
@@ -71,8 +71,8 @@ export const userController = ({
             });
             if (!users || users.length === 0) return res.status(404).json({ message: "No users found" });
             res.status(200).json(users);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     recover: async (req, res) => {
@@ -86,8 +86,8 @@ export const userController = ({
             const token = await userModel.recover({ email, url, key });
             if(!token) return res.status(404).json({ message: "Token not generated" });
             res.status(200).json({ message: "Check your Email" });
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     resetPassword: async (req, res) => {
@@ -99,8 +99,8 @@ export const userController = ({
             const user = await userModel.resetPassword({ token, email, password, key });
             if(!user) return res.status(404).json({ message: "User not found" });
             res.status(200).json(user);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     getMe: async (req, res) => {
@@ -111,8 +111,8 @@ export const userController = ({
             const user = await userModel.getMe({ token, host });
             if (!user) return res.status(404).json({ message: "User not found" });
             res.status(200).json(user);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     generateToken: async (req, res) => {
@@ -126,8 +126,8 @@ export const userController = ({
             if (!token) return res.status(404).json({ message: "User not found" });
             res.cookie("token", token, { httpOnly: true });
             res.status(200).json({ message: "Token generated successfully" });
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     updateMe: async (req, res) => {
@@ -141,8 +141,8 @@ export const userController = ({
             const user = await userModel.updateMe({ ...data, token, key, host });
             if (!user) return res.status(404).json({ message: "User not found" });
             res.status(200).json(user);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     deleteMe: async (req, res) => {
@@ -155,8 +155,8 @@ export const userController = ({
             await userModel.deleteMe({ token, key, host });
             res.clearCookie("token");
             res.status(200).json({ message: "User deleted successfully" });
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     photoMe: async (req, res) => {
@@ -171,8 +171,8 @@ export const userController = ({
             const user = await userModel.photoMe({ photo, token, key, host });
             if (!user) return res.status(404).json({ message: "User not found" });
             res.status(200).json(user);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     deletePhotoMe: async (req, res) => {
@@ -185,8 +185,8 @@ export const userController = ({
             const user = await userModel.deletePhotoMe({ token, key, host });
             if (!user) return res.status(404).json({ message: "User not found" });
             res.status(200).json(user);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     makeAdmin: async (req, res) => {
@@ -201,8 +201,8 @@ export const userController = ({
             const admin = await userModel.makeAdmin({ token, key, adminId, removeAdmin, host });
             if(!admin) return res.status(404).json({ message: "Admin not found" });
             res.status(200).json(admin);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     generateKey: async (req, res) => {
@@ -214,8 +214,8 @@ export const userController = ({
             const apiKey = await userModel.generateKey({ token, key });
             if(!apiKey) return res.status(404).json({ message: "API Key not found" });
             res.status(200).json({ apiKey });
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     deleteKey: async (req, res) => {
@@ -228,8 +228,8 @@ export const userController = ({
             const keyToDelete = getKey(keyTD)!;
             await userModel.deleteKey({ token, key, keyToDelete });
             res.status(200).json({ message: "Key deleted successfully" });
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     }
 });
