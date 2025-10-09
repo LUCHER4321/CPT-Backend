@@ -49,8 +49,8 @@ export const speciesController = ({
             const species = await speciesModel.createSpecies({ token, treeId, ...output, key, host });
             if(!species) return res.status(404).json({ message: "PhTree not found" });
             res.json(species);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     updateSpecies: async (req, res) => {
@@ -74,8 +74,8 @@ export const speciesController = ({
             });
             if(!updatedSpecies) return res.status(404).json({ message: "PhTree or Species not found" });
             res.json(updatedSpecies);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     deleteSpecies: async (req, res) => {
@@ -89,8 +89,8 @@ export const speciesController = ({
             const id = toObjectId(_id);
             await speciesModel.deleteSpecies({ token, treeId, id, key });
             res.json({ message: "Species deleted successfully" });
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     setSpeciesImage: async (req, res) => {
@@ -108,8 +108,8 @@ export const speciesController = ({
             const updatedSpecies = await speciesModel.setSpeciesImage({ token, treeId, id, image, key, host });
             if(!updatedSpecies) return res.status(404).json({ message: "PhTree or Species not found" });
             res.json(updatedSpecies);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     deleteSpeciesImage: async (req, res) => {
@@ -125,8 +125,8 @@ export const speciesController = ({
             const updatedSpecies = await speciesModel.deleteSpeciesImage({ token, treeId, id, key, host });
             if(!updatedSpecies) return res.status(404).json({ message: "PhTree or Species not found" });
             res.json(updatedSpecies);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     getSpecies: async (req, res) => {
@@ -139,8 +139,8 @@ export const speciesController = ({
             const species = await speciesModel.getSpecies({ token, treeId, id, host });
             if(!species) return res.status(404).json({ message: "PhTree or Species not found" });
             res.json(species);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     getPhTreeSpecies: async (req, res) => {
@@ -152,8 +152,8 @@ export const speciesController = ({
             const speciesList = await speciesModel.getPhTreeSpecies({ token, treeId, host });
             if(!speciesList) return res.status(404).json({ message: "PhTree not found" });
             res.json(speciesList);
-        } catch (error: any) {
-            res.status(400).json({ message: error.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     }
 });
