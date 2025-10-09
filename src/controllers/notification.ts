@@ -73,8 +73,8 @@ export const notificationController = ({
             });
             if(!notifications) return res.status(404).json({ message: "No notifications found" });
             res.json(notifications);
-        } catch (e: any) {
-            res.status(400).json({ message: e.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     },
     seeNotification: async (req, res) => {
@@ -92,8 +92,8 @@ export const notificationController = ({
             });
             if(!notification) return res.status(404).json({ message: "Notification not found" });
             res.json(notification);
-        } catch (e: any) {
-            res.status(400).json({ message: e.message });
+        } catch(e) {
+            res.status(400).json({ error: (e as Error).message });
         }
     }
 });
