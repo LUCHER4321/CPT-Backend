@@ -78,6 +78,11 @@
 ## Enums
 
 ```typescript
+export enum Billing {
+  MONTHLY = "monthly",
+  ANNUAL = "annual",
+}
+
 export enum NotiFunc {
   FOLLOW = "follow",
   TREE = "tree",
@@ -182,6 +187,7 @@ Create a new user
   "username": "string",
   "photo": "string | undefined",
   "plan": "Plan",
+  "billing": "Billing",
   "role": "Role",
   "createdAt": "Date",
   "lastLogin": "Date",
@@ -219,6 +225,7 @@ Log in with an existing account
   "username": "string",
   "photo": "string | undefined",
   "plan": "Plan",
+  "billing": "Billing",
   "role": "Role",
   "createdAt": "Date",
   "lastLogin": "Date",
@@ -249,6 +256,7 @@ Search for users
     "username": "string",
     "photo": "string | undefined",
     "plan": "Plan",
+    "billing": "Billing",
     "role": "Role",
     "createdAt": "Date",
     "lastLogin": "Date",
@@ -275,6 +283,7 @@ Get info about an specific user
   "username": "string",
   "photo": "string | undefined",
   "plan": "Plan",
+  "billing": "Billing",
   "role": "Role",
   "createdAt": "Date",
   "lastLogin": "Date",
@@ -338,6 +347,7 @@ Reset password
   "username": "string",
   "photo": "string | undefined",
   "plan": "Plan",
+  "billing": "Billing",
   "role": "Role",
   "createdAt": "Date",
   "lastLogin": "Date",
@@ -396,6 +406,7 @@ Make an user to be an admin (`admin.role = Role.ADMIN`) or make an admin to be a
   "username": "string",
   "photo": "string | undefined",
   "plan": "Plan",
+  "billing": "Billing",
   "role": "Role",
   "createdAt": "Date",
   "lastLogin": "Date",
@@ -451,6 +462,7 @@ Get info about your user
   "username": "string",
   "photo": "string | undefined",
   "plan": "Plan",
+  "billing": "Billing",
   "role": "Role",
   "createdAt": "Date",
   "lastLogin": "Date",
@@ -481,6 +493,7 @@ Updates data about your account
   "password": "string | undefined",
   "description": "string | undefined",
   "plan": "Plan | undefined",
+  "billing": "Billing | null | undefined",
   "planExpiration": "Date | undefined"
 }
 ```
@@ -494,6 +507,7 @@ Updates data about your account
   "username": "string",
   "photo": "string | undefined",
   "plan": "Plan",
+  "billing": "Billing",
   "role": "Role",
   "createdAt": "Date",
   "lastLogin": "Date",
@@ -548,6 +562,7 @@ Set your profile picture
   "username": "string",
   "photo": "string | undefined",
   "plan": "Plan",
+  "billing": "Billing",
   "role": "Role",
   "createdAt": "Date",
   "lastLogin": "Date",
@@ -578,6 +593,7 @@ Set your profile picture as `null | undefined`
   "username": "string",
   "photo": "string | undefined",
   "plan": "Plan",
+  "billing": "Billing",
   "role": "Role",
   "createdAt": "Date",
   "lastLogin": "Date",
