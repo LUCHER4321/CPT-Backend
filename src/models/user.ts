@@ -151,9 +151,11 @@ export const userModel: UserModel = {
                 ]
             }
         })).map(k => k._id) : undefined;
+        const billing = user.billing ?? undefined;
         return {
             ...(await userModel.getUser({ id: user._id, host }))!,
-            apiKeys
+            apiKeys,
+            billing
         };
     },
     generateToken: async({ oldToken, expiresIn, key }) => {
@@ -165,7 +167,7 @@ export const userModel: UserModel = {
         const token = tokenSign({ id: user._id, expiresIn });
         return { token }
     },
-    updateMe: async ({ username, oldPassword, password, description, plan, token, key, host }) => {
+    updateMe: async ({ username, oldPassword, password, description, plan, billing, token, key, host }) => {
         const apiKey = await confirmAPIKey(key);
         if(!apiKey) return undefined;
         const user = await userByToken(token);
@@ -184,6 +186,8 @@ export const userModel: UserModel = {
             const [_, domain] = user.email.split("@");
             user.domain = domain;
         }
+        if(billing) user.billing = billing;
+        else if (billing === null) user.billing = undefined;
         await user.save();
         return await userModel.getMe({ token, host });
     },
