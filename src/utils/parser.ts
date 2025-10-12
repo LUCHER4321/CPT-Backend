@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { NotiFunc, Order, Plan, TreeChange, TreeCriteria } from "../enums";
+import { Billing, NotiFunc, Order, Plan, TreeChange, TreeCriteria } from "../enums";
 import { nullableInput } from "./nullableInput";
 import { Email, PhTreeChange, SpeciesMongoInput } from "../types";
 
@@ -50,6 +50,8 @@ const isNumber = (num: any): boolean => typeof num === "number" || num instanceo
 
 const parseNumber = (num: any, prop = "") => parseProp<number>(num, isNumber, prop);
 
+const parseBilling = (billing: any, prop = "") => parseProp<Billing>(billing, isEnum(Billing), prop);
+
 const parsePlan = (plan: any, prop = "") => parseProp<Plan>(plan, isEnum(Plan), prop);
 
 const parseFun = (fun: any, prop = "") => parseProp<NotiFunc>(fun, isEnum(NotiFunc), prop);
@@ -97,6 +99,7 @@ export const parsePatchUser = (object: any) => ({
     oldPassword: toPartial(() => parseString(object.oldPassword)),
     password: toPartial(() => parseString(object.password)),
     plan: toPartial(() => parsePlan(object.plan)),
+    billing: object.billing === null ? null : toPartial(() => parseBilling(object.billing)),
     planExpiration: toPartial(() => parseDate(object.planExpiration)),
     description: toPartial(() => parseString(object.description))
 });
