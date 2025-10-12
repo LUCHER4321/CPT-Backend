@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
 import { Server, Socket } from "socket.io";
-import { NotiFunc, Order, Plan, Role, TreeCriteria } from "./enums";
+import { Billing, NotiFunc, Order, Plan, Role, TreeCriteria } from "./enums";
 import { SpeciesJSON } from "chrono-phylo-tree";
 import { StringValue } from "ms";
 
@@ -39,6 +39,7 @@ export interface User {
     photo?: string;
     role: Role;
     plan: Plan;
+    billing?: Billing;
     createdAt: Date;
     lastLogin: Date;
     isActive?: boolean;
@@ -105,6 +106,7 @@ export interface UserModel {
         token: string;
         username?: string;
         plan?: Plan;
+        billing?: Billing | null;
         description?: string;
         oldPassword?: string;
         password?: string;
