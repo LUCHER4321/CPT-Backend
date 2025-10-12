@@ -1,3 +1,8 @@
+export enum Billing {
+    MONTHLY = "monthly",
+    ANNUAL = "annual"
+}
+
 export enum NotiFunc {
     FOLLOW = "follow",
     TREE = "tree",
