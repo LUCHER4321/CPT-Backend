@@ -16,7 +16,7 @@ export const userController = ({
                 token,
                 ...user
             } = await userModel.register({ ...data, key, host }) ?? { id: undefined };
-            if (!user.id) return res.status(400).json({ message: "User already exists" });
+            if (!user.id) return res.status(400).json({ error: "User already exists" });
             res.cookie("token", token, { httpOnly: true });
             res.status(201).json(user);
         } catch(e) {
@@ -33,7 +33,7 @@ export const userController = ({
                 token,
                 ...user
             } = await userModel.login({ ...data, key, host }) ?? { id: undefined };
-            if (!user.id) return res.status(401).json({ message: "User not found" });
+            if (!user.id) return res.status(401).json({ error: "User not found" });
             res.cookie("token", token, { httpOnly: true });
             res.status(200).json(user);
         } catch(e) {
@@ -54,7 +54,7 @@ export const userController = ({
         try {
             const id = toObjectId(_id);
             const user = await userModel.getUser({ id, host });
-            if (!user) return res.status(404).json({ message: "User not found" });
+            if (!user) return res.status(404).json({ error: "User not found" });
             res.status(200).json(user);
         } catch(e) {
             res.status(400).json({ error: (e as Error).message });
@@ -69,7 +69,7 @@ export const userController = ({
                 limit: limit ? Number(limit) : 10,
                 host
             });
-            if (!users || users.length === 0) return res.status(404).json({ message: "No users found" });
+            if (!users?.length) return res.status(404).json({ error: "No users found" });
             res.status(200).json(users);
         } catch(e) {
             res.status(400).json({ error: (e as Error).message });
@@ -84,7 +84,7 @@ export const userController = ({
                 url
             } = parseRecover(req.body);
             const token = await userModel.recover({ email, url, key });
-            if(!token) return res.status(404).json({ message: "Token not generated" });
+            if(!token) return res.status(404).json({ error: "Token not generated" });
             res.status(200).json({ message: "Check your Email" });
         } catch(e) {
             res.status(400).json({ error: (e as Error).message });
@@ -97,7 +97,7 @@ export const userController = ({
         try {
             const { email, password } = parseReset(req.body);
             const user = await userModel.resetPassword({ token, email, password, key });
-            if(!user) return res.status(404).json({ message: "User not found" });
+            if(!user) return res.status(404).json({ error: "User not found" });
             res.status(200).json(user);
         } catch(e) {
             res.status(400).json({ error: (e as Error).message });
@@ -106,10 +106,10 @@ export const userController = ({
     getMe: async (req, res) => {
         const { token } = req.cookies;
         const { host } = req.headers;
-        if (!token) return res.status(401).json({ message: "Unauthorized" });
+        if (!token) return res.status(401).json({ error: "Unauthorized" });
         try {
             const user = await userModel.getMe({ token, host });
-            if (!user) return res.status(404).json({ message: "User not found" });
+            if (!user) return res.status(404).json({ error: "User not found" });
             res.status(200).json(user);
         } catch(e) {
             res.status(400).json({ error: (e as Error).message });
@@ -117,13 +117,13 @@ export const userController = ({
     },
     generateToken: async (req, res) => {
         const { token: oldToken } = req.cookies;
-        if (!oldToken) return res.status(401).json({ message: "Unauthorized" });
+        if (!oldToken) return res.status(401).json({ error: "Unauthorized" });
         const { apiKey } = req.query;
         const key = getKey(apiKey);
         const { expiresIn } = req.body;
         try {
             const { token } = await userModel.generateToken({ oldToken, expiresIn, key }) ?? {};
-            if (!token) return res.status(404).json({ message: "User not found" });
+            if (!token) return res.status(404).json({ error: "User not found" });
             res.cookie("token", token, { httpOnly: true });
             res.status(200).json({ message: "Token generated successfully" });
         } catch(e) {
@@ -132,14 +132,14 @@ export const userController = ({
     },
     updateMe: async (req, res) => {
         const { token } = req.cookies;
-        if (!token) return res.status(401).json({ message: "Unauthorized" });
+        if (!token) return res.status(401).json({ error: "Unauthorized" });
         const { apiKey } = req.query;
         const key = getKey(apiKey);
         const { host } = req.headers;
         try {
             const data = parsePatchUser(req.body);
             const user = await userModel.updateMe({ ...data, token, key, host });
-            if (!user) return res.status(404).json({ message: "User not found" });
+            if (!user) return res.status(404).json({ error: "User not found" });
             res.status(200).json(user);
         } catch(e) {
             res.status(400).json({ error: (e as Error).message });
@@ -147,7 +147,7 @@ export const userController = ({
     },
     deleteMe: async (req, res) => {
         const { token } = req.cookies;
-        if (!token) return res.status(401).json({ message: "Unauthorized" });
+        if (!token) return res.status(401).json({ error: "Unauthorized" });
         const { apiKey } = req.query;
         const key = getKey(apiKey);
         const { host } = req.headers;
@@ -161,15 +161,15 @@ export const userController = ({
     },
     photoMe: async (req, res) => {
         const { token } = req.cookies;
-        if (!token) return res.status(401).json({ message: "Unauthorized" });
+        if (!token) return res.status(401).json({ error: "Unauthorized" });
         const { file: photo } = req;
-        if (!photo) return res.status(400).json({ message: "Photo is required" });
+        if (!photo) return res.status(400).json({ error: "Photo is required" });
         const { apiKey } = req.query;
         const key = getKey(apiKey);
         const { host } = req.headers;
         try {
             const user = await userModel.photoMe({ photo, token, key, host });
-            if (!user) return res.status(404).json({ message: "User not found" });
+            if (!user) return res.status(404).json({ error: "User not found" });
             res.status(200).json(user);
         } catch(e) {
             res.status(400).json({ error: (e as Error).message });
@@ -177,13 +177,13 @@ export const userController = ({
     },
     deletePhotoMe: async (req, res) => {
         const { token } = req.cookies;
-        if (!token) return res.status(401).json({ message: "Unauthorized" });
+        if (!token) return res.status(401).json({ error: "Unauthorized" });
         const { apiKey } = req.query;
         const key = getKey(apiKey);
         const { host } = req.headers;
         try {
             const user = await userModel.deletePhotoMe({ token, key, host });
-            if (!user) return res.status(404).json({ message: "User not found" });
+            if (!user) return res.status(404).json({ error: "User not found" });
             res.status(200).json(user);
         } catch(e) {
             res.status(400).json({ error: (e as Error).message });
@@ -191,7 +191,7 @@ export const userController = ({
     },
     makeAdmin: async (req, res) => {
         const { token } = req.cookies;
-        if (!token) return res.status(401).json({ message: "Unauthorized" });
+        if (!token) return res.status(401).json({ error: "Unauthorized" });
         const { apiKey } = req.query;
         const key = getKey(apiKey);
         const { host } = req.headers;
@@ -199,7 +199,7 @@ export const userController = ({
             const { adminId: id, removeAdmin } = parseNewAdmin(req.body);
             const adminId = getKey(id)!;
             const admin = await userModel.makeAdmin({ token, key, adminId, removeAdmin, host });
-            if(!admin) return res.status(404).json({ message: "Admin not found" });
+            if(!admin) return res.status(404).json({ error: "Admin not found" });
             res.status(200).json(admin);
         } catch(e) {
             res.status(400).json({ error: (e as Error).message });
@@ -207,12 +207,12 @@ export const userController = ({
     },
     generateKey: async (req, res) => {
         const { token } = req.cookies;
-        if (!token) return res.status(401).json({ message: "Unauthorized" });
+        if (!token) return res.status(401).json({ error: "Unauthorized" });
         const { apiKey: defaultAPIKey } = req.query;
         const key = getKey(defaultAPIKey);
         try {
             const apiKey = await userModel.generateKey({ token, key });
-            if(!apiKey) return res.status(404).json({ message: "API Key not found" });
+            if(!apiKey) return res.status(404).json({ error: "API Key not found" });
             res.status(200).json({ apiKey });
         } catch(e) {
             res.status(400).json({ error: (e as Error).message });
@@ -220,7 +220,7 @@ export const userController = ({
     },
     deleteKey: async (req, res) => {
         const { token } = req.cookies;
-        if (!token) return res.status(401).json({ message: "Unauthorized" });
+        if (!token) return res.status(401).json({ error: "Unauthorized" });
         const { apiKey } = req.query;
         const { keyTD } = req.params;
         const key = getKey(apiKey);
