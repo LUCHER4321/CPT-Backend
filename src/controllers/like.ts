@@ -7,13 +7,13 @@ export const likeController = ({
     likePhTree: async (req, res) => {
         const { treeId: id } = req.params;
         const { token } = req.cookies;
-        if (!token) return res.status(401).json({ message: "Unauthorized" });
+        if (!token) return res.status(401).json({ error: "Unauthorized" });
         const { apiKey } = req.query;
         const key = getKey(apiKey);
         try {
             const treeId = toObjectId(id);
             const like = await likeModel.likePhTree({ token, treeId, key });
-            if (!like) return res.status(404).json({ message: "PhTree not found" });
+            if (!like) return res.status(404).json({ error: "PhTree not found" });
             res.json(like);
         } catch(e) {
             res.status(400).json({ error: (e as Error).message });
@@ -22,7 +22,7 @@ export const likeController = ({
     unlikePhTree: async (req, res) => {
         const { treeId: id } = req.params;
         const { token } = req.cookies;
-        if (!token) return res.status(401).json({ message: "Unauthorized" });
+        if (!token) return res.status(401).json({ error: "Unauthorized" });
         const { apiKey } = req.query;
         const key = getKey(apiKey);
         try {
@@ -35,11 +35,11 @@ export const likeController = ({
     },
     likedPhTrees: async (req, res) => {
         const { token } = req.cookies;
-        if (!token) return res.status(401).json({ message: "Unauthorized" });
+        if (!token) return res.status(401).json({ error: "Unauthorized" });
         const { host } = req.headers;
         try {
             const likedPhTrees = await likeModel.likedPhTrees({ token, host });
-            if (!likedPhTrees) return res.status(404).json({ message: "No liked PhTrees found" });
+            if (!likedPhTrees) return res.status(404).json({ error: "No liked PhTrees found" });
             res.json(likedPhTrees);
         } catch(e) {
             res.status(400).json({ error: (e as Error).message });
@@ -51,7 +51,7 @@ export const likeController = ({
         try {
             const treeId = toObjectId(id);
             const likes = await likeModel.phTreeLikes({ treeId, token });
-            if (!likes) return res.status(404).json({ message: "PhTree not found" });
+            if (!likes) return res.status(404).json({ error: "PhTree not found" });
             res.json(likes);
         } catch(e) {
             res.status(400).json({ error: (e as Error).message });
@@ -60,13 +60,13 @@ export const likeController = ({
     likeComment: async (req, res) => {
         const { commentId: id } = req.params;
         const { token } = req.cookies;
-        if (!token) return res.status(401).json({ message: "Unauthorized" });
+        if (!token) return res.status(401).json({ error: "Unauthorized" });
         const { apiKey } = req.query;
         const key = getKey(apiKey);
         try {
             const commentId = toObjectId(id);
             const like = await likeModel.likeComment({ token, commentId, key });
-            if (!like) return res.status(404).json({ message: "Comment not found" });
+            if (!like) return res.status(404).json({ error: "Comment not found" });
             res.json(like);
         } catch(e) {
             res.status(400).json({ error: (e as Error).message });
@@ -75,23 +75,23 @@ export const likeController = ({
     unlikeComment: async (req, res) => {
         const { commentId: id } = req.params;
         const { token } = req.cookies;
-        if (!token) return res.status(401).json({ message: "Unauthorized" });
+        if (!token) return res.status(401).json({ error: "Unauthorized" });
         const { apiKey } = req.query;
         const key = getKey(apiKey);
         try {
             const commentId = toObjectId(id);
             await likeModel.unlikeComment({ token, commentId, key });
-            res.status(204).json({ message: "Like deleted successfully" });
+            res.status(204).json({ error: "Like deleted successfully" });
         } catch(e) {
             res.status(400).json({ error: (e as Error).message });
         }
     },
     likedComments: async (req, res) => {
         const { token } = req.cookies;
-        if (!token) return res.status(401).json({ message: "Unauthorized" });
+        if (!token) return res.status(401).json({ error: "Unauthorized" });
         try {
             const likedComments = await likeModel.likedComments({ token });
-            if (!likedComments) return res.status(404).json({ message: "No liked comments found" });
+            if (!likedComments) return res.status(404).json({ error: "No liked comments found" });
             res.json(likedComments);
         } catch(e) {
             res.status(400).json({ error: (e as Error).message });
@@ -103,7 +103,7 @@ export const likeController = ({
         try {
             const commentId = toObjectId(id);
             const likes = await likeModel.commentLikes({ commentId, token });
-            if (!likes) return res.status(404).json({ message: "Comment not found" });
+            if (!likes) return res.status(404).json({ error: "Comment not found" });
             res.json(likes);
         } catch(e) {
             res.status(400).json({ error: (e as Error).message });
