@@ -117,8 +117,10 @@ export const userModel: UserModel = {
         const user = await UserClass.findOne({ email });
         if(!user) throw new Error("User not found");
         const token = randomBytes(20).toString("hex");
+        const expires = new Date((new Date()).getTime() + 2.5 * 3600);
         user.tokens.push({
-            token
+            token,
+            expires
         });
         await user.save();
         await sendMail({ token, url, user: userModel.getUser({ id: user._id }) })
@@ -130,7 +132,7 @@ export const userModel: UserModel = {
         const user = await UserClass.findOne({
             "tokens.token": token,
             "tokens.expires": {
-                $gt: new Date()
+                $lt: new Date()
             },
             email
         });
