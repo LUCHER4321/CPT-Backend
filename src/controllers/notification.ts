@@ -59,7 +59,7 @@ export const notificationController = ({
     },
     getNotifications: async (req, res) => {
         const { token } = req.cookies;
-        if(!token) return res.status(401).json({ message: "Unauthorized" });
+        if(!token) return res.status(401).json({ error: "Unauthorized" });
         const { from: _from, to: _to, limit: _limit } = req.query;
         try {
             const limit = nullableInput(_limit, l => +l);
@@ -71,7 +71,7 @@ export const notificationController = ({
                 to,
                 limit
             });
-            if(!notifications) return res.status(404).json({ message: "No notifications found" });
+            if(!notifications) return res.status(404).json({ error: "No notifications found" });
             res.json(notifications);
         } catch(e) {
             res.status(400).json({ error: (e as Error).message });
@@ -79,7 +79,7 @@ export const notificationController = ({
     },
     seeNotification: async (req, res) => {
         const { token } = req.cookies;
-        if(!token) return res.status(401).json({ message: "Unauthorized" });
+        if(!token) return res.status(401).json({ error: "Unauthorized" });
         const { id: _id } = req.params;
         const { apiKey } = req.query;
         const key = getKey(apiKey);
@@ -90,7 +90,7 @@ export const notificationController = ({
                 id,
                 key
             });
-            if(!notification) return res.status(404).json({ message: "Notification not found" });
+            if(!notification) return res.status(404).json({ error: "Notification not found" });
             res.json(notification);
         } catch(e) {
             res.status(400).json({ error: (e as Error).message });
