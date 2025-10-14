@@ -9,7 +9,7 @@ export const imageController = ({
         const { img } = req.params;
         if (!img) return res.status(400).json({ error: "Image name is required" });
         const { path } = await imageModel.getImage({ img }) ?? {};
-        if (!path) return res.status(404).json({ message: "Image not found" });
+        if (!path) return res.status(404).json({ error: "Image not found" });
         try {
             const response = await fetch(path);
             if (!response.ok) throw new Error('Failed to fetch image');
@@ -19,7 +19,7 @@ export const imageController = ({
             if (contentType) res.set('Content-Type', contentType);
             res.send(buffer);
         } catch(e) {
-            res.status(400).json({ error: (e as Error).message });
+            return res.status(500).json({ error: "Error fetching image" });
         }
     }
 });
