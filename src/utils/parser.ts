@@ -203,3 +203,9 @@ export const parsePhTreeChange = (data: any) => ({
     species: toPartial(() => parseSpeciesMongo(data.species)),
     phTree: toPartial(() => parsePhTree(data.phTree))
 });
+
+export const parseContact = (object: any) => ({
+    name: parseString(object.name, "name"),
+    email: parseEmail(object.email),
+    message: parseString(object.message, "message")
+});
