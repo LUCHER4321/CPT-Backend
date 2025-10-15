@@ -9,7 +9,7 @@ export type Email = `${string}@${string}.${string}`;
 
 type ControllerFunction = (req: Request, res: Response) => Promise;
 
-type ModelFuncton<DATA, OUTPUT> = (data: DATA & {
+type ModelFunction<DATA, OUTPUT> = (data: DATA & {
     key?: Types.ObjectId;
     host?: string;
 }) => Promise<OUTPUT | undefined>;
@@ -19,14 +19,14 @@ export interface ImageController {
 }
 
 export interface ImageModel {
-    getImage: ModelFuncton<{
+    getImage: ModelFunction<{
         img: string;
     }, { path: string }>;
-    createImage: ModelFuncton<{
+    createImage: ModelFunction<{
         token: string;
         file: Express.Multer.File;
     }, { url: string }>;
-    deleteImage: ModelFuncton<{
+    deleteImage: ModelFunction<{
         token: string;
         img: string;
     }, void>;
@@ -67,42 +67,42 @@ export interface UserController {
 }
 
 export interface UserModel {
-    register: ModelFuncton<{
+    register: ModelFunction<{
         email: Email;
         password: string;
         username: string;
     }, User & { token: string }>;
-    login: ModelFuncton<{
+    login: ModelFunction<{
         email: Email;
         password: string;
     }, User & { token: string }>;
-    logout: ModelFuncton<{
+    logout: ModelFunction<{
         token: string;
     }, void>
-    getUser: ModelFuncton<{
+    getUser: ModelFunction<{
         id: Types.ObjectId;
     }, User>;
-    search: ModelFuncton<{
+    search: ModelFunction<{
         limit?: number;
         search?: string;
     }, User[]>;
-    recover: ModelFuncton<{
+    recover: ModelFunction<{
         email: Email;
         url: string;
     }, string>;
-    resetPassword: ModelFuncton<{
+    resetPassword: ModelFunction<{
         token: string;
         email: Email;
         password: string;
     }, User>,
-    getMe: ModelFuncton<{
+    getMe: ModelFunction<{
         token: string;
     }, User>;
-    generateToken: ModelFuncton<{
+    generateToken: ModelFunction<{
         oldToken: string;
         expiresIn?: number | StringValue;
     }, { token: string}>;
-    updateMe: ModelFuncton<{
+    updateMe: ModelFunction<{
         token: string;
         username?: string;
         plan?: Plan;
@@ -112,25 +112,25 @@ export interface UserModel {
         password?: string;
         planExpiration?: Date;
     }, User>;
-    deleteMe: ModelFuncton<{
+    deleteMe: ModelFunction<{
         token: string;
     }, void>;
-    photoMe: ModelFuncton<{
+    photoMe: ModelFunction<{
         photo: Express.Multer.File;
         token: string;
     }, User>;
-    deletePhotoMe: ModelFuncton<{
+    deletePhotoMe: ModelFunction<{
         token: string;
     }, User>;
-    makeAdmin: ModelFuncton<{
+    makeAdmin: ModelFunction<{
         token: string;
         adminId: Types.ObjectId;
         removeAdmin?: boolean
     }, User>;
-    generateKey: ModelFuncton<{
+    generateKey: ModelFunction<{
         token: string;
     }, Types.ObjectId>;
-    deleteKey: ModelFuncton<{
+    deleteKey: ModelFunction<{
         token: string;
         keyToDelete: Types.ObjectId;
     }, void>;
@@ -151,21 +151,21 @@ export interface FollowController {
 }
 
 export interface FollowModel {
-    followUser: ModelFuncton<{
+    followUser: ModelFunction<{
         token: string;
         followedUserId: Types.ObjectId;
     }, Follow>;
-    unfollowUser: ModelFuncton<{
+    unfollowUser: ModelFunction<{
         token: string;
         followedUserId: Types.ObjectId;
     }, void>;
-    getFollowers: ModelFuncton<{
+    getFollowers: ModelFunction<{
         userId: Types.ObjectId;
     }, User[]>;
-    getFollowing: ModelFuncton<{
+    getFollowing: ModelFunction<{
         userId: Types.ObjectId;
     }, User[]>;
-    getFollowersCount: ModelFuncton<{
+    getFollowersCount: ModelFunction<{
         userId: Types.ObjectId;
     }, number>;
 }
@@ -244,7 +244,7 @@ type SearchResult = {
 }
 
 export interface PhTreeModel {
-    createPhTree: ModelFuncton<{
+    createPhTree: ModelFunction<{
         token: string;
         name: string;
         description?: string;
@@ -252,18 +252,18 @@ export interface PhTreeModel {
         tags?: string[];
         collaborators?: Types.ObjectId[];
     }, PhTree>;
-    getMyPhTrees: ModelFuncton<{
+    getMyPhTrees: ModelFunction<{
         token: string;
         owner?: boolean;
     } & TreeSearch, SearchResult>;
-    getMyTotalTrees: ModelFuncton<{
+    getMyTotalTrees: ModelFunction<{
         token: string;
     }, {
         total: number;
         myTrees: number;
         collabs: number;
     }>;
-    getTotalTrees: ModelFuncton<{
+    getTotalTrees: ModelFunction<{
         token?: string;
         userId: Types.ObjectId;
     }, {
@@ -271,7 +271,7 @@ export interface PhTreeModel {
         myTrees: number;
         collabs: number;
     }>;
-    updatePhTree: ModelFuncton<{
+    updatePhTree: ModelFunction<{
         token: string;
         id: Types.ObjectId;
         name?: string;
@@ -281,27 +281,27 @@ export interface PhTreeModel {
         newCollaborators?: Types.ObjectId[];
         deleteCollaborators?: Types.ObjectId[];
     }, PhTree>;
-    deletePhTree: ModelFuncton<{
+    deletePhTree: ModelFunction<{
         token: string;
         id: Types.ObjectId;
     }, void>;
-    setPhTreeImage: ModelFuncton<{
+    setPhTreeImage: ModelFunction<{
         id: Types.ObjectId;
         token: string;
         image: Express.Multer.File;
     }, PhTree>;
-    deletePhTreeImage: ModelFuncton<{
+    deletePhTreeImage: ModelFunction<{
         token: string;
         id: Types.ObjectId;
     }, PhTree>;
-    getPhTrees: ModelFuncton<{
+    getPhTrees: ModelFunction<{
         token?: string;
     } & TreeSearch, SearchResult>;
-    getPhTree: ModelFuncton<{
+    getPhTree: ModelFunction<{
         token?: string;
         id: Types.ObjectId;
     }, PhTree>;
-    setView: ModelFuncton<{
+    setView: ModelFunction<{
         token?: string;
         id: Types.ObjectId;
     }, number>
@@ -327,27 +327,27 @@ export interface CommentController {
 }
 
 export interface CommentModel {
-    createComment: ModelFuncton<{
+    createComment: ModelFunction<{
         token: string;
         treeId: Types.ObjectId;
         content: string;
         parentId?: Types.ObjectId;
     }, Comment>;
-    updateComment: ModelFuncton<{
+    updateComment: ModelFunction<{
         token: string;
         treeId: Types.ObjectId;
         id: Types.ObjectId;
         content: string;
     }, Comment>;
-    deleteComment: ModelFuncton<{
+    deleteComment: ModelFunction<{
         token: string;
         treeId: Types.ObjectId;
         id: Types.ObjectId;
     }, void>;
-    getComments: ModelFuncton<{
+    getComments: ModelFunction<{
         treeId: Types.ObjectId;
     }, Comment[]>;
-    getComment: ModelFuncton<{
+    getComment: ModelFunction<{
         treeId: Types.ObjectId;
         id: Types.ObjectId;
     }, Comment>;
@@ -373,36 +373,36 @@ export interface LikeController {
 }
 
 export interface LikeModel {
-    likePhTree: ModelFuncton<{
+    likePhTree: ModelFunction<{
         token: string;
         treeId: Types.ObjectId;
     }, Like>;
-    unlikePhTree: ModelFuncton<{
+    unlikePhTree: ModelFunction<{
         token: string;
         treeId: Types.ObjectId;
     }, void>;
-    likedPhTrees: ModelFuncton<{
+    likedPhTrees: ModelFunction<{
         token: string;
     }, PhTree[]>;
-    phTreeLikes: ModelFuncton<{
+    phTreeLikes: ModelFunction<{
         token?: string;
         treeId: Types.ObjectId;
     }, {
         likesCount: number;
         myLike?: boolean;
     }>;
-    likeComment: ModelFuncton<{
+    likeComment: ModelFunction<{
         token: string;
         commentId: Types.ObjectId;
     }, Like>;
-    unlikeComment: ModelFuncton<{
+    unlikeComment: ModelFunction<{
         token: string;
         commentId: Types.ObjectId;
     }, void>;
-    likedComments: ModelFuncton<{
+    likedComments: ModelFunction<{
         token: string;
     }, Comment[]>;
-    commentLikes: ModelFuncton<{
+    commentLikes: ModelFunction<{
         token?: string;
         commentId: Types.ObjectId;
     }, {
@@ -429,39 +429,39 @@ export interface SpeciesController {
 }
 
 export interface SpeciesModel {
-    createSpecies: ModelFuncton<SpeciesJSON & {
+    createSpecies: ModelFunction<SpeciesJSON & {
         treeId: Types.ObjectId;
         token: string;
         ancestorId?: Types.ObjectId;
     }, SpeciesMongo>;
-    updateSpecies: ModelFuncton<Partial<SpeciesJSON> & {
+    updateSpecies: ModelFunction<Partial<SpeciesJSON> & {
         token: string;
         treeId: Types.ObjectId;
         id: Types.ObjectId;
         ancestorId?: Types.ObjectId | null;
     }, SpeciesMongo>;
-    deleteSpecies: ModelFuncton<{
+    deleteSpecies: ModelFunction<{
         token: string;
         treeId: Types.ObjectId;
         id: Types.ObjectId;
     }, void>;
-    setSpeciesImage: ModelFuncton<{
+    setSpeciesImage: ModelFunction<{
         token: string;
         treeId: Types.ObjectId;
         id: Types.ObjectId;
         image: Express.Multer.File;
     }, SpeciesMongo>;
-    deleteSpeciesImage: ModelFuncton<{
+    deleteSpeciesImage: ModelFunction<{
         token: string;
         treeId: Types.ObjectId;
         id: Types.ObjectId;
     }, SpeciesMongo>;
-    getSpecies: ModelFuncton<{
+    getSpecies: ModelFunction<{
         token?: string;
         treeId: Types.ObjectId;
         id: Types.ObjectId;
     }, SpeciesMongo>;
-    getPhTreeSpecies: ModelFuncton<{
+    getPhTreeSpecies: ModelFunction<{
         token?: string;
         treeId: Types.ObjectId;
     }, SpeciesMongo[]>;
@@ -480,7 +480,7 @@ export interface Notification {
     commentId?: Types.ObjectId;
 }
 
-type WSControllerFunction = ModelFuncton<{
+type WSControllerFunction = ModelFunction<{
     socket: Socket;
     call: string;
     key: any;
@@ -493,37 +493,49 @@ export interface NotificationController {
 }
 
 export interface NotificationModel {
-    newFollower: ModelFuncton<{
+    newFollower: ModelFunction<{
         token: string;
         userId: Types.ObjectId;
     }, Notification>;
-    newTree: ModelFuncton<{
+    newTree: ModelFunction<{
         token: string;
         treeId: Types.ObjectId;
     }, Notification>;
-    newComment: ModelFuncton<{
+    newComment: ModelFunction<{
         token: string;
         treeId: Types.ObjectId;
         commentId: Types.ObjectId;
     }, Notification>;
-    newLike: ModelFuncton<{
+    newLike: ModelFunction<{
         token: string;
         treeId?: Types.ObjectId;
         commentId?: Types.ObjectId;
     }, Notification>;
-    newCollaborate: ModelFuncton<{
+    newCollaborate: ModelFunction<{
         token: string;
         treeId: Types.ObjectId;
         userId: Types.ObjectId;
     }, Notification>;
-    getNotifications: ModelFuncton<{
+    getNotifications: ModelFunction<{
         token: string;
         from?: Date;
         to?: Date;
         limit?: number;
     }, Notification[]>;
-    seeNotification: ModelFuncton<{
+    seeNotification: ModelFunction<{
         token: string;
         id: Types.ObjectId;
     }, Notification>
+}
+
+export interface ContactController {
+    contact: ControllerFunction;
+}
+
+export interface ContactModel {
+    contact: ModelFunction<{
+        name: string;
+        email: string;
+        message: string;
+    }, {}>;
 }
