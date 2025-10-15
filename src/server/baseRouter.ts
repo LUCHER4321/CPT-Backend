@@ -1,4 +1,5 @@
 import { commentController } from "../controllers/comment";
+import { contactController } from "../controllers/contact";
 import { followController } from "../controllers/follow";
 import { imageController } from "../controllers/image";
 import { likeController } from "../controllers/like";
@@ -7,6 +8,7 @@ import { phTreeController } from "../controllers/phTree";
 import { speciesController } from "../controllers/species";
 import { userController } from "../controllers/user";
 import { commentModel } from "../models/comment";
+import { contactModel } from "../models/contact";
 import { followModel } from "../models/follow";
 import { imageModel } from "../models/image";
 import { likeModel } from "../models/like";
@@ -16,6 +18,7 @@ import { speciesModel } from "../models/species";
 import { userModel } from "../models/user";
 import { createBaseRoutes } from "../routes/base";
 import { createCommentRoutes } from "../routes/comment";
+import { createContactRoutes } from "../routes/contact";
 import { createFollowRoutes } from "../routes/follow";
 import { createImageRoutes } from "../routes/image";
 import { createLikeRoutes } from "../routes/like";
@@ -90,5 +93,13 @@ export const baseRouter = createBaseRoutes({
                 })
             })
         ],
+        [
+            "/contact",
+            createContactRoutes({
+                contactController: contactController({
+                    contactModel
+                })
+            })
+        ]
     ])
 });
