@@ -143,6 +143,7 @@ VIEWS_PONDERATION
 COMMENTS_PONDERATION
 LIKES_PONDERATION
 MAILER_USER
+CONTACT_MAIL
 ```
 
 ### Secrets
@@ -1834,6 +1835,32 @@ Mark a notification as read
   "authorId": "ObjectId",
   "seen": "boolean",
   "createdAt": "Date"
+}
+```
+
+### Route `POST /contact`
+
+Send me an email
+
+**Query:**
+
+- `?apiKey`: API Key
+
+**Body:**
+
+```json
+{
+  "name": "string",
+  "email": "string",
+  "message": "string"
+}
+```
+
+**Response:**
+
+```json
+{
+  "message": "Message sent successfully"
 }
 ```
 
