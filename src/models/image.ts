@@ -13,24 +13,16 @@ const imgPath = (name: string, includeImage = true) => join(__dirname, "..", "..
 
 export const imageModel: ImageModel = {
     getImage: async ({ img }) => {
-        if (!img) {
-            throw new Error("Image name is required");
-        }
+        if (!img) throw new Error("Image name is required");
         return { path: url(img) };
     },
     createImage: async ({ token, file }) => {
         const user = await userByToken(token);
         if (!user) throw new Error("User not found");
-        if (!file) {
-            throw new Error("File is required");
-        }
+        if (!file) throw new Error("File is required");
         const [extension] = file.originalname.split('.').reverse();
-        if (!extension) {
-            throw new Error("File must have an extension");
-        }
-        if (!extensions.includes(extension)) {
-            throw new Error(`File must be an image (${extensions.join(", ")})`);
-        }
+        if (!extension) throw new Error("File must have an extension");
+        if (!extensions.includes(extension)) throw new Error(`File must be an image (${extensions.join(", ")})`);
         const { path } = file;
         const name = `${user._id.toString()}-${new Date().getTime()}`;
         const fileName = `${name}.${extension}`;
@@ -43,15 +35,13 @@ export const imageModel: ImageModel = {
         });
         unlink(filePath, (error) => {
             if (error) throw new Error(`Error deleting file ${filePath}`);
-        })
+        });
         return { url: `${IMAGES}/${fileName}` }
     },
     deleteImage: async ({ token, img }) => {
         const user = await userByToken(token);
         if (!user) throw new Error("User not found");
-        if (!img) {
-            return;
-        }
+        if (!img) return;
         await destroy(img);
     }
 }
