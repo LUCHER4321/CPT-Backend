@@ -14,6 +14,7 @@ const imgPath = (name: string, includeImage = true) => join(__dirname, "..", "..
 export const imageModel: ImageModel = {
     getImage: async ({ img }) => {
         if (!img) throw new Error("Image name is required");
+        //Hosting Connection (url)
         return { path: url(img) };
     },
     createImage: async ({ token, file }) => {
@@ -30,6 +31,7 @@ export const imageModel: ImageModel = {
         rename(path, filePath, (err) => {
             if (err) throw new Error(`Error renaming ${path} to ${filePath}`);
         });
+        //Hosting Connection (upload)
         await upload(filePath, {
             public_id: name
         });
@@ -42,6 +44,7 @@ export const imageModel: ImageModel = {
         const user = await userByToken(token);
         if (!user) throw new Error("User not found");
         if (!img) return;
+        //Hosting Connection (destroy)
         await destroy(img);
     }
 }
