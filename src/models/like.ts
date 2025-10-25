@@ -56,7 +56,7 @@ export const likeModel: LikeModel = {
             id: t._id,
             userId: t.userId,
             name: t.name,
-            image: photoToString(t.image, host) ?? undefined,
+            image: photoToString(t.image ?? null, host ?? "") ?? undefined,
             description: t.description ?? undefined,
             isPublic: t.isPublic,
             createdAt: t.createdAt,
