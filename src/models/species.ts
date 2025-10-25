@@ -82,7 +82,7 @@ const getSpecies = async ({
         afterApparition: species.afterApparition ?? undefined,
         duration: species.duration ?? undefined,
         description: species.description ?? undefined,
-        image: photoToString(species.image, host)
+        image: photoToString(species.image ?? null, host ?? "")
     };
 };
 
