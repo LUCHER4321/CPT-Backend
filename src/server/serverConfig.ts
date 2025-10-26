@@ -4,7 +4,6 @@ import { corsMw } from "../middlewares/cors";
 import cookieParser from "cookie-parser";
 import { createServer } from "node:http";
 import { Server, ServerOptions } from "socket.io";
-import { join } from "node:path";
 import { notFound } from "../middlewares/notFound";
 
 interface ServerConfigProps {
@@ -34,7 +33,7 @@ export default ({
     app.use(corsMw());
     app.use(morgan("dev"));
     app.use(cookieParser());
-    app.get(url, (_, res) => { res.sendFile(join(__dirname, "..", "pages", "welcome.html")); })
+    app.get(url, (_, res) => { res.json({ message: "Welcome to Life Tree API" }) });
     app.use(url, router);
     app.use(notFound);
     return { app, server, io, socket };
