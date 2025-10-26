@@ -434,7 +434,7 @@ export interface SpeciesModel {
         token: string;
         ancestorId?: Types.ObjectId;
     }, SpeciesMongo>;
-    updateSpecies: ModelFunction<Partial<SpeciesJSON> & {
+    updateSpecies: ModelFunction<Omit<Partial<SpeciesJSON>, "id"> & {
         token: string;
         treeId: Types.ObjectId;
         id: Types.ObjectId;
