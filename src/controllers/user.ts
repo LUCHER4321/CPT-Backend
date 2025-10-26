@@ -1,6 +1,14 @@
+import { Response } from "express";
 import { API } from "../config";
 import { UserController, UserModel } from "../types";
 import { getKey, parseLogin, parseNewAdmin, parsePatchUser, parseRecover, parseRegister, parseReset, toObjectId } from "../utils/parser";
+
+const resToken = (res: Response, token?: string) => res.cookie("token", token, {
+    httpOnly: true,
+    secure: !API,
+    sameSite: "none",
+    domain: API ? ".onrender.com" : undefined
+});
 
 export const userController = ({
     userModel
@@ -18,7 +26,7 @@ export const userController = ({
                 ...user
             } = await userModel.register({ ...data, key, host }) ?? { id: undefined };
             if (!user.id) return res.status(400).json({ error: "User already exists" });
-            res.cookie("token", token, { httpOnly: true, secure: !API, sameSite: "none", domain: API ? undefined : ".onrender.com" });
+            resToken(res, token);
             res.status(201).json(user);
         } catch(e) {
             res.status(400).json({ error: (e as Error).message });
@@ -35,7 +43,7 @@ export const userController = ({
                 ...user
             } = await userModel.login({ ...data, key, host }) ?? { id: undefined };
             if (!user.id) return res.status(401).json({ error: "User not found" });
-            res.cookie("token", token, { httpOnly: true, secure: !API, sameSite: "none", domain: API ? undefined : ".onrender.com" });
+            resToken(res, token);
             res.status(200).json(user);
         } catch(e) {
             res.status(400).json({ error: (e as Error).message });
@@ -45,7 +53,11 @@ export const userController = ({
         const { token } = req.cookies;
         const { apiKey } = req.query;
         const key = getKey(apiKey);
-        res.clearCookie("token");
+        res.clearCookie("token", {
+            domain: API ? ".onrender.com" : undefined,
+            secure: !API,
+            sameSite: "none"
+        });
         await userModel.logout({ token, key });
         res.status(200).json({ message: "Logged out successfully" });
     },
@@ -125,7 +137,7 @@ export const userController = ({
         try {
             const { token } = await userModel.generateToken({ oldToken, expiresIn, key }) ?? {};
             if (!token) return res.status(404).json({ error: "User not found" });
-            res.cookie("token", token, { httpOnly: true, secure: !API, sameSite: "none", domain: API ? undefined : ".onrender.com" });
+            resToken(res, token);
             res.status(200).json({ message: "Token generated successfully" });
         } catch(e) {
             res.status(400).json({ error: (e as Error).message });
