@@ -3,7 +3,7 @@ import { PhTreeClass } from "../schemas/phTree";
 import { SpeciesClass } from "../schemas/species";
 import { SpeciesModel, SpeciesMongo } from "../types";
 import { nullableInput } from "../utils/nullableInput";
-import { Species } from "chrono-phylo-tree";
+import { Species, SpeciesJSON } from "chrono-phylo-tree";
 import { imageModel } from "./image";
 import { photoToString } from "../utils/photo";
 import { userByToken } from "../utils/token";
@@ -86,34 +86,21 @@ const getSpecies = async ({
     };
 };
 
-class IdSpecies extends Species{
-    id: Types.ObjectId;
-    descendants: IdSpecies[] = [];
-    ancestor?: IdSpecies;
-    constructor(json: SpeciesMongo, ancestor?: IdSpecies){
-        super(
-            json.name,
-            json.apparition ?? (ancestor?.apparition ?? 0) + (json.afterApparition ?? 0),
-            json.duration,
-            ancestor,
-            json.descendants?.map(d => new IdSpecies(d, this)),
-            json.description,
-            json.image
-        );
-        this.name = json.name;
-        this.id = json.id;
-    }
-    allDescendants(): IdSpecies[] {
-        if(!this.descendants || this.descendants.length === 0) return [this];
-        return [this, ...this.descendants.flatMap(d => d.allDescendants())];
-    }
-}
-
 const spApparition = async (id: Types.ObjectId): Promise<number> => {
     let species = await SpeciesClass.findById(id);
     if(!species) return 0;
     return (species.afterApparition ?? species.apparition ?? 0) + ((await nullableInput(species.ancestorId, spApparition)) ?? 0);
 }
+
+const toJSON = ({
+    id,
+    descendants,
+    ...mongo
+}: SpeciesMongo): SpeciesJSON => ({
+    id: id.toString(),
+    ...mongo,
+    descendants: descendants?.map(d => toJSON(d))
+});
 
 export const speciesModel: SpeciesModel = {
     createSpecies: async ({
@@ -223,7 +210,7 @@ export const speciesModel: SpeciesModel = {
         const { phTree } = await check({ token, treeId, id });
         const json = await getSpecies({ token, treeId, id, mustCheck: false });
         if(!json) return;
-        const _id = new IdSpecies(json).allDescendants().map(sp => sp.id);
+        const _id = Species.fromJSON(toJSON(json)).allDescendants().map(sp => sp);
         await SpeciesClass.deleteMany({ _id: { $in: _id } });
         phTree.updatedAt = new Date();
         await phTree.save();
