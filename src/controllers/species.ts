@@ -8,7 +8,7 @@ type Input = SpeciesJSON & { ancestorId?: string | null; };
 
 type Output = SpeciesJSON & { ancestorId?: Types.ObjectId; };
 
-type PartialOutput = Partial<SpeciesJSON> & { ancestorId?: Types.ObjectId | null };
+type PartialOutput = Omit<Partial<SpeciesJSON>, "id"> & { ancestorId?: Types.ObjectId | null };
 
 const toOutput = ({
     ancestorId,
