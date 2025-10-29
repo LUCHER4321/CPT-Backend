@@ -30,6 +30,7 @@ const UserSchema = new Schema({
         enum: Object.values(Plan),
         default: Plan.FREE
     },
+    subId: String,
     billing: {
         type: String,
         enum: Object.values(Billing)
