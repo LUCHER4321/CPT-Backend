@@ -39,6 +39,7 @@ export interface User {
     photo?: string;
     role: Role;
     plan: Plan;
+    subId?: string;
     billing?: Billing;
     createdAt: Date;
     lastLogin: Date;
@@ -107,6 +108,7 @@ export interface UserModel {
         username?: string;
         plan?: Plan;
         billing?: Billing | null;
+        subId?: string | null;
         description?: string;
         oldPassword?: string;
         password?: string;
