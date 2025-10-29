@@ -11,7 +11,7 @@ import { APIKeyClass } from "../schemas/apiKey";
 import { confirmAPIKey } from "../utils/apiKey";
 import { randomBytes } from "node:crypto";
 import { Types } from "mongoose";
-import { sendMail } from "../utils/sendMail";
+import { sendMail, sendWelcomeMail } from "../utils/sendMail";
 import { upgradeByDomain } from "../utils/upgradeByDomain";
 
 const checkPlan = async (id: Types.ObjectId) => {
@@ -40,8 +40,10 @@ export const userModel: UserModel = {
         const newUser = await user.save();
         const token = tokenSign({ id: newUser._id });
         await upgradeByDomain(email);
+        const finalUser = userModel.getUser({ id: newUser._id, host });
+        await sendWelcomeMail({ user: finalUser });
         return {
-            ...(await userModel.getUser({ id: newUser._id, host }))!,
+            ...(await finalUser)!,
             token
         };
     },
