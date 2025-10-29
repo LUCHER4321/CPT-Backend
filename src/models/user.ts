@@ -81,6 +81,8 @@ export const userModel: UserModel = {
             username: user.username,
             photo: photoToString(user.photo ?? null, host ?? ""),
             plan: user.plan,
+            subId: user.subId ?? undefined,
+            billing: user.billing ?? undefined,
             role: user.role,
             createdAt: user.createdAt,
             lastLogin: user.lastLogin,
@@ -169,7 +171,7 @@ export const userModel: UserModel = {
         const token = tokenSign({ id: user._id, expiresIn });
         return { token }
     },
-    updateMe: async ({ username, oldPassword, password, description, plan, billing, token, key, host }) => {
+    updateMe: async ({ username, oldPassword, password, description, plan, subId, billing, token, key, host }) => {
         const apiKey = await confirmAPIKey(key);
         if(!apiKey) return undefined;
         const user = await userByToken(token);
@@ -184,10 +186,8 @@ export const userModel: UserModel = {
         if (username && username !== user.username) user.username = username;
         if(description) user.description = description;
         if(plan) user.plan = plan;
-        if(plan === Plan.INSTITUTIONAL) {
-            const [_, domain] = user.email.split("@");
-            user.domain = domain;
-        }
+        if(subId) user.subId = subId;
+        else if (subId === null) user.subId = undefined;
         if(billing) user.billing = billing;
         else if (billing === null) user.billing = undefined;
         await user.save();
