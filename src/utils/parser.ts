@@ -99,6 +99,7 @@ export const parsePatchUser = (object: any) => ({
     oldPassword: toPartial(() => parseString(object.oldPassword)),
     password: toPartial(() => parseString(object.password)),
     plan: toPartial(() => parsePlan(object.plan)),
+    subId: toPartial(() => parseString(object.subId)),
     billing: object.billing === null ? null : toPartial(() => parseBilling(object.billing)),
     planExpiration: toPartial(() => parseDate(object.planExpiration)),
     description: toPartial(() => parseString(object.description))
