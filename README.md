@@ -1969,3 +1969,22 @@ Sends the changes in a Ph. Tree
   }
 }
 ```
+
+## Licenses and Attributions
+
+This project uses the following open-source libraries:
+
+### Backend Dependencies
+
+- **Express, Mongoose, bcrypt, etc.** - MIT License
+- **jsonwebtoken** - MIT License
+- **Cloudinary** - MIT License
+- **Socket.io** - MIT License
+- **Chrono-Phylo-Tree** - MIT License
+
+### Development Dependencies
+
+- **TypeScript** - Apache-2.0 License
+- **@types/\*** packages - MIT License
+
+Full license texts are available in the `LICENSES/` directory.
