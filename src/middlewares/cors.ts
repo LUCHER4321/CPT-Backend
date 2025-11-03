@@ -22,5 +22,6 @@ export const corsMw = ({ acceptedOrigins = ACCEPTED_ORIGINS }: { acceptedOrigins
 
 export const corsWS = ({ acceptedOrigins = ACCEPTED_ORIGINS }: { acceptedOrigins?: string[] } = {}): cors.CorsOptions | cors.CorsOptionsDelegate<any> => ({
     origin: origin({ acceptedOrigins }),
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true
 });
