@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import { createServer } from "node:http";
 import { Server, ServerOptions } from "socket.io";
 import { notFound } from "../middlewares/notFound";
+import { allowedMethods } from "../middlewares/options";
 
 interface ServerConfigProps {
     app: Express;
@@ -31,6 +32,11 @@ export default ({
     app.disable("x-powered-by");
     app.use(json());
     app.use(corsMw());
+    allowedMethods({
+        router: app,
+        route: url,
+        methods: ["GET", "POST", "PATCH", "DELETE"]
+    })
     app.use(morgan("dev"));
     app.use(cookieParser());
     app.get(url, (_, res) => { res.json({ message: "Welcome to Life Tree API" }) });
