@@ -17,11 +17,11 @@ export const corsMw = ({ acceptedOrigins = ACCEPTED_ORIGINS }: { acceptedOrigins
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'Set-Cookie'],
     exposedHeaders: ['Set-Cookie'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH']
 });
 
 export const corsWS = ({ acceptedOrigins = ACCEPTED_ORIGINS }: { acceptedOrigins?: string[] } = {}): cors.CorsOptions | cors.CorsOptionsDelegate<any> => ({
     origin: origin({ acceptedOrigins }),
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     credentials: true
 });
