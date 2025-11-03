@@ -8,7 +8,7 @@ type CustomOrigin = (
 ) => void;
 
 const origin = ({ acceptedOrigins = ACCEPTED_ORIGINS }: { acceptedOrigins?: string[] } = {}): StaticOrigin | CustomOrigin | undefined => (origin, callback) => {
-    if((!origin && API) || acceptedOrigins.includes(origin ?? "")) return callback(null, true);
+    if(!origin || API || acceptedOrigins.includes(origin)) return callback(null, true);
     return callback(new Error("CORS origin not allowed"));
 }
 
