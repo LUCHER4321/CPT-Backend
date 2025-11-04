@@ -3,7 +3,7 @@ import { PhTreeClass } from "../schemas/phTree";
 import { SpeciesClass } from "../schemas/species";
 import { SpeciesModel, SpeciesMongo } from "../types";
 import { nullableInput } from "../utils/nullableInput";
-import { Species, SpeciesJSON } from "chrono-phylo-tree";
+import { SpeciesJSON } from "chrono-phylo-tree";
 import { imageModel } from "./image";
 import { photoToString } from "../utils/photo";
 import { userByToken } from "../utils/token";
@@ -210,8 +210,12 @@ export const speciesModel: SpeciesModel = {
         const { phTree } = await check({ token, treeId, id });
         const json = await getSpecies({ token, treeId, id, mustCheck: false });
         if(!json) return;
-        const _id = Species.fromJSON(toJSON(json)).allDescendants().map(sp => sp);
-        await SpeciesClass.deleteMany({ _id: { $in: _id } });
+        const deleteSpeciesRecursive = async (speciesId: Types.ObjectId) => {
+            const descendants = await SpeciesClass.find({ ancestorId: speciesId });
+            await Promise.all(descendants.map(({ _id }) => deleteSpeciesRecursive(_id)));
+            await SpeciesClass.findByIdAndDelete(speciesId);
+        };
+        await deleteSpeciesRecursive(id);
         phTree.updatedAt = new Date();
         await phTree.save();
     },
