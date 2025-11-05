@@ -1,5 +1,5 @@
 import { createTransport } from "nodemailer";
-import { API, MAILER_PASS, MAILER_USER } from "../config";
+import { MAILER_PASS, MAILER_USER } from "../config";
 
 export const transporter = createTransport({
   host: "smtp.gmail.com",
@@ -9,9 +9,9 @@ export const transporter = createTransport({
     user: MAILER_USER,
     pass: MAILER_PASS
   },
-  tls: API ? {
+  tls: {
     rejectUnauthorized: false
-  } : undefined
+  }
 });
 
 transporter.verify()
