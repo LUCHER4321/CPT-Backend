@@ -11,14 +11,12 @@ export const transporter = createTransport({
     user: MAILER_USER,
     pass: MAILER_PASS
   },
-  ...API && {
-    tls: {
-      rejectUnauthorized: false
-    },
-    connectionTimeout: timeout,
-    socketTimeout: timeout,
-    greetingTimeout: timeout
-  }
+  tls: {
+    rejectUnauthorized: false
+  },
+  connectionTimeout: timeout,
+  socketTimeout: timeout,
+  greetingTimeout: timeout
 });
 
 transporter.verify()
