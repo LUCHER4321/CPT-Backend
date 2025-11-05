@@ -127,7 +127,7 @@ export const userModel: UserModel = {
             expires
         });
         await user.save();
-        await sendMail({ token, url, user: userModel.getUser({ id: user._id }) })
+        await sendMail({ token, url, user: userModel.getUser({ id: user._id }) });
         return token;
     },
     resetPassword: async ({ token, email, password, key }) => {
