@@ -1,16 +1,23 @@
 import { createTransport } from "nodemailer";
-import { MAILER_PASS, MAILER_USER } from "../config";
+import { API, MAILER_PASS, MAILER_USER } from "../config";
+
+const timeout = 3 * 60 * 1000;
 
 export const transporter = createTransport({
   host: "smtp.gmail.com",
-  port: 465,
-  secure: true, // true for 465, false for other ports
+  port: API ? 465 : 587,
+  secure: !!API, // true for 465, false for other ports
   auth: {
     user: MAILER_USER,
     pass: MAILER_PASS
   },
-  tls: {
-    rejectUnauthorized: false
+  ...API && {
+    tls: {
+      rejectUnauthorized: false
+    },
+    connectionTimeout: timeout,
+    socketTimeout: timeout,
+    greetingTimeout: timeout
   }
 });
 
