@@ -17,9 +17,7 @@ export const transporter = createTransport({
   },
   connectionTimeout: timeout,
   socketTimeout: timeout,
-  greetingTimeout: timeout / 2,
-  logger: true, // Para debug
-  debug: true // Para ver logs detallados
+  greetingTimeout: timeout / 2
 });
 
 transporter.verify()
