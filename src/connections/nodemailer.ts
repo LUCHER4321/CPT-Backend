@@ -25,6 +25,6 @@ export const transporter = createTransport({
 transporter.verify()
   .then(() => console.log("Ready for send emails"))
   .catch(e => {
-    console.error("Error configuring email:", e);
+    console.error("Error configuring email:", (e as Error).message);
     console.error("Details:", e);
   });
