@@ -5,7 +5,7 @@ import { getKey, parseLogin, parseNewAdmin, parsePatchUser, parseRecover, parseR
 
 const resToken = (res: Response, token?: string) => res.cookie("token", token, {
     httpOnly: true,
-    secure: !API,
+    secure: true,
     sameSite: "none",
     domain: API ? ".onrender.com" : undefined
 });
