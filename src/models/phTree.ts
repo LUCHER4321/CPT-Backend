@@ -62,7 +62,7 @@ const getTrees = async ({
     trees: PhTree[];
     count: number;
 }> => {
-    const user = await nullableInput(token, userByToken);
+    const user = await nullableInput(token, userByToken)?.catch(() => undefined);
     if(myTrees && !user) throw new Error("Invalid Token");
     const searchRegex = nullableInput(search, s => new RegExp(s, "i"));
     const users = await UserClass.find({ username: searchRegex });
