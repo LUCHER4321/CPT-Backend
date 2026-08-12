@@ -110,6 +110,7 @@ export const speciesController = ({
             res.json(updatedSpecies);
         } catch(e) {
             res.status(400).json({ error: (e as Error).message });
+            console.error(e);
         }
     },
     deleteSpeciesImage: async (req, res) => {
