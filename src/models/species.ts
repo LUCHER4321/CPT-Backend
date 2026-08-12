@@ -67,7 +67,8 @@ const getSpecies = async ({
                 token,
                 treeId,
                 id: d._id,
-                mustCheck: false
+                mustCheck: false,
+                host
             })
         )
     );
