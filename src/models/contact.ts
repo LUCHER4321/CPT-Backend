@@ -1,4 +1,5 @@
 import { MAIL, MAILER_USER } from "../config";
+import { sendWhatsApp } from "../connections/callmebot";
 import { transporter } from "../connections/nodemailer";
 import { ContactModel } from "../types";
 import { confirmAPIKey } from "../utils/apiKey";
@@ -13,6 +14,10 @@ export const contactModel: ContactModel = {
             subject: `Contact mail from ${name} (${email})`,
             text: message
         });
+        await fetch(sendWhatsApp(`*MESSAGE FROM LIFE TREE*
+*Name*: ${name}
+*Email*: ${email}
+${message}`));
         return {}
     }
 }
