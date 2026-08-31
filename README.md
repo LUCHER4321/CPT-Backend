@@ -71,6 +71,7 @@
   - [Route `/notification`](#route-notification)
     - [`GET /`](#get--2)
     - [`PATCH /:id`](#patch-id-1)
+  - [`POST /contact`](#post-contact)
 - [Web Socket](#web-socket)
   - [`on("set-notification-client")`](#onset-notification-client)
   - [`on("set-tree-change-client")`](#onset-tree-change-client)
@@ -1837,7 +1838,7 @@ Mark a notification as read
 }
 ```
 
-### Route `POST /contact`
+### `POST /contact`
 
 Send me an email
 
