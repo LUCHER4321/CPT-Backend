@@ -14,6 +14,7 @@ interface CheckProps {
     treeId: Types.ObjectId;
     id?: Types.ObjectId;
     host?: string;
+    ancestorIds?: Types.ObjectId[];
 }
 
 interface GetProps extends CheckProps {
@@ -48,7 +49,8 @@ const getSpecies = async ({
     treeId,
     id,
     mustCheck = true,
-    host
+    host,
+    ancestorIds = []
 }: GetProps): Promise<SpeciesMongo> => {
     const { species } = mustCheck ? await check({ token, treeId, id }) : { species: await SpeciesClass.findById(id)};
     if(!species) throw new Error("Species not found");
@@ -61,14 +63,16 @@ const getSpecies = async ({
                         { $toString: "$ancestorId" },
                         species._id.toString()
                     ]
-                }
+                },
+                _id: { $nin: ancestorIds }
             }))
             .map(d => getSpecies({
                 token,
                 treeId,
                 id: d._id,
                 mustCheck: false,
-                host
+                host,
+                ancestorIds: [...ancestorIds, species._id]
             })
         )
     );
