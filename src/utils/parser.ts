@@ -153,7 +153,7 @@ type SpeciesInput = Partial<{
 const speciesPartials = (object: any) => ({
     apparition: toPartial(() => parseNumber(object.apparition)),
     afterApparition: toPartial(() => parseNumber(object.afterApparition)),
-    description: toPartial(() => parseString(object.afterApparition)),
+    description: toPartial(() => parseString(object.description)),
     descendants: toPartial(() => object.descendants.map(parseNewSpecies))
 })
 
